@@ -1,3 +1,5 @@
 client/.env
 server/.env
 server/firebase-adminsdk.json
+.env
+**/.env
