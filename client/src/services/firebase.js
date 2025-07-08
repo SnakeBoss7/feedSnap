@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import {getauth,GoogleAuthProvider} from 'firebase/auth'
+
+import {getAuth,GoogleAuthProvider} from 'firebase/auth'
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const api = process.env.REACT_APP_FIREBASE_API;
@@ -22,6 +22,6 @@ const firebaseConfig = {
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 
-export const analytics = getAnalytics(app);
-export const auth = getauth(app);
+
+export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
