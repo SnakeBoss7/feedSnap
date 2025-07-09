@@ -16,7 +16,7 @@ export const Login =()=>
                 console.log('Login success',res);
             }catch(err)
             {
-                console.err('login failed',err);
+                console.log('login failed',err);
             }
         }
 
