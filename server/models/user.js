@@ -3,7 +3,7 @@ const UserSchema = mongoose.Schema(
     {
         name: String,
         email: String,
-        webURl:String,
+        webURl:[String],
         firebaseId: String,
         createdAt: { type: Date, default: Date.now }
     }

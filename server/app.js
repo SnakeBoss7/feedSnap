@@ -1,26 +1,35 @@
 const express = require('express');
-const app = express();
-const authRoute = require('./routes/authRoutes');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
+
+const authRoute = require('./routes/authRoutes');
+const scriptRoute = require('./routes/scriptRoute');
+
+const app = express();
 require('dotenv').config();
-console.log(process.env.PORT)
-//routes
-const firebase = require('./routes/authRoutes');
+
+// Connect DB
 connectDB();
+
+// middleware
 app.use(cors({
-  origin: 'http://localhost:3000', // 👈 your React app URL
+  origin: 'http://localhost:3000',
   credentials: true
 }));
-// in app.js
+app.use(express.json());
+app.use(cookieParser());
+
+// routes calling
+app.use('/api/auth', authRoute);
+app.use('/api/script', scriptRoute);
+
+//  Test if server is up
 app.get('/api/test', (req, res) => {
-  res.json({ message: 'Server is up ✅' });
+  console.log(" Test route hit");
+  res.json({ message: "Server is live" });
 });
 
-app.use(express.json());
-
-app.use('/api/auth',authRoute);
-
 app.listen(process.env.PORT || 5000, () => {
-    console.log(`Server is running on port ${process.env.PORT}`);
+  console.log(` Server running on port ${process.env.PORT || 5000}`);
 });

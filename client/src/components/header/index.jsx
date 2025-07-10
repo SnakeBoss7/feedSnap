@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 // import { FaUsers,FaPagelines } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagic, faFileAlt, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { SidebarContextprovider } from "../../context/sidebarContext";
 
 export default function Header({ pages, links, icons }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -64,7 +65,7 @@ export default function Header({ pages, links, icons }) {
         
          <Link
             className="text-bg_c transtition-all hover:bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text hover:text-transparent  ease-in-out duration-400 font-bold  px-4 py-2 rounded-md  hover:bg-gradient-to-r hover:from-blue-500 hover:via-blue-500 hover:to-purple-600 hover:text-white hover:border-white"
-            to="/signIn"
+            to="/logIn"
           >
             Log In
           </Link>

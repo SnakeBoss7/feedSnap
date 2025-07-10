@@ -2,7 +2,7 @@ import { SimpleHeader } from "../../../components/header/header";
 import { GlobeLock, Paintbrush } from "lucide-react";
 import { useState } from "react";
 
-export const DashboardHome= () => {
+export const Feedback = () => {
   //widget color
   const [UrlSettings, setUrlsettings] = useState({
     webUrl: "",
