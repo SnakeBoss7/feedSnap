@@ -16,4 +16,4 @@ const scriptSchema = new mongoose.Schema({
   timestamps: true, // Optional: adds createdAt & updatedAt
 });
 
-module.exports = mongoose.model('Script', scriptSchema);
+module.exports = mongoose.model('webData', scriptSchema);

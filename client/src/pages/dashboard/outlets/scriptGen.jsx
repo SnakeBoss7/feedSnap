@@ -16,7 +16,7 @@ export const ScriptGen = () => {
   const colorChange = (e) => {
     setUrlsettings((prev)=>({...prev,[e.target.name]:e.target.value}))
   };
-  const genScript =(e)=>
+  const genScript =async(e)=>
     {
       e.preventDefault();
       let emptyVal = Object.values(UrlSettings).some((item)=>item ==='')
@@ -29,7 +29,7 @@ export const ScriptGen = () => {
       
       try
       {
-        let res = axios.post(`${apiUrl}/api/script/create`,UrlSettings,
+          let res = await axios.post(`${apiUrl}/api/script/create`,{settings:UrlSettings},
           {
             withCredentials:true
           })
