@@ -11,6 +11,8 @@ const verifyUser = (req, res, next) =>
             if(!token)
                 {
                     console.log('Token not found');
+                    res.status(401).json({ msg: "Unauthorized" });
+
                 }
             let decoded = jwt.verify(token,process.env.JWT_SECRET);
             console.log('decoded',decoded)

@@ -10,14 +10,14 @@ import {
   MessageSquare,
   MessageSquareCode,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 export const Sidebar = () => {
   const { showSidebar, setShowSidebar } = useSidebarContext();
   const ref = useRef();
   const onclickLink = () => {
     setShowSidebar((prev) => !prev);
   };
-  useEffect(() => {
+  useLayoutEffect(() => {
     const handleOutsideClick = (event) => {
       if (
         window.innerWidth < 1024 &&
@@ -25,6 +25,11 @@ export const Sidebar = () => {
         !ref.current.contains(event.target)
       ) {
         setShowSidebar(false);
+      }
+      else
+      {
+        setShowSidebar(true);
+
       }
     };
     document.addEventListener("mousedown", handleOutsideClick);

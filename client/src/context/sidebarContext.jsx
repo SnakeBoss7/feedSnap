@@ -9,7 +9,7 @@ const sidebarContext = createContext(
 
 const SidebarContextprovider = ({children})=>
     {
-        const [showSidebar, setShowSidebar] = useState(false);
+        const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 1024);
         return (
             <sidebarContext.Provider value={{showSidebar,setShowSidebar}}>
                 {children}

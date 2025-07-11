@@ -7,6 +7,7 @@ const path = require('path')
 const authRoute = require('./routes/authRoutes');
 const scriptRoute = require('./routes/scriptRoute');
 const widgetRoute = require('./routes/widgetRoute');
+const feedRoute = require('./routes/feedback');
 const app = express();
 
 // Connect DB
@@ -14,7 +15,7 @@ connectDB();
 
 // middleware
 app.use(cors({
-  origin: ['http://localhost:3000','http://localhost:3001'],
+  origin: ['http://localhost:3000','http://localhost:3001','http://localhost:3002'],
   credentials: true
 }));
 app.use(express.json());
@@ -24,6 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', authRoute);
 app.use('/api/script', scriptRoute);
 app.use('/api/widget', widgetRoute);
+app.use('/api/feedback', feedRoute);
 //  Test if server is up
 app.get('/api/test', (req, res) => {
   console.log(" Test route hit");

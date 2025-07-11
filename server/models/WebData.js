@@ -7,6 +7,7 @@ const scriptSchema = new mongoose.Schema({
   color: String,
   position: String,
   text: String,
+  email:Boolean,
   userId: {
     type: mongoose.Types.ObjectId,
     ref: 'User',
