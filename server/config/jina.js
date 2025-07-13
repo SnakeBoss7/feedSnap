@@ -1,7 +1,7 @@
 // utils/getEmbedding.js
 const axios = require('axios');
 
-const JINA_API_KEY = 'jina_4a64dade321845a98a8991d91f12ee94eDD68UcvKVPYxi4OtErTM1DHKMV_'; //
+const JINA_API_KEY = ''; //
 require('dotenv').config();
 async function getEmbedding(text) {
     if(!JINA_API_KEY) 
