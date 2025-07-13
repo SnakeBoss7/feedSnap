@@ -1,7 +1,9 @@
 import { SimpleHeader } from "../../../components/header/header";
-import { GlobeLock, Paintbrush } from "lucide-react";
+import { GlobeLock, Paintbrush,Grid2X2, Grid2X2Check } from "lucide-react";
 import { useState } from "react";
 import axios from "axios";
+import  Select  from 'react-select'
+import { HighlightedGridIcon } from "../../../utils/gridIcons";
 let apiUrl = process.env.REACT_APP_API_URL
 export const ScriptGen = () => {
   //widget color
@@ -19,7 +21,7 @@ export const ScriptGen = () => {
   const genScript =async(e)=>
     {
       e.preventDefault();
-      let emptyVal = Object.values(UrlSettings).some((item)=>item ==='')
+      let emptyVal = Object.entries(UrlSettings).some((key,value)=>(value==='' && key !== UrlSettings.text ) )
         
         if(emptyVal)
           {
@@ -40,6 +42,37 @@ export const ScriptGen = () => {
         console.log(err);
       }
     }
+
+    const options = [
+      {
+        value:"bottom right",
+        label:(
+          <div className="flex items-center font-bold gap-3">
+          <HighlightedGridIcon highlight="bottom-right"/>Bottom right</div>
+        )
+      },
+      {
+        value:"bottom left",
+        label:(
+          <div className="flex items-center font-bold gap-3"><HighlightedGridIcon highlight="bottom-left"/> Bottom left</div>
+        )
+      },
+      {
+        value:"top right",
+        label:(
+          <div className="flex items-center font-bold gap-3"><HighlightedGridIcon highlight="top-right"/>Top right</div>
+        )
+      },
+      {
+        value:"top left",
+        label:(
+          <div className="flex items-center font-bold gap-3">
+            <HighlightedGridIcon highlight="top-left"/>
+            Top left</div>
+        )
+      }
+  ];
+ 
   return (
     <div className="flex overflow-y-scroll flex-col min-h-screen lg:[70%] w-full bg-white">
       <SimpleHeader />
@@ -104,25 +137,33 @@ export const ScriptGen = () => {
             >
               Position
             </label>
-            <select
-              name="position"
-              value={UrlSettings.position}
-              onChange={(e) => {
-                setUrlsettings((prev) => ({
-                  ...prev,
-                  [e.target.name]: e.target.value,
-                }));
+             <Select
+              required
+              options={options}
+              onChange={(e) =>
+                setUrlsettings((prev) => ({ ...prev, title: e?.value || "" }))
+              }
+              placeholder="Select feedback type..."
+              className="text-sm"
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  borderColor: "#d1d5db",
+                  boxShadow: "none",
+                  padding: "2px",
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isSelected ? "#60a5fa" : "#fff",
+                  color: state.isSelected ? "#fff" : "#000",
+                  "&:hover": {
+                    backgroundColor: "#e0f2fe",
+                  },
+                }),
               }}
-              className="rounded-lg h-10  px-2  tracking-tight mb-5"
-              id=""
-            >
-              <option value="Bottom right">Bottom right</option>
-              <option value="Bottom left">Bottom left</option>
-              <option value="Top left">Top left</option>
-              <option value="Top right">Top right</option>
-            </select>
+            />
             {/* paint section  */}
-            <label for="color " className="font-bold ">
+            <label for="color " className="font-bold mt-5">
               Widget Color
             </label>
             <div class="color gap-3 flex  items-center mb-5 ">

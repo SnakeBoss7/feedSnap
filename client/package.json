@@ -14,6 +14,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.10.0",
     "firebase": "^11.10.0",
+    "framer-motion": "^12.23.3",
     "lucide-react": "^0.525.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -28,7 +29,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build:widget": "cp src/index.js src/index.main.js && cp src/index.widget.js src/index.js && npm run build && mv build widget-build && cp src/index.main.js src/index.js",
+    "serve:widget": "serve -s widget-build -l 3002"
   },
   "eslintConfig": {
     "extends": [

@@ -2,16 +2,15 @@ const User = require('../models/user');
 const webData = require('../models/WebData');
 const scriptCreate = async (req,res)=>
 {
-    // console.log(req.body)
-    // console.log(req.user)
     if(!req.user)
         {
             res.status(400).json({mess:"user not found"});
 
         }
     const {webUrl,position,color,text} = req.body.settings;
+    
     let webdata = await webData.findOne({webUrl:webUrl})
-    console.log(process.env.SERVER);
+    // console.log(process.env.SERVER);
     if(!webdata)
         {
             console.log('new data created');

@@ -1,4 +1,4 @@
-import logo from './logo.svg';
+
 import './App.css';
 import { Login } from './pages/login/index';
 import { Home } from './pages/landing/index';
@@ -7,9 +7,9 @@ import { DashboardHome } from './pages/dashboard/outlets/dashboard';
 import { ScriptGen } from './pages/dashboard/outlets/scriptGen';
 import { Analytics } from './pages/dashboard/outlets/analytics';
 import { Feedback } from './pages/dashboard/outlets/feedback';
-import { Outlet } from "react-router-dom";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { FeedbackBox } from './components/feedbackUi/feedback';
+
 function App() {
 
   return (

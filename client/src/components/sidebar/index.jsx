@@ -53,14 +53,14 @@ export const Sidebar = () => {
         </div>
         {/* <Checkbox show={showSidebar} /> */}
       </div>
-      <div className="links flex flex-col gap-5 p-5">
+      <div className="links flex flex-col gap-3 p-8">
         <NavLink
           to="/dashboard"
           end
           className={({ isActive }) =>
             isActive
-              ? "flex items-center gap-3 text-blue-600 font-bold border-l-4 border-blue-600 pl-2"
-              : "flex items-center gap-3 text-gray-700 hover:text-blue-500 pl-2"
+              ? "flex items-center gap-3 text-white h-12 font-bold  text-lg rounded-lg bg-blue-500  pl-2"
+              : "flex items-center gap-3 text-gray-700 h-12 hover:text-blue-500 pl-2"
           }
         >
           <DatabaseIcon className="w-5" /> Dashboard
@@ -69,8 +69,8 @@ export const Sidebar = () => {
           to="/dashboard/feedback"
           className={({ isActive }) =>
             isActive
-              ? "flex items-center gap-3 text-blue-600 font-bold border-l-4 border-blue-600 pl-2"
-              : "flex items-center gap-3 text-gray-700 hover:text-blue-500 pl-2"
+              ? "flex items-center gap-3 text-white h-12 font-bold  text-lg rounded-lg bg-blue-500  pl-2"
+              : "flex items-center gap-3 text-gray-700v h-12 hover:text-blue-500 pl-2"
           }
         >
           <MessageSquare className="w-5" /> Feedback
@@ -79,8 +79,8 @@ export const Sidebar = () => {
           to="/dashboard/analytics"
           className={({ isActive }) =>
             isActive
-              ? "flex items-center gap-3 text-blue-600 font-bold border-l-4 border-blue-600 pl-2"
-              : "flex items-center gap-3 text-gray-700 hover:text-blue-500 pl-2"
+              ? "flex items-center gap-3 text-white h-12 font-bold  text-lg rounded-lg bg-blue-500  pl-2"
+              : "flex items-center gap-3 text-gray-700 h-12 hover:text-blue-500 pl-2"
           }
         >
           <ChartArea className="w-5" /> Analytics
@@ -90,8 +90,8 @@ export const Sidebar = () => {
           to="/dashboard/scriptGen"
           className={({ isActive }) =>
             isActive
-              ? "flex items-center gap-3 text-blue-600 font-bold border-l-4 border-blue-600 pl-2"
-              : "flex items-center gap-3 text-gray-700 hover:text-blue-500 pl-2"
+              ? "flex items-center gap-3 text-white h-12 font-bold  text-lg rounded-lg bg-blue-500  pl-2"
+              : "flex items-center gap-3 text-gray-700 h-12 hover:text-blue-500 pl-2"
           }
         >
           <Code className="w-5" /> Script Generator
