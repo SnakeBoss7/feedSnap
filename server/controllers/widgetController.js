@@ -1,4 +1,4 @@
-const feedback = require('../models/bug')
+const feedback = require('../models/feedback')
 const user = require('../models/user')
 const webData = require('../models/WebData');
 
@@ -12,9 +12,9 @@ const widgetConfigProvider =async(req,res)=>
                 res.status(400).send("Service is not provided to this web");
                 return;
             }
-        const {color,text,position} = web;
-        console.log(color,text,position);
-        res.json({color,text,position,});
+        const {color,text,position,bgColor} = web;
+        console.log(color,text,position,bgColor);
+        res.json({color,text,position,bgColor});
 
         
     }

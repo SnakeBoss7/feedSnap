@@ -4,6 +4,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
 const path = require('path')
+
+//routes
 const authRoute = require('./routes/authRoutes');
 const scriptRoute = require('./routes/scriptRoute');
 const widgetRoute = require('./routes/widgetRoute');
@@ -13,7 +15,6 @@ const app = express();
 // Connect DB
 connectDB();
 
-// middleware
 app.use(cors({
   origin: ['http://localhost:3000','http://localhost:3001','http://localhost:3002'],
   credentials: true

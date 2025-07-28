@@ -40,10 +40,10 @@ export const  Home=()=> {
           ratings, comments, and analytics to improve your user experience.
         </p>
       </div>
-      <div class="features flex gap-3 px-5 items-center">
-        <div class="div flex flex-wrap text-center items-center font-extrabold flex-col sm:flex-row sm:gap-3"> <FontAwesomeIcon icon={faCheck} className="text-green-600"/>  No credit card required</div>
-        <div class="div flex flex-wrap text-center items-center font-extrabold flex-col sm:flex-row sm:gap-3"> <FontAwesomeIcon icon={faCheck} className="text-green-600"/> Less than 5 minutes to set up</div>
-        <div class="div flex flex-wrap text-center items-center font-extrabold flex-col sm:flex-row sm:gap-3"> <FontAwesomeIcon icon={faCheck} className="text-green-600"/>  Free forever Plan</div>
+      <div className="features flex gap-3 px-5 items-center">
+        <div className="div flex flex-wrap text-center items-center font-extrabold flex-col sm:flex-row sm:gap-3"> <FontAwesomeIcon icon={faCheck} className="text-green-600"/>  No credit card required</div>
+        <div className="div flex flex-wrap text-center items-center font-extrabold flex-col sm:flex-row sm:gap-3"> <FontAwesomeIcon icon={faCheck} className="text-green-600"/> Less than 5 minutes to set up</div>
+        <div className="div flex flex-wrap text-center items-center font-extrabold flex-col sm:flex-row sm:gap-3"> <FontAwesomeIcon icon={faCheck} className="text-green-600"/>  Free forever Plan</div>
       </div>
       {/* Message section  */}
       <div className=" mt-10 message flex flex-col items-center w-full">
@@ -60,8 +60,8 @@ export const  Home=()=> {
 
       {/* Analyse redirection section  */}
       <div className=" px-5  mx-auto md:container md:p-0 w-full">
-        <div class="box h-[300px] flex flex-col p-5 items-center justify-evenly w-full  bg-gradient-to-r from-primary via-primary_lg to-purple-500 text-white font-normal tracking-tight  rounded-xl">
-          <div class="textual_dta">
+        <div className="box h-[300px] flex flex-col p-5 items-center justify-evenly w-full  bg-gradient-to-r from-primary via-primary_lg to-purple-500 text-white font-normal tracking-tight  rounded-xl">
+          <div className="textual_dta">
             <h1 className="md:text-4xl text-3xl text-center font-extrabold ">
               Ready to optimize your resume?
             </h1>

@@ -81,13 +81,13 @@ const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     const webUrlParam = queryParams.get("webUrl");
 
     if (!webUrlParam) {
-      console.warn("⚠️ webUrl missing in query params!");
+      console.warn(" webUrl missing in query params!");
       return;
     }
 
     // handling message from iframe
     const handleMessage = (event) => {
-      console.log(" Message received:", event);
+      // console.log(" Message received:", event);
 
       if (event.origin !== webUrlParam) {
         console.warn(" Origin mismatch:", event.origin);
@@ -99,7 +99,9 @@ const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
       if (type === "FEEDBACK_WIDGET_CONFIG") {
         console.log(" Received config payload:", payload, pathname);
         setThemeColor(payload.color);
-        setFeedback((prev) => ({ ...prev, Url: event.origin }));
+        console.log(" path changed", pathname);
+        setFeedback((prev) => ({ ...prev, Url: event.origin}));
+        setFeedback((prev) => ({ ...prev, pathname:pathname }));
       }
       if (type === "ROUTE_CHANGE") {
         console.log(" path changed", pathname);
@@ -224,8 +226,9 @@ const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
                   backgroundColor: state.isSelected ? themeColor : "#fff",
                   color: state.isSelected ? "#fff" : "#000",
                   "&:hover": {
-                    backgroundColor: `${themeColor}20`, // 20 = ~12% opacity
-                  },
+                    backgroundColor: themeColor,
+                    color: "#fff" ,
+                  }, 
                 }),
               }}
             />

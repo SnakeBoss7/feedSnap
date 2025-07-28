@@ -5,6 +5,7 @@ const scriptSchema = new mongoose.Schema({
     required: true,
   },
   color: String,
+  bgColor:String,
   position: String,
   text: String,
   email:Boolean,

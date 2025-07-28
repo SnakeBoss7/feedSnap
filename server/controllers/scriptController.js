@@ -2,6 +2,7 @@ const User = require('../models/user');
 const webData = require('../models/WebData');
 const scriptCreate = async (req,res)=>
 {
+    console.log(process.env.SERVER)
     if(!req.user)
         {
             res.status(400).json({mess:"user not found"});

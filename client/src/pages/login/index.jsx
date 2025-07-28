@@ -16,7 +16,7 @@ export const Login =()=>
                 const token = await result.user.getIdToken();
                 console.log("Frontend API URL:", apiUrl);
                 console.log(token);
-                let res = axios.post(`${apiUrl}/api/auth/firebase`,{idToken:token},
+                let res = await  axios.post(`${apiUrl}/api/auth/firebase`,{idToken:token},
                     {
                         withCredentials:true
                     });

@@ -1,8 +1,10 @@
 (function () {
   const webUrl = window.location.origin;
+  console.log(webUrl)
   if (!webUrl) return;
+  
+  let currentPathname = window.location.pathname === ''?"/":window.location.pathname ;
 
-  let currentPathname = window.location.pathname == ''?"/":window.location.pathname ;
 
   // route change tracker for SPA 
   function onRouteChange(callback) {
@@ -15,7 +17,8 @@
         callback(currentUrl);
       }
     }).observe(document, { subtree: true, childList: true });
-
+    
+    // route change tracker for non SPA 
     window.addEventListener('popstate', () => {
       const currentUrl = location.href;
       if (currentUrl !== lastUrl) {
@@ -24,7 +27,6 @@
       }
     });
   }
-// route change tracker for non SPA 
   onRouteChange(() => {
     currentPathname = window.location.pathname;
     const iframe = document.getElementById("feedback-widget-iframe");
@@ -57,7 +59,6 @@
           background: rgba(0, 0, 0, 0.6);
           justify-content: center;
           align-items: center;
-          z-index: 999999;
         `;
 
 
@@ -66,7 +67,7 @@
         iframe.id = "feedback-widget-iframe";
         iframe.src = `http://localhost:3002?webUrl=${webUrl}`;
         iframe.style.cssText = `
-          width: 70vw;
+          width: 90vw;
           max-width: 400px;
           height: 90vh;
           max-height: 550px;
@@ -146,9 +147,9 @@
         // for closing the feedback widget
         window.addEventListener('message',(event)=>
           {
-            console.log('yo');
             if(event.origin !== 'http://localhost:3002') return;
             if (event.data.type === "FEEDBACK_SUBMITTED") {
+              console.log('yo');
                           modal.style.display = "none";
             button.style.display = "flex";
             } 

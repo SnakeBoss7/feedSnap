@@ -4,11 +4,14 @@ const bugSchema = new mongoose.Schema({
   description: String,
   severity: Number,
   rating: Number,
+  vector:Number,
   status: Boolean,
   image:String,
+  webUrl:String,
+  pathname:String,
   email:String,
   createdOn: { type: Date, default: Date.now },
   updatedOn: { type: Date, default: Date.now }
 });
 
-module.exports= mongoose.model('Feedback', bugSchema);
+module.exports= mongoose.model('feedback', bugSchema);

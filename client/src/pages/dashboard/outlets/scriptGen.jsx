@@ -4,6 +4,7 @@ import { useState } from "react";
 import axios from "axios";
 import  Select  from 'react-select'
 import { HighlightedGridIcon } from "../../../utils/gridIcons";
+import { RatingStar } from "../../../components/star/star";
 let apiUrl = process.env.REACT_APP_API_URL
 export const ScriptGen = () => {
   //widget color
@@ -74,8 +75,8 @@ export const ScriptGen = () => {
   ];
  
   return (
-    <div className="flex overflow-y-scroll flex-col min-h-screen lg:[70%] w-full bg-white">
-      <SimpleHeader />
+    <div className="">
+
       <div className="p-6">
         <h1 className="tracking-tight text-4xl font-bold ">Script Generator</h1>
         <p className="tracking-tight text-lg text-gray-600">
@@ -93,7 +94,7 @@ export const ScriptGen = () => {
               Enter your website details to generate the script
             </p>
             {/* website url  */}
-            <label for="web_url" className="tracking-tight text-lg font-bold">
+            <label htmlFor="web_url" className="tracking-tight text-lg font-bold">
               Website Url
             </label>
             <input
@@ -132,7 +133,7 @@ export const ScriptGen = () => {
               Customize the appearance and behavior of your widget
             </p>
             <label
-              for="position"
+              htmlFor="position"
               className=" text-lg font-bold  tracking-tight"
             >
               Position
@@ -163,10 +164,10 @@ export const ScriptGen = () => {
               }}
             />
             {/* paint section  */}
-            <label for="color " className="font-bold mt-5">
+            <label htmlFor="color " className="font-bold mt-5">
               Widget Color
             </label>
-            <div class="color gap-3 flex  items-center mb-5 ">
+            <div className="color gap-3 flex  items-center mb-5 ">
               <input
                 type="color"
                 name="color"
@@ -177,12 +178,13 @@ export const ScriptGen = () => {
               <input
                 className="w-fit h-8 p-3 border border-gray-500"
                 type="text"
-                defaultValue={UrlSettings.color}
+                name="color"
+                value={UrlSettings.color}
                 onChange={colorChange}
               />
             </div>
             {/*  widget text */}
-            <label for="text" className="font-bold">
+            <label htmlFor="text" className="font-bold">
               Widget Text
             </label>
             <input

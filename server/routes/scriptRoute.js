@@ -4,7 +4,7 @@ const verifyUser = require('../middleware/jwtverify');
 const {scriptCreate} = require('../controllers/scriptController');
 
 router.post('/create',verifyUser,scriptCreate);
-router.get('/test', (req, res) => {
+router.get('/test',verifyUser, (req, res) => {
   console.log('🎯 Route hit');
   res.send('Test passed');
 });
