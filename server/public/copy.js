@@ -17,97 +17,11 @@
     constructor(parameters) {
       this.webUrl = window.location.origin;
       this.pathname = window.location.pathname || "/";
-      this.currentPath = window.location.pathname || "/"; // Initialize currentPath
       this.config = null;
       this.isOpen = false;
       this.selectedFeedbackType = null;
-      this.setupRouteDetection();
       this.init();
-      this.handleOutsideClick = this.handleOutsideClick.bind(this);
     }
-
-    handleOutsideClick(e) {
-  if (!this.modal.contains(e.target) && !this.button.contains(e.target)) {
-    this.modal.classList.remove("open");
-    this.isOpen = false;
-    window.removeEventListener("click", this.handleOutsideClick);
-  }
-}
-
-    async setupRouteDetection() {
-      // Store initial path
-      this.currentPath = window.location.pathname || '/';
-      
-      // Listen for forward and backward navigation (popstate)
-      window.addEventListener('popstate', () => {
-        this.handleRouteChange('popstate');
-      });
-
-      // Listen for hash changes
-      window.addEventListener('hashchange', () => {
-        this.handleRouteChange('hashchange');
-      });
-
-      // MutationObserver for SPA route changes
-      if (typeof MutationObserver !== 'undefined') {
-        const observer = new MutationObserver((mutations) => {
-          const newPath = window.location.pathname;
-          if (newPath !== this.currentPath) {
-            this.handleRouteChange('mutation');
-          }
-        });
-        
-        // Observe changes to the entire document body for SPA navigation
-        observer.observe(document.body, {
-          childList: true,
-          subtree: true,
-          attributes: true,
-          attributeFilter: ['href', 'data-path']
-        });
-        
-        // Also observe title changes which often happen during route changes
-        observer.observe(document.head, {
-          childList: true,
-          subtree: true
-        });
-        
-        // Store observer reference for cleanup if needed
-        this.routeObserver = observer;
-      }
-      
-      // Additional method: Poll for route changes (fallback)
-      this.startRoutePolling();
-    }
-    
-    startRoutePolling() {
-      // Fallback polling method for route detection
-      setInterval(() => {
-        const newPath = window.location.pathname;
-        if (newPath !== this.currentPath) {
-          this.handleRouteChange('polling');
-        }
-      }, 500); // Check every 500ms
-    }
-
-    handleRouteChange(source) {
-      const newPath = window.location.pathname;
-      
-      if (newPath !== this.currentPath) {
-        console.log(`Route changed from ${this.currentPath} to ${newPath} (via ${source})`);
-        
-        this.currentPath = newPath;
-        this.pathname = newPath;
-        
-        // Close modal if open
-        if (this.isOpen) {
-          this.displayModal();
-        }
-        
-        // Reload config for new page
-        this.loadConfig();
-      }
-    }
-    
     async init() {
       try {
         await this.loadConfig();
@@ -118,10 +32,6 @@
         console.log(err);
       }
     }
-
-
-  // Rest of your existing methods...
-
     async loadConfig() {
       try {
         // hard coded web url*******
@@ -150,6 +60,7 @@
       this.createStyles();
       this.createButton();
       this.createModal();
+      this.addTabSwitchingEvents()
 
 
     }
@@ -199,56 +110,38 @@
       border-bottom-${position[1]}-radius: 5px;
       cursor: pointer;
       }
- 
-.feedsnap-container {
-    gap: 20px;
-    background-color: var(--mode-color);
-    height: 550px;
-    width: 400px;
-    position: fixed;
-    ${position[0]}: -230px;
-    ${position[1]}: -155px;
-    border: 2px solid var(--primary-color);
-    border-radius: 15px;
-    border-bottom-${position[1]}-radius: 5px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    overflow: visible;
-    z-index: 9999999;
-    transform: scale(0) rotate(15deg);
-    opacity: 0;
-    transition: all cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s;
-    transform-origin: ${position[0]} ${position[1]};
-    backdrop-filter: blur(10px);
-}
+      .feedsnap-modal
+      {
 
-
-
-.open {
-    gap: 20px;
-    background-color: var(--mode-color);
-    height: 550px;
-    z-index: 999999999;
-    width: 400px;
-    position: fixed;
-    ${position[0]}: 100px;
-    ${position[1]}: 100px;
-    border: 2px solid var(--primary-color);
-    border-radius: 15px;
-    border-bottom-${position[1]}-radius: 5px;
-    padding: 20px;
-    display: flex;
-    transform: scale(1) rotate(0deg);
-    opacity: 1;
-    flex-direction: column;
-    overflow: visible;
-    transition: all cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s;
-}
-
-.open::before {
-    opacity: 0.8;
-}
+      top:0;
+      left:0;
+      height:100%;
+      width:100%;
+      position:fixed;
+      z-index:9999999;
+      display:none;
+      
+      }
+        .feedsnap-container{
+                  justify-content: space-between;
+        background-color:var(--mode-color);
+        height:550px;
+        width:400px;
+        position:fixed;
+        ${position[0]}:100px;
+        ${position[1]}:100px;
+        border: 2px solid rgba(var(--primary-rgb) ,0.6);
+        border-radius:15px;
+        border-bottom-${position[1]}-radius: 5px;
+        padding:20px;
+        display:flex;
+        flex-direction:column;
+        overflow: visible;
+        }
+      .open
+      {
+      display:flex;
+      }
       .closingButton
       {
       display:flex;
@@ -393,8 +286,8 @@
           }
           .radio-option img
           {
-            height:40px;
-            width:40px;
+            height:35px;
+            width:35px;
             border-radius:50%;
             
             transition: all 0.2s ease; 
@@ -407,8 +300,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 55px;
-  width: 55px;
+  height: 50px;
+  width: 50px;
   border-radius: 15px;
   transition: all 300ms ease-in-out;
 }
@@ -446,17 +339,12 @@
 
 .feedsnap-textarea {
   min-height: 80px;
-  height: 180px;
   resize: vertical;
 }
 
 .feedsnap-submit {
   width: 100%;
   padding: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap:10px;
   background: var(--primary-color);
   color: var(--mode-color);
   border: none;
@@ -479,7 +367,7 @@
     createButton() {
       this.button = document.createElement("button");
       this.button.className = "feedsnap-widget-base-config feedsnap-button ";
-      this.button.title = `Send Feedback `;
+      this.button.title = "Send Feedback";
       this.button.setAttribute("aria-label", "Open feedback widget");
 
       if (this.config.text) {
@@ -488,7 +376,7 @@
         `;
       } else {
         buttonContent = `
-          <i data-lucide="message-square"></i>
+           <i data-lucide="home"></i>
         `;
       }
       this.button.innerHTML = buttonContent;
@@ -500,13 +388,18 @@
     createModal() {
 
       this.modal = document.createElement("div");
-      this.modal.className = "feedsnap-container feedsnap-widget-base-config";
+      this.modal.className = "feedsnap-modal";
       this.modal.innerHTML = `
+        <div class="feedsnap-container feedsnap-widget-base-config">
           <div class="feedsnap-header">
-            <button class="tab_btn">Feedback </button>
+            <button class="tab_btn active">Feedback </button>
+            <button class="tab_btn">Let's Chat</button>
           </div>
 
-          <form id="feedbackForm">
+          <div class="underline">
+            <div class="highlight"></div>
+          </div>
+          
           <div class="dropdown" id="myDropdown">
             <div class="dropdown-button" id="dropdownButton">
                 <span id="selectedText">Choose feedback type</span>
@@ -545,27 +438,35 @@
           </div>
         
           <input type="text" class="feedsnap-input" name="title" placeholder="Brief title (e.g., 'Login button not working')" required>
-
-          <textarea class="feedsnap-textarea" name="description" placeholder="Describe your Story in detail..." required></textarea>
-
+          
+          <textarea class="feedsnap-textarea" name="description" placeholder="Describe your feedback in detail..." required></textarea>
+          
           <button type="submit" class="feedsnap-submit">
             <span class="submit-text">Send Feedback</span>
-            <i data-lucide="send"></i>
-            </button>
-                      <form id="feedbackForm">
-            `;
-            
+          </button>
+        </div>
+      `;
 
       document.body.appendChild(this.modal);
     }
     
-    //send feedback
-    addSendFeedbackEvent()
-    {
-      const sendBtn = this.modal.querySelector('.feedsnap-submit');
-      console.log('reached the function')
-      sendBtn.addEventListener("click", (e)=>{this.sendFeedback(e)});
+    //tab switching events - FIXED
+    addTabSwitchingEvents() {
+      const btns = this.modal.querySelectorAll('.tab_btn');
+      const highlight = this.modal.querySelector('.highlight');
+
+      btns.forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+          // Remove active class from all buttons
+          btns.forEach(b => b.classList.remove('active'));
+          // Add active class to clicked button
+          btn.classList.add('active');
+          // Move highlight
+          highlight.style.transform = `translateX(${index * 100}%)`;
+        });
+      });
     }
+    
     //dropdown events - PROPERLY IMPLEMENTED
     addDropdownEvents() {
       const dropdownButton = this.modal.querySelector("#dropdownButton");
@@ -633,84 +534,38 @@
         
         console.log('Selected feedback type:', this.selectedFeedbackType);
       };
-      this.sendFeedback = (e) => 
-        {
-          console.log('reached the function')
-          e.preventDefault();
-          const title = this.modal.querySelector("input[name='title']").value;
-          const description = this.modal.querySelector("textarea[name='description']").value;
-          const rating = this.modal.querySelector("input[name='rating']:checked")?.value;
-
-          if (!this.selectedFeedbackType || !title || !description || !rating) {
-            alert("Please fill in all fields.");
-            return;
-          }
-
-          // Post data to server
-          fetch(`${CONFIG.BASE_API}/api/feedback/addfeedback`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              webUrl: this.webUrl,
-              pathname: this.pathname,
-              feedbackType: this.selectedFeedbackType,
-              title,
-              description,
-              rating,
-            }),
-          })
-          .then(response => response.json())
-          .then(data => {
-            console.log("Feedback submitted successfully:", data);
-            window.parent.postMessage({ type: "FEEDBACK_SUBMITTED" }, "*");
-          })
-          .catch(error => {
-            console.error("Error submitting feedback:", error);
-          });
-        }
     }
     
     //EVENT HANDLERS
     addEventListeners() {
       // BUTTON EVENTS
-      this.button.addEventListener("click", (e) => {
-          e.stopPropagation();
-        this.displayModal()
-
+      this.button.addEventListener("click", () => this.displayModal());
+      this.modal.addEventListener("click", (e) => {
+        if (e.target == this.modal) {
+          this.displayModal();
+        }
       });
-
       
       // ADD DROPDOWN EVENTS
       this.addDropdownEvents();
-      this.addSendFeedbackEvent();
-
     }
 
     //functions or events
-
- displayModal() {
-  console.log(this.isOpen);
-  if (this.isOpen) {
-    this.button.classList.remove("closingButton");
-    this.button.innerHTML = buttonContent;
-    this.modal.classList.remove("open");
-    console.log('we are closing');
-    lucide.createIcons();
-    window.removeEventListener('click', this.handleOutsideClick);
-  } else {
-    this.button.innerHTML = `<i data-lucide="chevron-down"></i>`;
-    this.modal.classList.add("open");
-    console.log('we are adding');
-    this.button.classList.add("closingButton");
-    lucide.createIcons();
-    window.addEventListener('click', this.handleOutsideClick);
-  }
-  console.log('changing');
-  this.isOpen = !this.isOpen;
-  console.log(this.isOpen);
-}
+    displayModal() {
+      console.log(this.isOpen);
+      if (this.isOpen) {
+        this.button.classList.remove("closingButton");
+        this.button.innerHTML = buttonContent;
+        this.modal.classList.remove("open");
+         lucide.createIcons();
+        } else {
+          this.button.innerHTML = `<i data-lucide="chevron-down"></i>`;
+          this.modal.classList.add("open");
+          this.button.classList.add("closingButton");
+          lucide.createIcons();
+      }
+      this.isOpen = !this.isOpen;
+    }
   }
   
   if (document.readyState === "loading") {
@@ -719,4 +574,3 @@
     new FeedbackSnippet();
   }
 })();
-
