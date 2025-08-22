@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@copilotkit/backend": "^0.37.0",
+    "@copilotkit/react-core": "^1.9.3",
+    "@copilotkit/react-ui": "^1.9.3",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
@@ -23,6 +26,7 @@
     "react-router-dom": "^7.6.3",
     "react-scripts": "^5.0.1",
     "react-select": "^5.10.1",
+    "recharts": "^3.1.0",
     "styled-components": "^6.1.19",
     "web-vitals": "^2.1.4"
   },

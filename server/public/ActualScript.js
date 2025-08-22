@@ -11,7 +11,7 @@
     BASE_API: "http://localhost:5000",
   };
 
-  let buttonContent;
+
   //creating widget class
   class FeedbackSnippet {
     constructor(parameters) {
@@ -20,6 +20,7 @@
       this.currentPath = window.location.pathname || "/"; // Initialize currentPath
       this.config = null;
       this.isOpen = false;
+      this.btnCont=''
       this.selectedFeedbackType = null;
       this.setupRouteDetection();
       this.init();
@@ -31,6 +32,8 @@
     this.modal.classList.remove("open");
     this.isOpen = false;
     window.removeEventListener("click", this.handleOutsideClick);
+    this.button.innerHTML = this.btnCont;
+        lucide.createIcons();
   }
 }
 
@@ -201,7 +204,6 @@
       }
  
 .feedsnap-container {
-    gap: 20px;
     background-color: var(--mode-color);
     height: 550px;
     width: 400px;
@@ -211,10 +213,9 @@
     border: 2px solid var(--primary-color);
     border-radius: 15px;
     border-bottom-${position[1]}-radius: 5px;
-    padding: 20px;
     display: flex;
     flex-direction: column;
-    overflow: visible;
+    overflow: hidden;
     z-index: 9999999;
     transform: scale(0) rotate(15deg);
     opacity: 0;
@@ -226,7 +227,6 @@
 
 
 .open {
-    gap: 20px;
     background-color: var(--mode-color);
     height: 550px;
     z-index: 999999999;
@@ -237,12 +237,10 @@
     border: 2px solid var(--primary-color);
     border-radius: 15px;
     border-bottom-${position[1]}-radius: 5px;
-    padding: 20px;
     display: flex;
     transform: scale(1) rotate(0deg);
     opacity: 1;
     flex-direction: column;
-    overflow: visible;
     transition: all cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s;
 }
 
@@ -258,20 +256,27 @@
       }
         .feedsnap-header
         {
+        z-index:-9999999;
         display:flex;
+        height:10%;
         justify-content:space-evenly;
-        }
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 10px 20px;
-          font-size: 16px;
-          transition: all 0.3s ease;
+        
         }
         .tab_btn {
-          color: var(--primary-color);
+          background-color:var(--primary-color);
+          color:white;
+          border: none;
           font-weight: 600;
-        }
+          height:80%;
+          width:50%;
+          opacity:0.8;
+          transition: all 0.3s ease;
+          }
+          .feedsnap-header .checked
+          {
+          opacity:1;
+            height:100%;
+          }
 
         .dropdown {
             position: relative;
@@ -465,11 +470,84 @@
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
+.feedForm
+{
+      padding:20px;
+      height:90%
+}
 .feedsnap-submit:hover {
   background: var(--primary-hover);
   transform: translateY(-2px);
 }
+  .showNot
+  {
+  display: none;
+  }
+  .ChatBot
+  {
+    height:90%;
+  }
+  .playground
+  {
+  height:85%;
+  border-radius: 10px;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  }
+  .handler
+  {
+  padding:12px;
+    height:15%;
+  width:100%;
+    display:flex;
+      gap:4px;
+      justify-content:center;
+      align-items:center;
+  }
+      .handler input
+      {
+      padding:8px;
+      width:100%;
+      border: 2px solid color-mix(in srgb, var(--primary-color) 80%, white);
+      border-radius:10px;
+      outline-color:color-mix(in srgb, var(--primary-color) 80%, white);
+      }
+      .askAI
+      {
+      height:40px;
+      background-color:var(--primary-color);
+      color:white;
+      width:50px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      border-radius:20%;
+      }
+      .message
+      {
+
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-size: 16px;
+  line-height: 1.4;
+  }
+  .bot
+  {
+    
+  color:black;
+  align-self:flex-start;
+  }
+  .user
+  {
+    color:white;
+
+      background-color:var(--primary-color);
+      align-self:flex-end;
+      }
       `;
       document.head.appendChild(style);
     }
@@ -483,15 +561,15 @@
       this.button.setAttribute("aria-label", "Open feedback widget");
 
       if (this.config.text) {
-        buttonContent = `
+        this.btnCont = `
         ${this.config.text}
         `;
       } else {
-        buttonContent = `
+        this.btnCont = `
           <i data-lucide="message-square"></i>
         `;
       }
-      this.button.innerHTML = buttonContent;
+      this.button.innerHTML = this.btnCont;
       document.body.appendChild(this.button);
 
     }
@@ -503,10 +581,11 @@
       this.modal.className = "feedsnap-container feedsnap-widget-base-config";
       this.modal.innerHTML = `
           <div class="feedsnap-header">
-            <button class="tab_btn">Feedback </button>
+            <button data-set="1" class="tab_btn checked">Feedback </button>
+            <button data-set="2" class="tab_btn">Chat Bot</button>
           </div>
 
-          <form id="feedbackForm">
+          <form data-content="1" id="feedbackForm" class=" feedForm">
           <div class="dropdown" id="myDropdown">
             <div class="dropdown-button" id="dropdownButton">
                 <span id="selectedText">Choose feedback type</span>
@@ -552,7 +631,25 @@
             <span class="submit-text">Send Feedback</span>
             <i data-lucide="send"></i>
             </button>
-                      <form id="feedbackForm">
+          </form>
+          <div  data-content="2" class='showNot ChatBot'>
+         
+          <div class="playground">
+           <div class="message bot">
+           Hello there, how can i help you today</div>
+
+      
+
+           <div class="message user">
+           You can't do shit nigga! Now FOOK offff
+
+          </div>
+          </div>
+          <div class="handler">
+          <input type='text' name="llmMessage" placeholder='Ask your doubts.....'></input>
+          <div class="askAI">            <i data-lucide="send"></i></div>
+          
+          </div>
             `;
             
 
@@ -631,7 +728,7 @@
         // Close dropdown
         this.closeDropdown();
         
-        console.log('Selected feedback type:', this.selectedFeedbackType);
+        console.log('SelBOT hereected feedback type:', this.selectedFeedbackType);
       };
       this.sendFeedback = (e) => 
         {
@@ -678,10 +775,53 @@
       this.button.addEventListener("click", (e) => {
           e.stopPropagation();
         this.displayModal()
+        //
+        const tabSwitches = this.modal.querySelectorAll('.tab_btn');
+        tabSwitches.forEach(tab => {
+          tab.addEventListener("click", (e) => {
+            if(tab.classList.contains("checked")) return; // Ignore if already checked
+            tabSwitches.forEach(t => t.classList.remove("checked"));
+            tab.classList.add("checked");
 
+            const contentId = tab.dataset.set;
+            this.modal.querySelectorAll("form[data-content], div[data-content]").forEach(el => {
+              el.classList.toggle("show", el.dataset.content === contentId);
+              if(el.classList.contains("showNot")) {
+                 el.classList.remove("showNot");
+              }
+              else
+                {
+                  el.classList.add("showNot");
+                }
+            });
+            console.log('Tab clicked:', e.target.textContent);
+          });
+        });
       });
-
-      
+      const sendLLMQuery = () => {
+        console.log('cliced');
+        const userMessage = this.modal.querySelector("input[name='llmMessage']");
+        if(userMessage.value.trim() === "") {
+          return;
+        }
+        fetch(`${CONFIG.BASE_API}/api/llm/llmquery`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userMessage:userMessage.value }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log("LLM response:", data);
+        })
+        .catch(error => {
+          console.error("Error fetching LLM response:", error);
+        });
+        userMessage.value = ""; 
+      };
+      const askAI = this.modal.querySelector('.askAI');
+      askAI.addEventListener('click', sendLLMQuery);
       // ADD DROPDOWN EVENTS
       this.addDropdownEvents();
       this.addSendFeedbackEvent();
@@ -694,7 +834,7 @@
   console.log(this.isOpen);
   if (this.isOpen) {
     this.button.classList.remove("closingButton");
-    this.button.innerHTML = buttonContent;
+    this.button.innerHTML = this.btnCont;
     this.modal.classList.remove("open");
     console.log('we are closing');
     lucide.createIcons();

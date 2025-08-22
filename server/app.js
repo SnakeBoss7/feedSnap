@@ -10,14 +10,16 @@ const authRoute = require('./routes/authRoutes');
 const scriptRoute = require('./routes/scriptRoute');
 const widgetRoute = require('./routes/widgetRoute');
 const feedRoute = require('./routes/feedback');
+const copilotRoute = require('./routes/coPilotRoute')
+const llmRoute = require('./routes/LLMRoutes');  
 const app = express();
 
 // Connect DB
 connectDB();
 
 app.use(cors({
-  origin: ['http://localhost:3000','http://localhost:3001','http://localhost:3002'],
-  credentials: true
+ origin: 'http://localhost:3000',
+  credentials: true,
 }));
 app.use(express.json());
 app.use(cookieParser());
@@ -27,6 +29,8 @@ app.use('/api/auth', authRoute);
 app.use('/api/script', scriptRoute);
 app.use('/api/widget', widgetRoute);
 app.use('/api/feedback', feedRoute);
+app.use('/api/llm', llmRoute);
+app.use('/api/copilot', copilotRoute);
 //  Test if server is up
 app.get('/api/test', (req, res) => {
   console.log(" Test route hit");

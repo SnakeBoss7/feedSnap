@@ -9,6 +9,7 @@ import { Analytics } from './pages/dashboard/outlets/analytics';
 import { Feedback } from './pages/dashboard/outlets/feedback';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { FeedbackBox } from './components/feedbackUi/feedback';
+import "@copilotkit/react-ui/styles.css";
 
 function App() {
 

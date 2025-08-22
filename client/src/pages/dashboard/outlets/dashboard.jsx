@@ -9,15 +9,35 @@ import { RatingStar } from "../../../components/star/star";
 import { Link } from "react-router-dom";
 //backedn_api
 const apiUrl = process.env.REACT_APP_API_URL;
-const initialState = 
+const getCachedData = ()=> 
 {
-  sites:[],
-  userfeedback:{},
-  avgRatingPerSite:{},
-  feedbackPerSite:{},
-  avgRating:0,
-  isLoading: true,
-  mess:'',
+     const type = localStorage.getItem('type');
+  const cachedData = localStorage.getItem('dashboardData');
+  
+  // Check if cache exists and is recent (e.g., less than 5 minutes old)
+  if(type === 'FETCH_SUCCESS' && cachedData) {
+    try {
+      const parsed = JSON.parse(cachedData);
+      const isRecent = Date.now() - parsed.timestamp < 5 * 60 * 1000; // 5 minutes
+      
+      if(isRecent && parsed.data) {
+        return {
+          ...parsed.data,isLoading:false
+        };
+      }
+    } catch(e) {
+      console.log('Cache parse error:', e);
+    }
+  }
+  return {
+    sites:[],
+    userfeedback:[],
+    avgRatingPerSite:{},
+    feedbackPerSite:{},
+    avgRating:0,
+    isLoading: true,
+    mess:'',
+  }
 }
 const dashboardReducer = (state,action) =>
   {
@@ -28,14 +48,14 @@ const dashboardReducer = (state,action) =>
           ...action.payload,
           isLoading:false
         };
-        break;
       case 'FETCH_FAIL':
                return{
           ...state,
           isLoading:false,
         };
       default:
-        break;
+        return state; // ✅ Always return state in default
+
     }
   }
   const wait= (ms)=>
@@ -43,34 +63,47 @@ const dashboardReducer = (state,action) =>
       return new Promise(resolve => setTimeout(resolve,ms));
     }
 export const DashboardHome = () => {
-    const [state, dispatch] = useReducer(dashboardReducer, initialState);
- useEffect(() => {
+    const [state, dispatch] = useReducer(dashboardReducer, getCachedData());
+useEffect(() => {
+ 
   async function fetchData() {
-    try
-    {
-      const res = await axios.get(`${apiUrl}/api/feedback/getfeedback`,
-        {
-          withCredentials:true
-        })
-        await wait(10000);
-        console.log(res);
-        dispatch(
-          {
-            type:'FETCH_SUCCESS',
-            payload:res.data,
-          })
+    try {
+      const res = await axios.get(`${apiUrl}/api/feedback/getfeedback`, {
+        withCredentials: true
+      });
+      await wait(2000);
+      console.log(res);
+      dispatch({
+        type: 'FETCH_SUCCESS',
+        payload: res.data,
+      });
+      
+      // Store with timestamp
+      const cacheData = {
+        data: res.data,
+        timestamp: Date.now()
+      };
+      localStorage.setItem("dashboardData", JSON.stringify(cacheData));
+      localStorage.setItem("type", 'FETCH_SUCCESS');
     }
-    catch(err)
-    {
-        dispatch(
-          {
-            type:'FETCH_SUCCESS',
-            payload:err.response.data,
-          })
+    catch(err) {
+      dispatch({
+        type: 'FETCH_FAIL',
+        payload: err.response?.data,
+      });
       console.log(err);
+      localStorage.setItem("type", 'FETCH_FAIL');
     }
   }
-  fetchData();
+
+
+  
+  // Fetch fresh data if cache is missing, old, or invalid
+  if(state.isLoading)
+    {
+      fetchData();
+
+    }
 }, []);
   return (
     <div className="p-4 pb-20relative h-full" style={{ backgroundColor: "#F9FAFB" }}>
@@ -155,7 +188,7 @@ export const DashboardHome = () => {
                 </div>
                 <div className="mt-10 flex flex-col gap-5">
                   {
-                    state.userfeedback.filter((data)=> (data.rating && data.rating!=='')).slice(0,3).map((data,idx)=>
+                    state?.userfeedback?.filter((data)=> (data.rating && data.rating!=='')).slice(0,3).map((data,idx)=>
                       {
                         return(
                           <div key={idx} className="flex flex-col gap-2 p-3 " style={{border:'2px solid #e3f0fdff'}}>
