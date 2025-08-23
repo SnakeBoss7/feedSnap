@@ -106,7 +106,14 @@ useEffect(() => {
     }
 }, []);
   return (
-    <div className="p-4 pb-20relative h-full" style={{ backgroundColor: "#F9FAFB" }}>
+    <div className="relative h-screen px-10 py-8 relative h-full" >
+         <div class="absolute inset-0">
+             <div class="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#e8e8e8_1px,transparent_1px),linear-gradient(to_bottom,#e8e8e8_1px,transparent_1px)] bg-[size:4.5rem_3.5rem] [&>div]:absolute [&>div]:inset-0 [&>div]:bg-[radial-gradient(circle_850px_at_0%_200px,#c5b5ff,transparent)]">
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+
       {state.isLoading ? (
         <SkeletonTheme baseColor="#d1d5db" highlightColor="#f3f4f6">
           <div className="p-6 space-y-6">
@@ -128,12 +135,12 @@ useEffect(() => {
         </SkeletonTheme>
       ) : (
         <>
-          <div className=" header flex flex-col gap-5 sm:flex-row justify-between items-start">
+          <div className="relative header flex flex-col gap-5 sm:flex-row justify-between items-start">
             <div className="heading flex flex-col gap-1">
-              <h1 className="text-4xl font-regular bg-gradient-to-r from-blue-500 via-purple-400  to-purple-800 bg-clip-text text-transparent ">
+              <h1 className="text-3xl font-regular bg-gradient-to-r from-blue-500 via-purple-400  to-purple-800 bg-clip-text text-transparent ">
                 Dashboard
               </h1>
-              <p className="text-lg text-gray-700 tracking-tight">
+              <p className="text-md text-gray-700 tracking-tight">
                 Welcome back! Here's your feedback overview.
               </p>
             </div>
@@ -147,14 +154,14 @@ useEffect(() => {
             <div className="h-[110px] bg-white shadow-lg flex rounded-lg items-center justify-between p-3"  style={{border:'2px solid #e3f0fdff'} }>
               <div className="left ">
                 <h1 className="text-sm text-gray-900">Total Feedback</h1>
-                <p className="text-2xl font-regular">{state.totalFeedbacks}</p>
+                <p className="text-xl font-regular">{state.totalFeedbacks}</p>
               </div>
               <MessageSquare size={20} className="h-full " color="#8714d4ff" />
             </div>
             <div className="h-[110px] bg-white shadow-lg flex rounded-lg items-center justify-between p-3"   style={{border:'2px solid #e3f0fdff'} }>
               <div className="left ">
                 <h1 className="text-sm text-gray-900">Average Rating</h1>
-                <p className="mb-3 text-2xl font-regular">{state.avgRating}</p>
+                <p className="mb-3 text-xl font-regular">{state.avgRating}</p>
                 <RatingStar value={state.avgRating} />
               </div>
               <Star size={20} color="#EAB307" />

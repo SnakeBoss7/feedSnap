@@ -5,9 +5,10 @@ const scriptSchema = new mongoose.Schema({
     required: true,
   },
   color: String,
-  bgColor:String,
+  modeColor:String,
+  bgColor: String,
   position: String,
-  text: String,
+  metadata: String,
   email:Boolean,
   userId: {
     type: mongoose.Types.ObjectId,

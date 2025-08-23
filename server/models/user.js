@@ -10,6 +10,8 @@ const UserSchema = mongoose.Schema(
             ref: 'User'
         },
         webURl:[String],
+        UserTier:{ type: Number, min: 1, max: 3 },
+        BotQuote:String,
         firebaseId: String,
         route:String,
         createdAt: { type: Date, default: Date.now }

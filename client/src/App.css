@@ -20,7 +20,13 @@ html,body,#root
     animation: App-logo-spin infinite 20s linear;
   }
 }
-
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;      /* Firefox */
+}
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

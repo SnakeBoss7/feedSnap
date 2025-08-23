@@ -1,231 +1,290 @@
 import { SimpleHeader } from "../../../components/header/header";
-import { GlobeLock, Paintbrush,Grid2X2, Grid2X2Check } from "lucide-react";
+import {
+  GlobeLock,
+  Paintbrush,
+  Grid2X2,
+  Grid2X2Check,
+  LucideInfo,
+  LucideBadgeInfo,
+  LucideCode,
+  LucideBookCopy,
+  LucideCloudDownload,
+} from "lucide-react";
 import { useState } from "react";
 import axios from "axios";
-import  Select  from 'react-select'
+import Select from "react-select";
 import { HighlightedGridIcon } from "../../../utils/gridIcons";
 import { RatingStar } from "../../../components/star/star";
-let apiUrl = process.env.REACT_APP_API_URL
+import Loader from "../../../components/loader/loader";
+import WidgetTabs from "../../../components/tabs/tabs";
+let apiUrl = process.env.REACT_APP_API_URL;
 export const ScriptGen = () => {
+  //tabs
+  const [active, setActive] = useState(0);
+  const tabs = ["Tab One", "Tab Two", "Tab Three"];
+  //tabs content
+
   //widget color
-  const[UrlSettings,setUrlsettings]=useState(
-    {
-        webUrl:'',
-        position:'bottom right',
-        color:'#2563EB',
-        text:'Feedback'
-    })
+  const [scriptInj, setScriptInj] = useState("");
+  const [UrlSettings, setUrlsettings] = useState({
+    webUrl: "",
+    position: "bottom right",
+    color: "#2563EB",
+    text: "Feedback",
+    loaded: false,
+  });
 
   const colorChange = (e) => {
-    setUrlsettings((prev)=>({...prev,[e.target.name]:e.target.value}))
+    setUrlsettings((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
-  const genScript =async(e)=>
-    {
-      e.preventDefault();
-      let emptyVal = Object.entries(UrlSettings).some((key,value)=>(value==='' && key !== UrlSettings.text ) )
-        
-        if(emptyVal)
-          {
-            console.warn('keys are empty')
-            return;
-          }
-      
-      try
-      {
-          let res = await axios.post(`${apiUrl}/api/script/create`,{settings:UrlSettings},
-          {
-            withCredentials:true
-          })
-        console.log(res);
-      }catch(err)
-      {
-        
-        console.log(err);
-      }
+  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const genScript = async (e) => {
+    console.log("genScript called with UrlSettings:", UrlSettings);
+    e.preventDefault();
+
+    // Fixed validation logic - check if webUrl is empty (the main required field)
+    if (!UrlSettings.webUrl || UrlSettings.webUrl.trim() === "") {
+      console.warn("Website URL is required");
+      return;
     }
 
-    const options = [
-      {
-        value:"bottom right",
-        label:(
-          <div className="flex items-center font-bold gap-3">
-          <HighlightedGridIcon highlight="bottom-right"/>Bottom right</div>
-        )
-      },
-      {
-        value:"bottom left",
-        label:(
-          <div className="flex items-center font-bold gap-3"><HighlightedGridIcon highlight="bottom-left"/> Bottom left</div>
-        )
-      },
-      {
-        value:"top right",
-        label:(
-          <div className="flex items-center font-bold gap-3"><HighlightedGridIcon highlight="top-right"/>Top right</div>
-        )
-      },
-      {
-        value:"top left",
-        label:(
-          <div className="flex items-center font-bold gap-3">
-            <HighlightedGridIcon highlight="top-left"/>
-            Top left</div>
-        )
-      }
-  ];
- 
-  return (
-    <div className="">
+    // Optional: More detailed validation
+    const requiredFields = ["webUrl", "position", "color"];
+    const emptyFields = requiredFields.filter(
+      (field) => !UrlSettings[field] || UrlSettings[field].trim() === ""
+    );
 
-      <div className="p-6">
-        <h1 className="tracking-tight text-4xl font-bold ">Script Generator</h1>
-        <p className="tracking-tight text-lg text-gray-600">
+    if (emptyFields.length > 0) {
+      console.warn("Empty required fields:", emptyFields);
+      return;
+    }
+
+    try {
+      console.log("Starting API call...");
+      setUrlsettings((prev) => ({ ...prev, loaded: true }));
+
+      let res = await axios.post(
+        `${apiUrl}/api/script/create`,
+        { settings: UrlSettings },
+        {
+          withCredentials: true,
+        }
+      );
+
+      console.log("API response:", res);
+      setScriptInj(res.data.injection);
+      await wait(4000);
+      setUrlsettings((prev) => ({ ...prev, loaded: false }));
+    } catch (err) {
+      console.error("API error:", err);
+      setUrlsettings((prev) => ({ ...prev, loaded: false }));
+    }
+  };
+
+  const options = [
+    {
+      value: "bottom right",
+      label: (
+        <div className="flex items-center font-bold gap-3">
+          <HighlightedGridIcon highlight="bottom-right" />
+          Bottom right
+        </div>
+      ),
+    },
+    {
+      value: "bottom left",
+      label: (
+        <div className="flex items-center font-bold gap-3">
+          <HighlightedGridIcon highlight="bottom-left" /> Bottom left
+        </div>
+      ),
+    },
+    {
+      value: "top right",
+      label: (
+        <div className="flex items-center font-bold gap-3">
+          <HighlightedGridIcon highlight="top-right" />
+          Top right
+        </div>
+      ),
+    },
+    {
+      value: "top left",
+      label: (
+        <div className="flex items-center font-bold gap-3">
+          <HighlightedGridIcon highlight="top-left" />
+          Top left
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className="relative h-full px-10 py-8">
+      <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#e8e8e8_1px,transparent_1px),linear-gradient(to_bottom,#e8e8e8_1px,transparent_1px)] bg-[size:4.5rem_3.5rem] [&>div]:absolute [&>div]:inset-0 [&>div]:bg-[radial-gradient(circle_850px_at_0%_200px,#c5b5ff,transparent)]">
+          <div></div>
+        </div>
+      </div>
+
+      <div className="relative">
+        <h1 className="text-4xl  font-extrabold bg-gradient-to-r from-blue-500 via-purple-400  to-purple-800 bg-clip-text text-transparent ">
+          Script Generator
+        </h1>
+        <p className="text-lg text-gray-700 tracking-tight">
           Generate and customize your feedback widget script
         </p>
       </div>
-      <div className="flex flex-col w-full h-full bg-white lg:flex-row">
-        <form className="p-6 lg:w-1/2" action="" onSubmit={genScript}>
-          <div className="border border-gray-300  p-2 rounded-lg w-full mb-5">
-            <h1 className="tracking-tight text-zinc-800 text-2xl font-bold flex items-center gap-3">
-              <GlobeLock className="h-5 " />
-              Website Configuration
-            </h1>
-            <p className="mb-9 tracking-tight text-gray-600 text-sm ">
-              Enter your website details to generate the script
-            </p>
-            {/* website url  */}
-            <label htmlFor="web_url" className="tracking-tight text-lg font-bold">
-              Website Url
-            </label>
-            <input
-              onChange={(e) => {
-                setUrlsettings((prev) => ({
-                  ...prev,
-                  [e.target.name]: e.target.value,
-                }));
-              }}
-              className="border border-gray-300 rounded-lg tracking-tight w-full h-8 text-black px-3 my-2 py-5 text-lg"
-              placeholder="https://yourwebsite.com"
-              type="text"
-              name="webUrl"
-            />
-            <p className="tracking-tight text-gray-500 mb-6 text-sm">
-              Enter the full URL of your website
-            </p>
-            <button
-              className={`h-12 rounded-md w-full text-white trasnition-all ease-in-out   text-xl font-bold ${
-                UrlSettings.webUrl === ""
-                  ? "bg-gradient-to-r from-blue-300 via-blue-300 to-purple-300"
-                  : "bg-gradient-to-r from-blue-500 via-blue-600 to-purple-500"
-              } `}
-            >
-              Generate
-            </button>
-          </div>
-          {/* widget customization */}
+      <div className="flex flex-col w-full my-3 h-full lg:flex-row justify-between">
+        {/* <div className="relative flex w-full max-w-md mx-auto bg-gray-100 rounded-lg p-1"> */}
+        {/* Highlight Background
+      <div
+        className="absolute top-1 bottom-1 w-1/3 bg-blue-500 rounded-lg transition-all duration-300 ease-in-out"
+        style={{
+          left: `${active * 33.3333}%`,
+        }}
+      ></div> */}
 
-          <div className="border border-gray-300 p-2 rounded-lg w-full mb-5 flex flex-col">
-            <h1 className="tracking-tight text-2xl font-bold flex items-center gap-3">
-              <Paintbrush className="h-5" />
-              Widget Customiztion
-            </h1>
-            <p className="text-gray-600 mb-8 text-sm">
-              Customize the appearance and behavior of your widget
-            </p>
-            <label
-              htmlFor="position"
-              className=" text-lg font-bold  tracking-tight"
-            >
-              Position
-            </label>
-             <Select
-              required
-              options={options}
-              onChange={(e) =>
-                setUrlsettings((prev) => ({ ...prev, title: e?.value || "" }))
-              }
-              placeholder="Select feedback type..."
-              className="text-sm"
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  borderColor: "#d1d5db",
-                  boxShadow: "none",
-                  padding: "2px",
-                }),
-                option: (base, state) => ({
-                  ...base,
-                  backgroundColor: state.isSelected ? "#60a5fa" : "#fff",
-                  color: state.isSelected ? "#fff" : "#000",
-                  "&:hover": {
-                    backgroundColor: "#e0f2fe",
-                  },
-                }),
-              }}
-            />
-            {/* paint section  */}
-            <label htmlFor="color " className="font-bold mt-5">
-              Widget Color
-            </label>
-            <div className="color gap-3 flex  items-center mb-5 ">
-              <input
-                type="color"
-                name="color"
-                onChange={colorChange}
-                value={UrlSettings.color}
-                className="h-10 w-[80px] rounded-lg border-3 bourder-green-500"
-              />
-              <input
-                className="w-fit h-8 p-3 border border-gray-500"
-                type="text"
-                name="color"
-                value={UrlSettings.color}
-                onChange={colorChange}
-              />
+        <WidgetTabs
+          options={options}
+          colorChange={colorChange}
+          UrlSettings={UrlSettings}
+          setUrlsettings={setUrlsettings}
+          genScript={genScript}
+        />
+        {/* </div> */}
+        <div className="scriptBox p-6 min-h-[300px] h-fit mb-5 border m-6 border-gray-300 rounded-lg lg:w-[40%] text-white  bg-[#111828] flex flex-col items-center">
+          <h1 className="text-2xl w-full font-medium mb-1 tracking-tight flex  items-start justify-between">
+            <div class="mb-8 items-center flex gap-3">
+              <LucideCode className="text-[#5BAE83]" />
+              Generated Script
             </div>
-            {/*  widget text */}
-            <label htmlFor="text" className="font-bold">
-              Widget Text
-            </label>
-            <input
-              onChange={(e) => {
-                setUrlsettings((prev) => ({
-                  ...prev,
-                  [e.target.name]: e.target.value,
-                }));
-              }}
-              className="h-10  border border-gray-400 px-3 mt-1 rounded-lg"
-              defaultValue="FeedBack"
-              type="text"
-              name="text"
-            />
-          </div>
-        </form>
-        <div className="scriptBox p-6 min-h-[300px] h-fit mb-5 border m-6 border-gray-300 rounded-lg lg:w-1/2">
-          <h1 className="text-3xl font-bold tracking-tight ">
-            {"< >  "} Generated Script
+            <div class="right text-sm">
+              <p
+                className={`${
+                  scriptInj !== ""
+                    ? "text-white bg-[#5BAE83]"
+                    : "text-white bg-gray-600"
+                } rounded-xl p-1 px-2 text-xs`}
+              >
+                Ready
+              </p>
+            </div>
           </h1>
-          <p className="mb-10">
-            Copy this script and paste it before the closing {"</body>"} tag
-          </p>
-          <div>
-            {UrlSettings.webUrl !== "" ? (
-              <></>
+
+        
+            {UrlSettings.loaded ? (
+              <div className="px-4 w-full self-center w-[90%] bg-[#1E2939] rounded-lg border-[0.5px] border-[#5BAE83]  py-8 text-white rounded-lg flex flex-col items-center ">
+                {" "}
+                <Loader />
+              </div>
+            ) : scriptInj !== "" ? (
+              <>
+                <div className="p-4 w-full w-[90%] bg-[#1E2939] rounded-lg border-[0.5px] border-[#5BAE83] text-white overflow-x-scroll">
+                  <code className="text-[#5BAE83]">{scriptInj}</code>
+                </div>
+                <div className="w-full mt-5 flex gap-5 justify-between">
+                  <button className="bg-[#1E2939] rounded-lg border-[0.5px] border-[#5BAE83] h-10 w-full text-sm font-medium gap-3 flex justify-center items-center p-2">
+                    <LucideBookCopy />Copy</button>
+                  <button className="bg-[#1E2939] rounded-lg border-[0.5px] border-[#5BAE83] h-10 w-full text-sm font-medium gap-3 flex justify-center items-center p-2">
+                    <LucideCloudDownload />Download</button>
+                </div>
+              </>
             ) : (
               <>
-                <div className="icon text-2xl text-center tracking-tight font-bold">
-                  {"<>"}
+                <div className="px-4  self-center py-8 w-[90%] bg-[#1E2939] rounded-lg border-[0.5px] border-[#5BAE83] text-white rounded-lg flex flex-col items-center ">
+                  <LucideCode color="#5BAE83" size={40} />
+                  <p className="text-lg text-center mt-3 tracking-tight font-bold">
+                    No Script Generated Yet
+                  </p>
+                  <p className="text-sm text-center tracking-tight">
+                    Configure your widget and click generate
+                  </p>
                 </div>
-                <p className="text-center font-bold text-gray-500">
-                  Enter your website URL and click "Generate Script" to get
-                  started
-                </p>
-                <button onClick={() => console.log(UrlSettings)}>print</button>
               </>
             )}
           </div>
         </div>
       </div>
-    </div>
+  
   );
 };
+
+{
+  /* <div class="relative h-screen">
+  <!-- Background Pattern -->
+  <div class="absolute inset-0">
+    <div class="absolute inset-0 -z-10 h-full w-full bg-white [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)]"></div>
+  </div>
+  
+  <!-- Hero Content -->
+
+</div> */
+}
+{
+  /* <div class="relative h-screen">
+  <!-- Background Pattern -->
+  <div class="absolute inset-0">
+    <div class="relative h-full w-full [&>div]:absolute [&>div]:top-0 [&>div]:right-0 [&>div]:z-[-2] [&>div]:h-full [&>div]:w-full [&>div]:bg-gradient-to-l [&>div]:from-blue-200 [&>div]:to-white">
+    <div></div>
+    
+  </div>
+  </div>
+  
+  <!-- Hero Content -->
+  <div class="relative z-10 flex h-full flex-col items-center justify-center px-4">
+    <div class="max-w-3xl text-center">
+      <h1 class="mb-8 text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl text-slate-900">
+        Your Next Great
+        <span class="text-sky-900">Project</span>
+      </h1>
+      <p class="mx-auto mb-8 max-w-2xl text-lg text-slate-700">
+        Build modern and beautiful websites with this collection of stunning background patterns. 
+        Perfect for landing pages, apps, and dashboards.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <button class="rounded-lg px-6 py-3 font-medium bg-sky-900 text-white hover:bg-sky-800">
+          Get Started
+        </button>
+        <button class="rounded-lg border px-6 py-3 font-medium border-slate-200 bg-white text-slate-900 hover:bg-slate-50">
+          Learn More
+        </button>
+      </div>
+    </div>
+  </div>
+</div> */
+}
+
+{
+  /* <div class="relative h-screen">
+  <!-- Background Pattern -->
+  <div class="absolute inset-0">
+    <div class="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem] [&>div]:absolute [&>div]:inset-0 [&>div]:bg-[radial-gradient(circle_800px_at_100%_200px,#d5c5ff,transparent)]">
+    <div></div>
+    
+  </div>
+  </div>
+  
+  <!-- Hero Content -->
+  <div class="relative z-10 flex h-full flex-col items-center justify-center px-4">
+    <div class="max-w-3xl text-center">
+      <h1 class="mb-8 text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl text-slate-900">
+        Your Next Great
+        <span class="text-sky-900">Project</span>
+      </h1>
+      <p class="mx-auto mb-8 max-w-2xl text-lg text-slate-700">
+        Build modern and beautiful websites with this collection of stunning background patterns. 
+        Perfect for landing pages, apps, and dashboards.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <button class="rounded-lg px-6 py-3 font-medium bg-sky-900 text-white hover:bg-sky-800">
+          Get Started
+        </button>
+        <button class="rounded-lg border px-6 py-3 font-medium border-slate-200 bg-white text-slate-900 hover:bg-slate-50">
+          Learn More
+        </button>
+      </div>
+    </div>
+  </div>
+</div> */
+}

@@ -21,7 +21,7 @@ function App() {
         <Route path="/widget" element={<FeedbackBox />} />
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<DashboardHome/>}/>
-          <Route path="feedback" element={<Feedback/>} />
+          <Route path="feedbacks" element={<Feedback/>} />
           <Route path="analytics" element={<Analytics/>} />
           <Route path="scriptGen" element={<ScriptGen/>} />
         </Route>

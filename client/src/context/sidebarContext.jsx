@@ -3,6 +3,8 @@ import { useState } from "react";
 const sidebarContext = createContext(
     {
         showSidebar: false,
+        sidebarSize: false,
+        setSidebarSize:()=>{},
         setShowSidebar: () => {},
     }
 );
@@ -10,8 +12,9 @@ const sidebarContext = createContext(
 const SidebarContextprovider = ({children})=>
     {
         const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 1024);
+        const [sidebarSize,setSidebarSize] = useState(false);
         return (
-            <sidebarContext.Provider value={{showSidebar,setShowSidebar}}>
+            <sidebarContext.Provider value={{showSidebar,setShowSidebar,sidebarSize,setSidebarSize}}>
                 {children}
             </sidebarContext.Provider>
         )

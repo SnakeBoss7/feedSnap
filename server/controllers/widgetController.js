@@ -12,9 +12,10 @@ const widgetConfigProvider =async(req,res)=>
                 res.status(400).send("Service is not provided to this web");
                 return;
             }
-        const {color,text,position,bgColor} = web;
-        console.log(color,text,position,bgColor);
-        res.json({color,text,position,bgColor});
+            console.log(web);
+        const {color,text,position,modeColor} = web;
+        console.log(color,text,position,modeColor);
+        res.json({color,text,position,modeColor});
 
         
     }

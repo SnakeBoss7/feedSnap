@@ -13,7 +13,7 @@ export const HighlightedGridIcon = ({ highlight = "top-left" }) => {
     <div className="relative w-8 h-8 ">
       <Grid2x2 className="w-full h-full text-zinc-800" />
       <div
-        className={`absolute ${position} w-[31%] h-[31%] bg-blue-400 rounded-xl opacity-100 rounded-sm`}
+        className={`absolute ${position} w-[32%] h-[32%] bg-blue-400 rounded-lg opacity-100 rounded-sm`}
       />
     </div>
   );

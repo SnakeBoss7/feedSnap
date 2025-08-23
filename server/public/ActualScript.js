@@ -6,6 +6,57 @@
   const num = parseInt(hex, 16);
   return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
 };
+function getContrastTextColor(hexColor) {
+  console.log(hexColor)
+    // Handle null, undefined, or non-string inputs
+    if (!hexColor || typeof hexColor !== 'string') {
+        return '#000000'; // Default to black for invalid inputs
+    }
+    
+    // Remove # if present and handle short hex codes
+    let hex = hexColor.replace('#', '').toUpperCase();
+    
+    // Convert 3-digit hex to 6-digit hex
+    if (hex.length === 3) {
+        hex = hex.split('').map(char => char + char).join('');
+    }
+    
+    // Validate hex color - allow any valid hex length and pad if needed
+    if (!/^[0-9A-F]*$/i.test(hex)) {
+        return '#000000'; // Default to black for invalid hex characters
+    }
+    
+    // Pad or truncate to 6 characters
+    if (hex.length < 6) {
+        hex = hex.padEnd(6, '0');
+    } else if (hex.length > 6) {
+        hex = hex.substring(0, 6);
+    }
+    
+    // Convert hex to RGB
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    
+    // Calculate relative luminance using WCAG formula
+    const getLuminance = (r, g, b) => {
+        const [rs, gs, bs] = [r, g, b].map(c => {
+            c = c / 255;
+            return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+    };
+    
+    const backgroundLuminance = getLuminance(r, g, b);
+    const whiteLuminance = 1;
+    const blackLuminance = 0;
+    
+    const whiteContrast = (whiteLuminance + 0.05) / (backgroundLuminance + 0.05);
+    const blackContrast = (backgroundLuminance + 0.05) / (blackLuminance + 0.05);
+    
+    // Return just the color string
+    return whiteContrast > blackContrast ? '#FFFFFF' : '#000000';
+}
   const CONFIG = {
     //hard coded web url ** render **
     BASE_API: "http://localhost:5000",
@@ -130,7 +181,7 @@
         // hard coded web url*******
 
         let res = await fetch(
-          `${CONFIG.BASE_API}/api/widget/GetWidConfig?webUrl=http://localhost:3001`,
+          `${CONFIG.BASE_API}/api/widget/GetWidConfig?webUrl=http://localhost:3000`,
           {
             method: "GET",
           }
@@ -170,6 +221,10 @@
       const position = this.config.position.split(" ");
       const style = document.createElement("style");
       const rgb = hexToRgb(this.config.color || "#3b82f6");
+const bgColor = !this.config.modeColor || this.config.modeColor.trim() === ''
+  ? "#ffffff"
+  : this.config.modeColor;
+      const text = getContrastTextColor(bgColor);
       console.log(this.config);
       style.id = "widget_styles";
       style.innerText = ` 
@@ -178,7 +233,8 @@
       {
         --primary-color:${this.config.color || "#3b82f6"};
         --primary-rgb:${rgb || "#3b82f6"};
-        --mode-color:${this.config.bgColor || "#ffffffff"};
+        --mode-color:${bgColor};
+        --text-color:${text || "#111111"};
 
         --primary-hover: ${this.config.color || "#3b82f6"};
         --primary-light: ${this.config.color || "#3b82f6"};
@@ -288,6 +344,7 @@
         .dropdown-button {
             width: 100%;
             padding: 12px 16px;
+            color:var(--text-color);
             background: var(--mode-color);
             border: 2px solid #ddd;
             border-bottom:0px;
@@ -342,6 +399,7 @@
         }
 
         .dropdown-item {
+        color:var(--text-color);
             padding: 12px 16px;
             cursor: pointer;
             transition: background-color 0.2s ease;
@@ -434,7 +492,10 @@
 }
 
 .feedsnap-input, .feedsnap-textarea {
+    background-color:  color-mix(in srgb, var(--mode-color) 80%, var(--primary-color));
   width: 100%;
+  color: var(--text-color);
+  font-weight:600;
   padding: 12px;
   border: 2px solid #ddd;
   border-radius: 8px;
@@ -456,6 +517,7 @@
 }
 
 .feedsnap-submit {
+color:white;
   width: 100%;
   padding: 12px;
   display: flex;
@@ -463,7 +525,6 @@
   align-items: center;
   gap:10px;
   background: var(--primary-color);
-  color: var(--mode-color);
   border: none;
   border-radius: 8px;
   font-size: 16px;
@@ -473,7 +534,8 @@
 .feedForm
 {
       padding:20px;
-      height:90%
+      height:90%;
+      background-color:var(--mode-color);
 }
 .feedsnap-submit:hover {
   background: var(--primary-hover);
@@ -511,6 +573,7 @@
       {
       padding:8px;
       width:100%;
+      background-color:  color-mix(in srgb, var(--mode-color) 80%, var(--primary-color));
       border: 2px solid color-mix(in srgb, var(--primary-color) 80%, white);
       border-radius:10px;
       outline-color:color-mix(in srgb, var(--primary-color) 80%, white);
@@ -538,8 +601,9 @@
   .bot
   {
     
-  color:black;
+  color:var(--text-color);
   align-self:flex-start;
+  background-color:color-mix(in srgb, var(--mode-color) 80%, var(--primary-color));
   }
   .user
   {
@@ -672,7 +736,7 @@
       const dropdownItems = this.modal.querySelectorAll(".dropdown-item");
       let isDropdownOpen = false;
 
-      // Toggle dropdown on button click
+      // Toggle dropdown on button clickYou can't do shit nigga! Now FOOK offff
       dropdownButton.addEventListener("click", (e) => {
         e.stopPropagation();
         if (isDropdownOpen) {
@@ -804,6 +868,14 @@
         if(userMessage.value.trim() === "") {
           return;
         }
+        const playground = this.modal.querySelector('.playground');
+        playground.innerHTML += `
+        <div class='message user'>
+        ${userMessage.value}
+        </div>
+        <div class='message bot loader'>
+        Wait a moment...
+        </div>`;
         fetch(`${CONFIG.BASE_API}/api/llm/llmquery`, {
           method: "POST",
           headers: {
@@ -813,12 +885,21 @@
         })
         .then(response => response.json())
         .then(data => {
-          console.log("LLM response:", data);
+          console.log("LLM response:", data.data.replaceAll('/n',''));
+              //removing loader and adding response
+        let loader = this.modal.querySelector('.loader');
+        loader.remove();
+         playground.innerHTML += `
+        <div class='message bot'>
+        ${data.data.replaceAll('/n','')}
+        </div>`
         })
         .catch(error => {
           console.error("Error fetching LLM response:", error);
         });
         userMessage.value = ""; 
+    
+
       };
       const askAI = this.modal.querySelector('.askAI');
       askAI.addEventListener('click', sendLLMQuery);

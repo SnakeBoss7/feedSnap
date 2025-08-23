@@ -130,7 +130,7 @@
         // hard coded web url*******
 
         let res = await fetch(
-          `${CONFIG.BASE_API}/api/widget/GetWidConfig?webUrl=http://localhost:3001`,
+          `${CONFIG.BASE_API}/api/widget/GetWidConfig?webUrl=http://localhost:3000`,
           {
             method: "GET",
           }
