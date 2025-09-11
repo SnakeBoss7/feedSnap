@@ -6,14 +6,14 @@ const boxPositions = {
   "bottom-right": "bottom-[5px] right-[5px]",
 };
 
-export const HighlightedGridIcon = ({ highlight = "top-left" }) => {
+export const HighlightedGridIcon = ({ highlight,color  }) => {
   const position = boxPositions[highlight];
 
   return (
     <div className="relative w-8 h-8 ">
       <Grid2x2 className="w-full h-full text-zinc-800" />
       <div
-        className={`absolute ${position} w-[32%] h-[32%] bg-blue-400 rounded-lg opacity-100 rounded-sm`}
+        className={`absolute ${position} w-[32%] h-[32%]   opacity-100 `} style={{backgroundColor: color }}
       />
     </div>
   );

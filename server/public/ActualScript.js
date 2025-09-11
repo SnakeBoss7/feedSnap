@@ -46,6 +46,16 @@ function getContrastTextColor(hexColor) {
         });
         return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
     };
+ function lightenRgb(rgb, percent) {
+  // rgb is like: "59, 130, 246"
+  const [r, g, b] = rgb.split(",").map(v => parseInt(v.trim()));
+
+  const newR = Math.min(255, r + (255 - r) * (percent / 100));
+  const newG = Math.min(255, g + (255 - g) * (percent / 100));
+  const newB = Math.min(255, b + (255 - b) * (percent / 100));
+
+  return `${Math.round(newR)}, ${Math.round(newG)}, ${Math.round(newB)}`;
+}
     
     const backgroundLuminance = getLuminance(r, g, b);
     const whiteLuminance = 1;
@@ -216,25 +226,28 @@ function getContrastTextColor(hexColor) {
       fontLink.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap";
       document.head.appendChild(fontLink);
 
-
       //elements 
       const position = this.config.position.split(" ");
       const style = document.createElement("style");
       const rgb = hexToRgb(this.config.color || "#3b82f6");
+      const lighterRgb = lightenRgb(rgb, 40); // make it 40% lighter
+
 const bgColor = !this.config.modeColor || this.config.modeColor.trim() === ''
   ? "#ffffff"
   : this.config.modeColor;
       const text = getContrastTextColor(bgColor);
       console.log(this.config);
+
       style.id = "widget_styles";
       style.innerText = ` 
-  
+
       .feedsnap-widget-base-config
       {
         --primary-color:${this.config.color || "#3b82f6"};
         --primary-rgb:${rgb || "#3b82f6"};
         --mode-color:${bgColor};
         --text-color:${text || "#111111"};
+        --send-color:${lighterRgb}
 
         --primary-hover: ${this.config.color || "#3b82f6"};
         --primary-light: ${this.config.color || "#3b82f6"};

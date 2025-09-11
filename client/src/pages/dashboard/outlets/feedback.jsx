@@ -1,162 +1,321 @@
-import { useState } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Legend,
-  Cell,
-  ResponsiveContainer,
-} from "recharts";
+  BotMessageSquareIcon,
+  LucideArrowUp,
+  LucideBot,
+} from "lucide-react";
+import axios from "axios";
+import { SimpleHeader } from "../../../components/header/header";
+import { FilterTable } from "../../../components/table/filterTable";
 
-// import { CopilotChat, CopilotSidebar } from "@copilotkit/react-ui";
-// import { useCopilotAction } from "@copilotkit/react-core";
+const apiUrl = process.env.REACT_APP_API_URL;
+
+// Cache helper function
+const getCachedData = () => {
+  const type = localStorage.getItem('type');
+  const cachedData = localStorage.getItem('feedbackData');
+  
+  if(type === 'FETCH_SUCCESS' && cachedData) {
+    try {
+      const parsed = JSON.parse(cachedData);
+      const isRecent = Date.now() - parsed.timestamp < 5 * 60 * 1000; // 5 minutes
+      
+      if(isRecent && parsed.data) {
+        return {
+          data: parsed.data.data || [],
+          sites: parsed.data.sites || [],
+          success: parsed.data.success || false,
+          isLoading: false
+        };
+      }
+    } catch(e) {
+      console.log('Cache parse error:', e);
+    }
+  }
+  return {
+    data: [],
+    sites: [],
+    success: false,
+    isLoading: true,
+  };
+};
+
+const dashboardReducer = (state, action) => {
+  switch (action.type) {
+    case 'FETCH_SUCCESS':
+      return {
+        ...state,
+        data: action.payload.data || [],
+        sites: action.payload.sites || [],
+        success: action.payload.success || false,
+        isLoading: false
+      };
+    case 'FETCH_FAIL':
+      return {
+        ...state,
+        isLoading: false,
+      };
+    default:
+      return state;
+  }
+};
+
+const wait = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
 
 export const Feedback = () => {
-  const [chartData, setChartData] = useState([
-    { label: "Website A", value: 120 },
-    { label: "Website B", value: 80 },
-    { label: "Website C", value: 150 },
+  const [aiResponse, setAiResponse] = useState([
+    {
+      role: "assistant",
+      content: "Hello! how can I help you today",
+    },
   ]);
+  
+  const [state, dispatch] = useReducer(dashboardReducer, getCachedData());
+  const [userPrompt, setUserPrompt] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [displayedMessages, setDisplayedMessages] = useState([]);
+  const chatRefContainer = useRef(null);
+  const messagesEndRef = useRef(null);
 
-  const [ratingsOverTime, setRatingsOverTime] = useState([
-    { date: "2024-01", rating: 3 },
-    { date: "2024-02", rating: 4 },
-    { date: "2024-03", rating: 4.5 },
-    { date: "2024-04", rating: 4.8 },
-  ]);
+  // Improved scroll to bottom function
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: "smooth", 
+        block: "end" 
+      });
+    }
+  };
 
-  const [feedbackTypeData, setFeedbackTypeData] = useState([
-    { type: "Bug", value: 12 },
-    { type: "UI", value: 8 },
-    { type: "Performance", value: 5 },
-    { type: "Feature Request", value: 15 },
-  ]);
+  // Alternative scroll method using the container
+  const scrollToBottomContainer = () => {
+    if (chatRefContainer.current) {
+      const container = chatRefContainer.current;
+      container.scrollTop = container.scrollHeight;
+    }
+  };
 
-  // ✅ Use the hook instead of JSX component
-  // useCopilotAction({
-  //   name: "clear-charts",
-  //   description: "Clear all chart data from feedback dashboard including bar chart, pie chart, and line chart data",
-  //   handler: async () => {
-  //     console.log("Clearing charts data...");
-  //     setChartData([]);
-  //     setRatingsOverTime([]);
-  //     setFeedbackTypeData([]);
-  //     return "Charts cleared successfully!";
-  //   },
-  // });
+  // Typewriter effect for AI messages
+  useEffect(() => {
+    if (!aiResponse.length) return;
 
-  // Additional action for removing specific website
-  // useCopilotAction({
-  //   name: "remove-website",
-  //   description: "Remove a specific website from the bar chart data",
-  //   parameters: [
-  //     {
-  //       name: "websiteName",
-  //       type: "string",
-  //       description: "Name of the website to remove (e.g., 'Website A', 'Website B', 'Website C')",
-  //       required: true,
-  //     },
-  //   ],
-  //   handler: async ({ websiteName }) => {
-  //     console.log(`Removing ${websiteName}...`);
-  //     setChartData(prev => prev.filter(item => 
-  //       item.label.toLowerCase() !== websiteName.toLowerCase()
-  //     ));
-  //     return `${websiteName} removed successfully!`;
-  //   },
-  // });
+    const lastMessage = aiResponse[aiResponse.length - 1];
+    if (lastMessage.role !== "assistant") {
+      setDisplayedMessages(aiResponse);
+      // Use setTimeout to ensure DOM is updated before scrolling
+      setTimeout(scrollToBottomContainer, 100);
+      return;
+    }
 
-  const COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444"];
+    let words = lastMessage.content.split(" ");
+    let i = 0;
+    const tempMessages = [...displayedMessages];
+
+    const interval = setInterval(() => {
+      if (
+        !tempMessages.length ||
+        tempMessages[tempMessages.length - 1].role !== "assistant"
+      ) {
+        tempMessages.push({ role: "assistant", content: "" });
+      }
+
+      tempMessages[tempMessages.length - 1].content +=
+        (i === 0 ? "" : " ") + words[i];
+      setDisplayedMessages([...tempMessages]);
+      
+      // Scroll after each word for smooth experience
+      setTimeout(scrollToBottomContainer, 50);
+
+      i++;
+      if (i >= words.length) {
+        clearInterval(interval);
+        // Final scroll after typewriter is complete
+        setTimeout(scrollToBottomContainer, 100);
+      }
+    }, 150); // 150ms per word
+
+    return () => clearInterval(interval);
+  }, [aiResponse]);
+
+  // Scroll when displayed messages change
+  useEffect(() => {
+    setTimeout(scrollToBottomContainer, 100);
+  }, [displayedMessages]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        console.log('Fetching fresh feedback data...');
+        const res = await axios.get(`${apiUrl}/api/feedback/getFeedbacks`, {
+          withCredentials: true
+        });
+        await wait(2000);
+        console.log(res);
+        dispatch({
+          type: 'FETCH_SUCCESS',
+          payload: res.data,
+        });
+        
+        // Store with timestamp
+        const cacheData = {
+          data: res.data,
+          timestamp: Date.now()
+        };
+
+        localStorage.setItem("feedbackData", JSON.stringify(cacheData));
+        localStorage.setItem("type", 'FETCH_SUCCESS');
+        console.log(cacheData);
+      }
+      catch(err) {
+        dispatch({
+          type: 'FETCH_FAIL',
+          payload: err.response?.data,
+        });
+        console.log(err);
+        localStorage.setItem("type", 'FETCH_FAIL');
+      }
+    }
+
+    // Fetch fresh data if cache is missing, old, or invalid
+    if(state.isLoading) {
+      fetchData();
+    }
+  }, [state.isLoading]);
+
+  const handleInput = async () => {
+    if (userPrompt.trim() === "") return;
+    
+    // Add user message
+    setAiResponse((prev) => [...prev, { role: "user", content: userPrompt }]);
+    setUserPrompt("");
+    setIsLoading(true);
+    
+    // Scroll immediately after adding user message
+    setTimeout(scrollToBottomContainer, 100);
+    
+    try {
+      let aiRes = await axios.post(`${apiUrl}/api/llm/askAI`, {
+        aiResponse,
+        userPrompt,
+      });
+      console.log(aiRes.data);
+      setAiResponse((prev) => [
+        ...prev,
+        { role: "assistant", content: aiRes.data.response },
+      ]);
+    } catch (error) {
+      console.log(error);
+      setAiResponse((prev) => [
+        ...prev,
+        { role: "assistant", content: "Sorry, I encountered an error. Please try again." },
+      ]);
+    }
+    setIsLoading(false);
+  };
+
+  if (state.isLoading) {
+    return (
+      <div className="h-full w-full font-sans flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-500 mx-auto"></div>
+          <p className="mt-4 text-lg text-gray-600">Loading feedback data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4 pb-20 relative h-full bg-[#F9FAFB]">
-      {/* <div className="p-6">
-        <h1 className="text-4xl font-bold">Script Generator</h1>
-        <p className="text-lg text-gray-600">
-          Generate and customize your feedback widget script
-        </p>
-      </div> */}
+    <div className="h-full overflow-hidden font-sans">
+      <SimpleHeader color="#c5b5ff" />
 
-      📊 Bar Chart
-      {/* {chartData.length > 0 && (
-        <div className="bg-white shadow rounded-xl p-6 mt-6 max-w-3xl mx-auto">
-          <h3 className="text-xl font-semibold mb-4">Feedback Count per Website</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
-              <XAxis dataKey="label" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="value" fill="#2563EB" />
-            </BarChart>
-          </ResponsiveContainer>
+      {/* <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#e8e8e8_1px,transparent_2px),linear-gradient(to_bottom,#e8e8e8_0.5px,transparent_2px)] bg-[size:4.5rem_3.5rem]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_700px_at_0%_250px,#2563EB,transparent)] lg:bg-none"></div>
+      <div className="absolute inset-0 bg-none lg:bg-[radial-gradient(circle_1900px_at_0%_10px,#fffffff,transparent)]"></div>
+    </div> */}
+
+      <div className="flex lg:flex-row flex-col overflow-y-auto scrollbar-hide max-h-screen">
+        <div className="flex flex-col w-full lg:w-[75%]">
+          <FilterTable data={state?.data}/>
         </div>
-      )} */}
 
-      {/* 🥧 Pie Chart */}
-      {/* {feedbackTypeData.length > 0 && (
-        <div className="bg-white shadow rounded-xl p-6 mt-6 max-w-3xl mx-auto">
-          <h3 className="text-xl font-semibold mb-4">Feedback by Type</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={feedbackTypeData}
-                dataKey="value"
-                nameKey="type"
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                fill="#8884d8"
-                label
+        <div className="lg:w-[25%] bg-white w-full h-full lg:min-h-screen min-h-[800px]" style={{borderLeft: '1px solid #eee',boxShadow: '-3px 0 15px rgba(0, 0, 0, 0.1), -1px 0 6px rgba(0, 0, 0, 0.06)'}}>
+          <div className="h-full w-full min-h-screen p-5 pb-10 flex flex-col">
+            <div className="flex-1 flex flex-col">
+              <div >
+                <h1 className="text-xl  mb-1 font-bold text-black flex items-center gap-3 ">
+                <LucideBot color="#000000" /> Feedback Assistant
+              </h1>
+              <p className="text-sm  mb-6  text-gray-500">Get insights and help with your feedback data</p>
+              </div>
+              
+              <div 
+                ref={chatRefContainer}
+                className="chats flex-1 overflow-y-auto scrollbar-hide mb-4 pr-2"
+                style={{ maxHeight: 'calc(100vh - 280px)' }}
               >
-                {feedbackTypeData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                {displayedMessages.map((chat, idx) => (
+                  <div
+                    key={idx}
+                    className={`w-full my-2 flex text-md ${
+                      chat.role === "assistant" ? "justify-start" : "justify-end"
+                    }`}
+                  >
+                    <div
+                      className={`max-w-[70%] p-3 rounded-2xl  shadow-sm ${
+                        chat.role === "assistant"
+                          ? "text-black bg-gray-100"
+                          : "bg-primary5 text-white rounded-br-md"
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap text-sm break-words text-left">
+                        {chat.content}
+                      </p>
+                    </div>
+                  </div>
                 ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+                {isLoading && (
+                  <div className="w-full my-2 flex justify-start">
+                    <div className="max-w-[70%] p-3 rounded-2xl shadow-sm text-black bg-gray-100">
+                      <p className="text-gray-500">Typing...</p>
+                    </div>
+                  </div>
+                )}
+                {/* Invisible element to scroll to */}
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+            
+            <div className="w-full flex flex-col py-5 px-2 border border-black rounded-2xl mt-auto lg:mb-0 mb-10">
+              <div className="flex w-full items-end ">
+                <textarea
+                  value={userPrompt}
+                  onChange={(e) => setUserPrompt(e.target.value)}
+                  onInput={(e) => {
+                    e.target.style.height = "auto";
+                    e.target.style.height = e.target.scrollHeight + "px";
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleInput();
+                    }
+                  }}
+                  placeholder="Ask here"
+                  className="w-full border-0 outline-0 bg-transparent  text-black resize-none rounded-md"
+                  disabled={isLoading}
+                />
+                <LucideArrowUp 
+                  onClick={handleInput}
+                  // color={isLoading && "gray"}
+                  className={`ml-2 hover:mb-1 hover:scale-[1.1] transition-all ease-in-out duration-300 ${isLoading ? "cursor-not-allowed text-gray-400 " : "cursor-pointer text-black"}`}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-      )} */}
-
-      {/* 📉 Line Chart */}
-      {/* {ratingsOverTime.length > 0 && (
-        <div className="bg-white shadow rounded-xl p-6 mt-6 max-w-3xl mx-auto">
-          <h3 className="text-xl font-semibold mb-4">Average Rating Over Time</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={ratingsOverTime}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="rating" stroke="#10B981" />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )} */}
-
-      {/* 💬 Chat */}
-      {/* <div className="max-w-3xl mx-auto shadow-lg border rounded-xl overflow-hidden mt-6">
-        <CopilotSidebar defaultOpen={true}>
-          <CopilotChat
-            instructions="You are FeedSnap AI. Help analyze and manage dashboard charts. Available actions: 
-            - Use 'clear-charts' to clear all chart data
-            - Use 'remove-website' to remove a specific website from the bar chart
-            When user asks to remove a website or clear data, execute the appropriate action."
-            labels={{
-              user: "You",
-              assistant: "FeedSnap AI",
-            }}
-          />
-        </CopilotSidebar> */}
       </div>
-    // </div>
+    </div>
   );
 };

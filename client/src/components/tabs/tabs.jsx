@@ -1,159 +1,281 @@
-import { useState } from "react";
-import { Paintbrush, LucideInfo, Globe2Icon, LucideStars, LucideTvMinimalPlay } from "lucide-react";
+import { useState, useCallback, useMemo, memo } from "react";
+import { Paintbrush, LucideInfo, Globe2Icon, LucideStars, LucideTvMinimalPlay, LucideArrowUpLeftFromSquare, LucideShield, Bot } from "lucide-react";
 import Select from "react-select";
 
-export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlsettings, genScript }) {
-  const [active, setActive] = useState(0);
+// Memoized tab button component
+const TabButton = memo(({ tab, index, isActive, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`relative flex-1 tracking-tight text-center py-2 font-medium transition-colors duration-300 z-10 ${
+      isActive ? "text-white" : "text-gray-600"
+    }`}
+  >
+    {tab.label}
+  </button>
+));
 
-  // Tabs with labels + content as JSX
-  const tabs = [
-    {
-      label: "Customize",
-    },
-    { 
-      label: "Settings", 
-    },
+// Memoized input components
+const WebUrlInput = memo(({ value, onChange }) => (
+  <div className="flex flex-col">
+    <label htmlFor="web_url" className="flex items-center gap-2 tracking-tight text-lg font-bold">
+      <LucideArrowUpLeftFromSquare size={18}/> Website Url
+    </label>
+    <input
+      className="h-10 p-2 backdrop-blur-md bg-[#fff] border border-black/30 rounded-md mt-2 relative z-10"
+      name="webUrl"
+      placeholder="https://example.com"
+      value={value || ''}
+      onChange={onChange}
+    />
+  </div>
+));
+
+const ColorInput = memo(({ color, onChange ,text,name}) => (
+  <>
+    <label htmlFor={name} className="font-extrabold  block">{text}</label>
+    <div className="flex gap-3 items-center  relative z-10">
+      <input
+        type="color"
+        name={name}
+        onChange={onChange}
+        value={color}
+        className="h-10 w-[80px] rounded-lg border relative z-10"
+      />
+      <input
+        className="h-10 p-2 backdrop-blur-md bg-[#fff] border border-black/30 rounded-lg relative z-10"
+        type="text"
+        name="color"
+        value={color}
+        onChange={onChange}
+      />
+    </div>
+  </>
+));
+
+const TextInput = memo(({ value, onChange }) => (
+  <>
+    <div className="flex gap-2 items-center relative">
+      <label htmlFor="text" className="font-[500]">Widget Text</label>
+      <div className="relative">
+        <LucideInfo size={18} className="peer inline-block ml-1 cursor-help" />
+        <p className="bg-gray-800 rounded-md text-white p-2 absolute left-20 -top-5 sm:left-6 sm:-top-2 -left-32 -top-12 text-sm hidden peer-hover:block sm:whitespace-nowrap shadow-lg z-[9999] max-w-[280px] sm:max-w-none">
+          Default Feedback as text will be shown, if empty a message icon will be shown
+        </p>
+      </div>
+    </div>
+    <input
+      onChange={onChange}
+      className="h-10 p-2 backdrop-blur-md bg-[#fff] border border-black/30 rounded-lg relative z-10"
+      defaultValue="FeedBack"
+      type="text"
+      name="text"
+      value={value || ''}
+    />
+  </>
+));
+
+// Pre-defined static styles to avoid inline calculations
+const TAB_STYLES = {
+  0: { left: 'calc(0% + 4px)', width: 'calc(33.333% - 8px)' },
+  1: { left: 'calc(33.333% + 4px)', width: 'calc(33.333% - 8px)' },
+  2: { left: 'calc(66.666% + 4px)', width: 'calc(33.333% - 8px)' }
+};
+
+// Static select styles
+const SELECT_STYLES = {
+  control: (base) => ({ ...base, padding: "2px" }),
+  option: (base, state) => ({
+    ...base,
+    backgroundColor: state.isSelected ? "#9c9c9cff" : "#fff",
+    color: state.isSelected ? "#fff" : "#000",
+    "&:hover": { backgroundColor: "#c4c5c5ff" },
+  }),
+};
+
+// Main component
+export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlsettings, genScript, genDemo, showDemo }) {
+  const [active, setActive] = useState(0);
+  
+  // Static tabs array
+  const tabs = useMemo(() => [
+    { label: "Configuration" },
+    { label: "Customization" },
     { label: "Preview" },
-  ];
+  ], []);
+
+  // Memoized callbacks
+  const handleTabClick = useCallback((index) => {
+    setActive(index);
+  }, []);
+
+  const handleInputChange = useCallback((e) => {
+    const { name, value } = e.target;
+    console.log("urlsetting:", UrlSettings);
+    setUrlsettings(prev => ({ ...prev, [name]: value }));
+  }, [setUrlsettings, UrlSettings]);
+
+  // Fixed handleSelectChange to update position
+  const handleSelectChange = useCallback((selectedOption) => {
+    console.log("Position selected:", selectedOption?.value);
+    setUrlsettings(prev => ({ ...prev, position: selectedOption?.value || "bottom right" }));
+  }, [setUrlsettings]);
+
+  const handleFormSubmit = useCallback((e) => {
+    e.preventDefault();
+    genScript(e);
+  }, [genScript]);
+
+  // Memoized computed values
+  const isDisabled = useMemo(() => !UrlSettings.webUrl, [UrlSettings.webUrl]);
+  const slideStyle = useMemo(() => TAB_STYLES[active], [active]);
+
+  // Find the selected option for the Select component
+  const selectedOption = useMemo(() => 
+    options.find(option => option.value === UrlSettings.position) || null
+  , [options, UrlSettings.position]);
+
+  // Memoized tab buttons
+  const tabButtons = useMemo(() => 
+    tabs.map((tab, i) => (
+      <TabButton
+        key={i}
+        tab={tab}
+        index={i}
+        isActive={active === i}
+        onClick={() => handleTabClick(i)}
+      />
+    )), [tabs, active, handleTabClick]);
 
   return (
-    <div className="w-full max-w-3xl">
+    <div className="w-full font-sans  ">
       {/* Tabs row */}
-      <div className="relative flex w-full h-[50px] bg-gray-100  rounded-lg mb-6">
-        {/* Sliding highlight - moved to back with pointer-events-none */}
+      <div className="relative flex w-full h-[50px] border backdrop-blur-md bg-white/90 border border-white/10 rounded-lg mb-3">
+        {/* Sliding highlight */}
         <div
-          className="absolute p-2 top-[4px] bottom-[4px] w-1/3 bg-blue-500 rounded-md transition-all duration-300 ease-in-out pointer-events-none z-0"
-          style={{
-            left: `calc(${active * 33.333}% + 4px)`,
-            width: `calc(33.333% - 10px)`,
-          }}
-        ></div>
+          className="absolute p-2 top-[4px] bottom-[4px] bg-primary5        rounded-md transition-all duration-300 ease-in-out pointer-events-none z-0"
+          style={slideStyle}
+        />
+        {tabButtons}
+      </div>
 
-        {/* Tab buttons */}
-        {tabs.map((tab, i) => (
-          <button
-            key={i}
-            onClick={() => setActive(i)}
-            className={`relative flex-1 text-center py-2 font-medium transition-colors duration-300 z-10 ${
-              active === i ? "text-white" : "text-gray-600"
+      <form id="widget-config" className="flex flex-col gap-3" onSubmit={handleFormSubmit}>
+        <div className="border backdrop-blur-md lg:h-[440px] w-[500px] bg-white/90 border border-white/10 p-3 rounded-md flex flex-col justify-between w-full">
+          
+          {/* Configuration Tab */}
+          {active === 0 && (
+            <>
+              <div>
+                <h1 className="tracking-tight text-[22px] font-extrabold flex items-center gap-2">
+                  <Globe2Icon className="text-white rounded-md bg-blue-500 p-1 h-6 w-6" size={30} />
+                  Widget Configuration
+                </h1>
+                <p className="tracking-tight text-gray-600 text-sm pt-1">
+                  Enter your website details to generate the script
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-8 py-3">
+                <WebUrlInput value={UrlSettings.webUrl} onChange={handleInputChange} />
+                
+                {/* <div>
+                  <h2 className="flex items-center gap-2 tracking-tight text-lg font-bold">
+                    <LucideShield className="text-primary" size={18}/>
+                    Website verification
+                  </h2>
+                  <p className="text-sm tracking-tight">Add this meta tag in you website to mark ownership</p>
+                  <div className="border border-black/30 rounded-md mt-1 px-2 py-4">
+                    <code>
+                      &lt;meta name="widget-id" content="{UrlSettings.id}" /&gt;
+                    </code>
+                  </div>
+                </div> */}
+               <div>
+                <h2 className="flex items-center gap-2 tracking-tight text-lg font-bold">
+                    <Bot className="text-primary" size={25}/>
+                    Bot Context
+                  </h2>
+                 <textarea name="botContext" id=""  onChange={handleInputChange} className="h-[120px] w-full p-2 backdrop-blur-md bg-[#fff] border border-black/30 rounded-md mt-2 relative z-10" placeholder="Tell us about your website..."></textarea>
+               </div>
+
+                <div className="w-full rounded-lg border border-primary5        bg-primary/10 px-1 flex gap-2">
+                  <LucideStars size={30} className="text-primary"/>
+                  <span className="font-bold tracking-tight lg:text-sm text-[10px] text-primary">
+                    For Live Demo: 
+                    <span className="font-[100] lg:text-[12px] text-[10px] text-black"> Complete the customization in the next tab, then use the Preview tab to see your widget in action before going live.</span>
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Customization Tab */}
+          {active === 1 && (
+            <>
+              <h1 className="tracking-tight text-[22px] font-extrabold flex items-center gap-2">
+                <Paintbrush className="text-white rounded-md bg-primary1 p-1 h-6 w-6" size={30} />
+                Widget Customization
+              </h1>
+              <p className="mb-9 tracking-tight text-gray-600 text-sm pt-1">
+                Customize the appearance and behavior of your widget
+              </p>
+
+              <div className="flex flex-col justify-between gap-2">
+                <label htmlFor="position" className="text-lg font-extrabold block z-[9999999999]">
+                  Position
+                </label>
+                <Select
+                  required
+                  options={options}
+                  value={selectedOption}
+                  onChange={handleSelectChange}
+                  placeholder="Select position..."
+                  className="text-sm bg-white/20 relative z-[999999]"
+                  styles={SELECT_STYLES}
+                />
+
+                <div className="flex flex-col gap-2 ">
+                  <ColorInput color={UrlSettings.color} onChange={colorChange} name={'color'} text={'Widget Color'} />
+                <ColorInput color={UrlSettings.bgColor} onChange={colorChange} name={'bgcolor'} text={'Widget mode Color'} />
+                </div>
+                <TextInput value={UrlSettings.text} onChange={handleInputChange} />
+              </div>
+            </>
+          )}
+
+          {/* Preview Tab */}
+          {active === 2 && (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-600">Preview content goes here</p>
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-3">
+          <button 
+            type="submit" 
+            disabled={isDisabled}
+            className={`flex justify-center items-center gap-2 w-[70%] rounded-lg h-[60px] bg-primary5       text-white transition-opacity ${
+              isDisabled ? 'opacity-70 cursor-not-allowed' : ''
             }`}
           >
-            {tab.label}
+            <LucideStars/>Generate Script
           </button>
-        ))}
-      </div>
-      <form action="" id="widget-config" className="flex flex-col gap-3" onSubmit={genScript}>
-        <div className="border bg-white opacity-80 p-3 rounded-md  w-full">
-
-        {active === 0 && (
-            <>
-
-            <h1 className="tracking-tight text-xl font-bold flex items-center gap-3">
-              <Paintbrush className="text-purple-500 h-5" />
-              Widget Customization
-          </h1>
-          <p className="text-gray-600 mb-8 text-sm">
-            Customize the appearance and behavior of your widget
-          </p>
-
-          <label htmlFor="position" className="text-lg font-[500] mb-2 block z-[9999999999]">
-            Position
-          </label>
-          <Select
-            required
-            options={options}
-            onChange={(e) =>
-                setUrlsettings((prev) => ({ ...prev, title: e?.value || "" }))
-            }
-            placeholder="Select feedback type..."
-            className="text-sm mb-4 relative z-[999999]"
-            styles={{
-                control: (base) => ({ ...base, borderColor: "#d1d5db", boxShadow: "none", padding: "2px" }),
-              option: (base, state) => ({
-                ...base,
-                backgroundColor: state.isSelected ? "#60a5fa" : "#fff",
-                color: state.isSelected ? "#fff" : "#000",
-                "&:hover": { backgroundColor: "#e0f2fe" },
-              }),
-            }}
-          />
-
-          {/* Color picker */}
-          <label htmlFor="color" className="font-[500] mt-5 mb-2 block">Widget Color</label>
-          <div className="flex gap-3 items-center mb-5 relative z-10">
-            <input
-              type="color"
-              name="color"
-              onChange={colorChange}
-              value={UrlSettings.color}
-              className="h-10 w-[80px] rounded-lg border relative z-10"
-            />
-            <input
-              className="h-10 p-2 border border-gray-500 rounded-lg relative z-10"
-              type="text"
-              name="color"
-              value={UrlSettings.color}
-              onChange={colorChange}
-              />
-          </div>
-
-          {/* Widget text */}
-           <div className="flex gap-2 items-center relative mb-4">
-            <label htmlFor="text" className="font-[500]">Widget Text</label>
-            <div className="relative">
-              <LucideInfo size={18} className="peer inline-block ml-1 cursor-help" />
-              <p className="bg-gray-800 rounded-md text-white p-2 absolute left-20 -top-5 sm:left-6 sm:-top-2 -left-32 -top-12 text-sm hidden peer-hover:block sm:whitespace-nowrap shadow-lg z-[9999] max-w-[280px] sm:max-w-none">
-                Default Feedback as text will be shown, if empty a message icon will be shown
-              </p>
-            </div>
-          </div>
-          <input
-            onChange={(e) =>
-                setUrlsettings((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-            }
-            className="h-10 border border-gray-400 px-3 mt-1 rounded-lg block relative z-10"
-            defaultValue="FeedBack"
-            type="text"
-            name="text"
-            />
-        </>
-  )}
-  {active === 1 && (
-    <>
-
-            <h1 className="text-zinc-800 text-xl font-[700] flex items-center gap-3">
-              <Globe2Icon className="h-5 text-blue-500" />
-              Website Configuration
-            </h1>
-            <p className="mb-9 tracking-tight text-gray-600 text-sm pt-1">
-              Enter your website details to generate the script
-            </p>
-            {/* website url */}
-            <label htmlFor="web_url" className="tracking-tight text-lg font-[500]">
-              Website Url
-            </label>
-            <input
-            name="webUrl"
-              onChange={(e) => {
-                  setUrlsettings((prev) => ({
-                      ...prev,
-                      [e.target.name]: e.target.value,
-                    }));
-                }}
-            />
-      </>
-  )}
-  </div>
-      <div className="flex gap-3">
-      <button type="submit" className={`flex justify-center items-center gap-2 w-[70%] rounded-lg h-[60px] bg-gradient-to-r from-blue-500  to-blue-600 text-white
-        ${UrlSettings.webUrl === ""?'opacity-70 cursor-not-allowed':''}`}>
-        <LucideStars/>Generate Script</button>
-      <button className={`flex justify-center items-center gap-2  w-[30%] rounded-lg h-[60px] bg-gradient-to-r from-purple-500 to-purple-600 text-white
-             ${UrlSettings.webUrl === ""?'opacity-70 cursor-not-allowed':''}`}>
-        <LucideTvMinimalPlay/>Live Demo</button>
-
-      </div>
-                 </form>
+          {!showDemo ?<>
+          <button 
+            onClick={(e) =>genDemo(e)}
+            className={`flex justify-center items-center md:gap-2 p-3 md:p-0 w-[30%] rounded-lg h-[60px] bg-primary1 text-white `}
+          >
+            <LucideTvMinimalPlay/>Live Demo
+          </button></>:<>
+          <button 
+            onClick={(e) =>genDemo(e)}
+            className={`flex justify-center items-center md:gap-2 p-3 md:p-0 w-[30%] rounded-lg h-[60px] bg-backgr text-white `}
+          >
+            <LucideTvMinimalPlay/>Stop Demo
+          </button></>}
+        </div>
+      </form>
     </div>
   );
 }

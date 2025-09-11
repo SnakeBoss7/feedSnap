@@ -5,16 +5,13 @@ const scriptSchema = new mongoose.Schema({
     required: true,
   },
   color: String,
-  modeColor:String,
-  bgColor: String,
+  modeColor: String,
   position: String,
   metadata: String,
-  email:Boolean,
-  userId: {
-    type: mongoose.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
+  email: Boolean,
+   owner: [{ type: mongoose.Types.ObjectId, ref: "User", required: true }],
+  members: [{ type: mongoose.Types.ObjectId, ref: "User" }], // allow sharing
+
 }, {
   timestamps: true, // Optional: adds createdAt & updatedAt
 });

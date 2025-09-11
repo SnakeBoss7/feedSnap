@@ -4,15 +4,14 @@ import styled from 'styled-components';
 const Loader = () => {
   return (
     <StyledWrapper>
-      <div className="card">
+      <div className="card bg-transparent">
         <div className="loader">
-          <p>loading</p>
-          <div className="words">
-            <span className="word">buttons</span>
-            <span className="word">forms</span>
-            <span className="word">switches</span>
-            <span className="word">cards</span>
-            <span className="word">buttons</span>
+          <p className="text-white">loading</p>
+          <div className="words text-primary2">
+            <span className="word">Widget</span>
+            <span className="word">Code</span>
+            <span className="word">Script</span>
+            <span className="word">Widget</span> {/* Duplicate first word for smooth loop */}
           </div>
         </div>
       </div>
@@ -22,31 +21,32 @@ const Loader = () => {
 
 const StyledWrapper = styled.div`
   .card {
-    /* color used to softly clip top and bottom of the .words container */
-    --bg-color: #ffffffff;
     background-color: var(--bg-color);
     padding: 1rem 2rem;
     border-radius: 1.25rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   }
+  
   .loader {
-    color: rgb(124, 124, 124);
+
     font-family: "Poppins", sans-serif;
     font-weight: 500;
     font-size: 25px;
-    -webkit-box-sizing: content-box;
     box-sizing: content-box;
     height: 40px;
-    padding: 10px 10px;
-    display: -webkit-box;
-    display: -ms-flexbox;
+    padding: 10px;
     display: flex;
+    align-items: center;
     border-radius: 8px;
   }
 
   .words {
     overflow: hidden;
     position: relative;
+    height: 40px;
+    margin-left: 8px;
   }
+  
   .words::after {
     content: "";
     position: absolute;
@@ -58,56 +58,35 @@ const StyledWrapper = styled.div`
       var(--bg-color) 90%
     );
     z-index: 20;
+    pointer-events: none;
   }
 
   .word {
     display: block;
-    height: 100%;
-    padding-left: 6px;
-    color: #956afa;
-    animation: spin_4991 4s infinite;
+    height: 40px;
+    line-height: 40px;
+
+    animation: spin_words 3s infinite;
   }
 
-  @keyframes spin_4991 {
-    10% {
-      -webkit-transform: translateY(-102%);
-      transform: translateY(-102%);
+  @keyframes spin_words {
+    0% {
+      transform: translateY(0%);
     }
-
-    25% {
-      -webkit-transform: translateY(-100%);
+    
+    33% {
       transform: translateY(-100%);
     }
-
-    35% {
-      -webkit-transform: translateY(-202%);
-      transform: translateY(-202%);
-    }
-
-    50% {
-      -webkit-transform: translateY(-200%);
+    
+    66% {
       transform: translateY(-200%);
     }
-
-    60% {
-      -webkit-transform: translateY(-302%);
-      transform: translateY(-302%);
-    }
-
-    75% {
-      -webkit-transform: translateY(-300%);
+    100% {
       transform: translateY(-300%);
     }
+    
 
-    85% {
-      -webkit-transform: translateY(-402%);
-      transform: translateY(-402%);
-    }
-
-    100% {
-      -webkit-transform: translateY(-400%);
-      transform: translateY(-400%);
-    }
-  }`;
+  }
+`;
 
 export default Loader;

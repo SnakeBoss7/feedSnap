@@ -3,11 +3,11 @@ const jwt = require('jsonwebtoken');
 const verifyUser = (req, res, next) => {
     try {
         // Debug: Log all cookies
-        console.log('All cookies:', req.cookies);
-        console.log('Headers:', req.headers);
+        // console.log('All cookies:', req.cookies);
+        // console.log('Headers:', req.headers);
         
         const token = req.cookies.token;
-        console.log('Extracted token:', token);
+        // console.log('Extracted token:', token);
         
         if (!token) {
             console.log('Token not found in cookies');
@@ -15,13 +15,14 @@ const verifyUser = (req, res, next) => {
         }
         
         let decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log('Token verified successfully:', decoded);
+        // console.log('Token verified successfully:', decoded);
         req.user = decoded;
+        console.log(decoded);
         next();
         
     } catch (err) {
-        console.log('JWT verification error:', err.message);
-        console.log('Error details:', err);
+        // console.log('JWT verification error:', err.message);
+        // console.log('Error details:', err);
         return res.status(401).json({ msg: "Invalid token", error: err.message });
     }
 }

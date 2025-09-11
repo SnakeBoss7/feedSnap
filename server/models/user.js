@@ -1,20 +1,14 @@
-const mongoose = require('mongoose');
-const { route } = require('../routes/scriptRoute');
-const UserSchema = mongoose.Schema(
-    {
-        name: String,
-        email: String,
-        userId:
-        {
-            type:mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        webURl:[String],
-        UserTier:{ type: Number, min: 1, max: 3 },
-        BotQuote:String,
-        firebaseId: String,
-        route:String,
-        createdAt: { type: Date, default: Date.now }
-    }
-)
-module.exports = mongoose.model('user', UserSchema);
+const mongoose = require("mongoose");
+const { route } = require("../routes/scriptRoute");
+const UserSchema = mongoose.Schema({
+  name: String,
+  email: { type: String, unique: true },
+  password: String, // if not using Firebase only
+  role: { type: String, enum: ["admin", "member"], default: "member" },
+  webURl: [String],
+  BotQuote: String,
+  userTier: { type: Number, min: 1, max: 3, default: 2 },
+  firebaseId: String,
+  createdAt: { type: Date, default: Date.now },
+});
+module.exports = mongoose.model("user", UserSchema);

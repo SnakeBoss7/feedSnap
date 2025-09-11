@@ -1,0 +1,579 @@
+"use client"
+
+import { useState, useMemo } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  Search,
+  Filter,
+  Calendar,
+  ChevronDown,
+  MoreHorizontal,
+  X,
+  ExternalLink,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  LucideFilter,
+} from "lucide-react"
+import { Button } from "../../components/ui/button"
+import { Input } from "../../components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
+import { Badge } from "../../components/ui/badge"
+import { Checkbox } from "../../components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover"
+import { Calendar as CalendarComponent } from "../../components/ui/calender"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog"
+import { format } from "date-fns"
+import { cn } from "../../lib/utils"
+import { RatingStar } from "../star/star"
+import ButtonDownload from "../button/button"
+import { exportData } from "../../services/exportData"
+
+const severityLabels = {
+  0: { label: "Unknown", color: "bg-zinc-500 text-white hover:bg-zinc-600  hover:text-white" },
+  1: { label: "Low", color: "bg-green-300/40 text-green-700/80 hover:bg-green-300/40  hover:text-green-700/80" },
+  2: { label: "Medium", color: "bg-yellow-100 text-yellow-700 hover:bg-yellow-100 hover:text-yellow-700" },
+  3: { label: "High", color: "bg-orange-300/40 text-orange-700/80 hover:bg-orange-300/40  hover:text-orange-700/80" },
+  4: { label: "Critical", color: "bg-red-300/40 text-red-700/80 hover:bg-red-300/40  hover:text-red-700/80" },
+}
+
+// Helper function to get severity label safely
+const getSeverityLabel = (severity) => {
+  return severityLabels[severity] || severityLabels[0]
+}
+
+export function FilterTable({ data, onAction }) {
+  const [searchTerm, setSearchTerm] = useState("")
+const [formatType, setFormatType] = useState('csv');
+  const [severityFilter, setSeverityFilter] = useState("all")
+  const [webUrlFilter, setWebUrlFilter] = useState("all")
+  const [dateRange, setDateRange] = useState({})
+  const [selectedItems, setSelectedItems] = useState(new Set())
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
+  const [viewDetailsItem, setViewDetailsItem] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 20
+
+  // Get unique web URLs for filter dropdown
+  const uniqueWebUrls = useMemo(() => {
+    const urls = [...new Set(data.map((item) => item.webUrl))]
+    return urls.sort()
+  }, [data])
+
+  // Filter data based on all filters
+  const filteredData = useMemo(() => {
+    return data.filter((item) => {
+      // Search filter
+      const matchesSearch =
+        item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.email?.toLowerCase().includes(searchTerm.toLowerCase())
+
+      // Severity filter
+      const matchesSeverity = severityFilter === "all" || item?.severity?.toString() === severityFilter
+
+      // Web URL filter
+      const matchesWebUrl = webUrlFilter === "all" || item.webUrl === webUrlFilter
+
+      // Date range filter
+      const itemDate = new Date(item.createdOn)
+      const matchesDateRange =
+        (!dateRange.from || itemDate >= dateRange.from) && (!dateRange.to || itemDate <= dateRange.to)
+
+      return matchesSearch && matchesSeverity && matchesWebUrl && matchesDateRange
+    })
+  }, [data, searchTerm, severityFilter, webUrlFilter, dateRange])
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedData = filteredData.slice(startIndex, endIndex)
+
+  useMemo(() => {
+    setCurrentPage(1)
+  }, [searchTerm, severityFilter, webUrlFilter, dateRange])
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedItems(new Set(paginatedData.map((item) => item._id)))
+    } else {
+      setSelectedItems(new Set())
+    }
+  }
+
+  const handleSelectItem = (itemId, checked) => {
+    const newSelected = new Set(selectedItems)
+    if (checked) {
+      newSelected.add(itemId)
+    } else {
+      newSelected.delete(itemId)
+    }
+    setSelectedItems(newSelected)
+  }
+
+  const clearFilters = () => {
+    setSearchTerm("")
+    setSeverityFilter("all")
+    setWebUrlFilter("all")
+    setDateRange({})
+    setCurrentPage(1)
+  }
+
+  const hasActiveFilters =
+    searchTerm || severityFilter !== "all" || webUrlFilter !== "all" || dateRange.from || dateRange.to
+
+  const handleViewDetails = (item) => {
+    setViewDetailsItem(item)
+  }
+
+  return (
+
+    
+    <div className="w-full overflow-y-scroll scrollbar-hide md:px-10 px-5 py-8  font-sans">
+           <div className=" flex md:flex-row flex-col mb-14 justify-between ">
+        <div className="mb-5">
+          <h1 className="text-4xl font-bold text-backgr p-0 mb-2">
+          Data Management
+        </h1>
+        <p className="text-backgr text-md tracking-tight">
+          Monitor and filter your application data with advanced controls
+        </p>
+        </div>
+        <div>
+ 
+          <ButtonDownload formatType={formatType} content={'Export All'}/>
+        </div>
+      </div>
+      <div className=" flex flex-col bg-white  rounded-t-lg gap-5">
+        <div className="flex font-medium mb-3 justify-between sm:flex-row h-5 sm:items-center gap-4">
+          <div className="flex p-3 md:text-2xl text-md items-center gap-2">
+            <LucideFilter/> Filters & Search</div>
+            
+          {selectedItems.size > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center gap-2"
+            >
+              <div className="w-[30px] text-center md:w-fit md:py-1 md:h-fit text-[12px] bg-backgr rounded-3xl text-white px-2 h-[20px] hover:text-white">
+                {selectedItems.size} selected
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Actions <ChevronDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-white font-sans">
+                  <DropdownMenuItem className="hover:bg-primary5/20  hover:text-black p-1 rounded-lg" 
+                    onClick={() =>
+                      onAction?.(
+                        filteredData.filter((item) => selectedItems.has(item._id)),
+                        "export",
+                      )
+                    }
+                  >
+                    Export Selected
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" 
+                    onClick={() =>
+                      onAction?.(
+                        filteredData.filter((item) => selectedItems.has(item._id)),
+                        "delete",
+                      )
+                    }
+                  >
+                    Delete Selected
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="hover:bg-primary/10 hover:text-black p-1 rounded-lg" 
+                    onClick={() =>
+                      onAction?.(
+                        filteredData.filter((item) => selectedItems.has(item._id)),
+                        "archive",
+                      )
+                    }
+                  >
+                    Archive Selected
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Filters */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 bg-white lg:grid-cols-4  gap-4">
+          {/* Search */}
+          <div className="relative sm:col-span-2 bg-whtie">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+<Input
+  placeholder="Search titles, descriptions, emails..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  className="pl-10  focus:border-0"
+/>
+          </div>
+
+          {/* Severity Filter */}
+          <Select value={severityFilter} onValueChange={setSeverityFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Severity" />
+            </SelectTrigger>
+            <SelectContent className="bg-white font-sans">
+              <SelectItem value="all"  className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" >All Severities</SelectItem>
+              <SelectItem value="1"  className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" >Low</SelectItem>
+              <SelectItem value="2"  className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" >Medium</SelectItem>
+              <SelectItem value="3" className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" >High</SelectItem>
+              <SelectItem value="4" className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" >Critical</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Web URL Filter */}
+          <Select value={webUrlFilter} onValueChange={setWebUrlFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Web URL" />
+            </SelectTrigger>
+            <SelectContent className="bg-white font-sans">
+              <SelectItem value="all"  className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" >All URLs</SelectItem>
+              {uniqueWebUrls.map((url) => (
+                <SelectItem key={url} value={url}  className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" >
+                  {new URL(url).hostname}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Date Range and Clear Filters */}
+        <div className="flex flex-row items-center bg-white sm:flex-row sm:items-center  mb-5 justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-start bg-white sm:items-center gap-2">
+            <Popover  open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="justify-start text-left font-normal bg-transparent w-full sm:w-auto"
+                >
+                  <Calendar className="h-4 bg-white w-4" />
+                  {dateRange.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
+                      </>
+                    ) : (
+                      format(dateRange.from, "LLL dd, y")
+                    )
+                  ) : (
+                    "Pick a date range"
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className=" bg-whtie border border-gray-300 shadow-xl z-[999999999999999] w-auto p-0" align="start">
+                <CalendarComponent
+                  initialFocus
+                  mode="range"
+                  defaultMonth={dateRange.from}
+                  selected={{ from: dateRange.from, to: dateRange.to }}
+                  onSelect={(range) => {
+                    setDateRange({ from: range?.from, to: range?.to })
+                    if (range?.from && range?.to) {
+                      setIsDatePickerOpen(false)
+                    }
+                  }}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <X className="mr-1 h-4 w-4" />
+                Clear Filters
+              </Button>
+            )}
+          </div>
+
+          <div className="text-sm text-muted-foreground bg-white">
+            Showing {startIndex + 1}-{Math.min(endIndex, filteredData.length)} of {filteredData.length} items
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white  overflow-hidden rounded-b-lg  ">
+        <div className="overflow-x-auto overflow-hidden">
+          <table className="w-full min-w-[800px]">
+            <thead className="border-b bg-muted/50">
+              <tr>
+                <th className="p-3 sm:p-4 text-left">
+                  <Checkbox 
+                    checked={selectedItems.size === paginatedData.length && paginatedData.length > 0}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all"
+                  />
+                </th>
+                <th className="p-3 sm:p-4 text-left max-w-[100px] font-medium">Title</th>
+                <th className="p-3 sm:p-4 text-left font-medium">Severity</th>
+                <th className="p-3 sm:p-4 text-left font-medium">Rating</th>
+                <th className="p-3 sm:p-4 text-left font-medium">Web URL</th>
+                <th className="p-3 sm:p-4 text-left font-medium">Email</th>
+                <th className=" text-left min-w-[100px] font-medium">Created</th>
+                <th className="p-3 sm:p-4 text-left font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <AnimatePresence mode="wait">
+                {paginatedData.map((item, index) => (
+                  <motion.tr
+                    key={`${item._id}-${currentPage}`}
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                      duration: 0.2,
+                      delay: index * 0.03,
+                      ease: "easeOut",
+                    }}
+                    className="border-b hover:bg-muted/50 transition-colors duration-150"
+                  >
+                    <td className="p-3 sm:p-4">
+                      <Checkbox
+                        checked={selectedItems.has(item._id)}
+                        onCheckedChange={(checked) => handleSelectItem(item._id, checked)}
+                        aria-label={`Select ${item.title}`}
+                      />
+                    </td>
+                    <td className="p-3 sm:p-4">
+                      <div className="space-y-1 max-w-[200px] sm:max-w-[150px]">
+                        <div className="font-thin text-sm truncate ">{item.title}</div>
+                        <div className="text-xs  text-muted-foreground line-clamp-2">{item.description}</div>
+                      </div>
+                    </td>
+                    <td className="p-3 sm:p-4">
+                      <Badge variant="secondary" className={cn("text-xs", getSeverityLabel(item.severity).color)}>
+                        {getSeverityLabel(item.severity).label}
+                      </Badge>
+                    </td>
+                    <td className="p-3 sm:p-4">
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-bold">
+                          <RatingStar value={item.rating} />
+                        </span>
+                        {/* <span className="text-xs text-muted-foreground">/5</span> */}
+                      </div>
+                    </td>
+                    <td className="p-3 sm:p-4">
+                      <a
+                        href={item.webUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 max-w-[150px] truncate"
+                      >
+                        {new URL(item.webUrl).hostname}
+                        <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                      </a>
+                    </td>
+                    <td className="p-3 sm:p-4">
+                      <span className="text-sm text-muted-foreground truncate max-w-[150px] block">{item.email}</span>
+                    </td>
+                    <td className="">
+                      <span className="text-sm text-muted-foreground">
+                        {format(new Date(item.createdOn), "MMM dd, yyyy")}
+                      </span>
+                    </td>
+                    <td className="p-3 sm:p-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="font-sans">
+                          <DropdownMenuItem onClick={() => handleViewDetails(item)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-500 bg-red-100 hover:bg-red-100 hover:text-red-500 text-destructive">Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            </tbody>
+          </table>
+
+          {filteredData.length === 0 && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
+              <Filter className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">No results found</h3>
+              <p className="text-muted-foreground mb-4">Try adjusting your filters or search terms</p>
+              {hasActiveFilters && (
+                <Button variant="outline" onClick={clearFilters}>
+                  Clear all filters
+                </Button>
+              )}
+            </motion.div>
+          )}
+        </div>
+
+        {filteredData.length > 0 && (
+          <motion.div
+            className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t bg-muted/20"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: 0.1 }}
+          >
+            <div className="text-sm text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="transition-all duration-150 hover:bg-muted/50 disabled:opacity-50"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+
+              <div className="flex items-center gap-1 transition-all ease-in-out duration-300">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum
+                  if (totalPages <= 5) {
+                    pageNum = i + 1
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i
+                  } else {
+                    pageNum = currentPage - 2 + i
+                  }
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNum)}
+                      className="w-8 h-8 p-0 transition-all ease-in-out duration-500 hover:scale-105"
+                    >
+                      {pageNum}
+                    </Button>
+                  )
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="transition-all duration-150 hover:bg-muted/50 disabled:opacity-50"
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </div>
+
+      <Dialog open={!!viewDetailsItem} onOpenChange={() => setViewDetailsItem(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto font-sans">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">Item Details</DialogTitle>
+          </DialogHeader>
+          {viewDetailsItem && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Title</label>
+                  <p className="text-sm">{viewDetailsItem.title}</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Email</label>
+                  <p className="text-sm">{viewDetailsItem.email}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Description</label>
+                <p className="text-sm">{viewDetailsItem.description}</p>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Severity</label>
+                  <Badge
+                    variant="secondary"
+                    className={cn("text-xs w-fit", getSeverityLabel(viewDetailsItem.severity).color)}
+                  >
+                    {getSeverityLabel(viewDetailsItem.severity).label}
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Rating</label>
+                  <p className="text-sm">{viewDetailsItem.rating}/5</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Vector</label>
+                  <p className="text-sm">{viewDetailsItem.vector}</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Version</label>
+                  <p className="text-sm">{viewDetailsItem.__v}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Web URL</label>
+                  <a
+                    href={viewDetailsItem.webUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1"
+                  >
+                    {viewDetailsItem.webUrl}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Pathname</label>
+                  <p className="text-sm font-mono">{viewDetailsItem.pathname}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Created On</label>
+                  <p className="text-sm">{format(new Date(viewDetailsItem.createdOn), "PPpp")}</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Updated On</label>
+                  <p className="text-sm">{format(new Date(viewDetailsItem.updatedOn), "PPpp")}</p>
+                </div>
+              </div>
+
+              {viewDetailsItem.image && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Image</label>
+                  <img
+                    src={viewDetailsItem.image || "/placeholder.svg"}
+                    alt={viewDetailsItem.title}
+                    className="w-32 h-32 object-cover rounded-lg border"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
