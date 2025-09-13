@@ -2,8 +2,9 @@ const mongoose = require("mongoose");
 const { route } = require("../routes/scriptRoute");
 const UserSchema = mongoose.Schema({
   name: String,
+  profile:String,
   email: { type: String, unique: true },
-  password: String, // if not using Firebase only
+  password: {type: String,default:"" },// if not using Firebase only
   role: { type: String, enum: ["admin", "member"], default: "member" },
   webURl: [String],
   BotQuote: String,

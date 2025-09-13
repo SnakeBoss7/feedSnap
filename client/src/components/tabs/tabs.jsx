@@ -45,7 +45,7 @@ const ColorInput = memo(({ color, onChange ,text,name}) => (
       <input
         className="h-10 p-2 backdrop-blur-md bg-[#fff] border border-black/30 rounded-lg relative z-10"
         type="text"
-        name="color"
+        name={name}
         value={color}
         onChange={onChange}
       />
@@ -236,7 +236,7 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
 
                 <div className="flex flex-col gap-2 ">
                   <ColorInput color={UrlSettings.color} onChange={colorChange} name={'color'} text={'Widget Color'} />
-                <ColorInput color={UrlSettings.bgColor} onChange={colorChange} name={'bgcolor'} text={'Widget mode Color'} />
+                <ColorInput color={UrlSettings.bgColor} onChange={colorChange} name={'bgColor'} text={'Widget mode Color'} />
                 </div>
                 <TextInput value={UrlSettings.text} onChange={handleInputChange} />
               </div>

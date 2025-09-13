@@ -1,14 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-    <script>
-        (function() {
+(function() {
     'use strict';
     
     // Prevent multiple instances
@@ -75,6 +65,8 @@
             this.isOpen = false;
             this.activeTab = 'feedback';
             this.selectedFeedbackType = null;
+            this.selectedRating = null;
+            this.followUp = false;
             this.btnContent = '';
             this.setupRouteDetection();
             this.init();
@@ -118,46 +110,39 @@
         }
         
         startRoutePolling() {
-    this.routePollingInterval = setInterval(() => {
-        const newPath = window.location.pathname;
-        if (newPath !== this.currentPath) {
-            this.handleRouteChange('polling');
+            this.routePollingInterval = setInterval(() => {
+                const newPath = window.location.pathname;
+                if (newPath !== this.currentPath) {
+                    this.handleRouteChange('polling');
+                }
+            }, 500);
         }
-    }, 500);
-}
+
         destroy() {
-  // Remove all event listeners
-    window.removeEventListener('popstate', this.handleRouteChange);
-    window.removeEventListener('hashchange', this.handleRouteChange);
-    
-    // Clear intervals
-    if (this.routePollingInterval) {
-        clearInterval(this.routePollingInterval);
-    }
-    
-    // Remove style sheets
-    document.querySelectorAll('style').forEach(style => {
-        if (style.textContent.includes('.fw-container')) {
-            style.remove();
+            window.removeEventListener('popstate', this.handleRouteChange);
+            window.removeEventListener('hashchange', this.handleRouteChange);
+            
+            if (this.routePollingInterval) {
+                clearInterval(this.routePollingInterval);
+            }
+            
+            document.querySelectorAll('style').forEach(style => {
+                if (style.textContent.includes('.fw-container')) {
+                    style.remove();
+                }
+            });
+            
+            delete window.FeedbackSnippet;
+            
+            document.querySelector('.fw-overlay')?.remove();
+            document.querySelector('.fw-popup')?.remove();
+            document.querySelector('.fw-button')?.remove();
+            this.routeObserver?.disconnect();
+            this.isOpen = false;
+            
+            console.log("FeedbackSnippet destroyed and cleared from window");
         }
-           
-    });
-    
-    // Reset global reference
-    delete window.FeedbackSnippet;
-    
-    // Existing cleanup...
-    document.querySelector('.fw-overlay')?.remove();
-    document.querySelector('.fw-popup')?.remove();
-    document.querySelector('.fw-button')?.remove();
-    this.routeObserver?.disconnect();
-    this.isOpen = false;
-     if (window.FeedbackSnippet) {
-        delete window.FeedbackSnippet;
-    }
-    
-    console.log("FeedbackSnippet destroyed and cleared from window");
-}
+
         handleRouteChange(source) {
             const newPath = window.location.pathname;
             
@@ -199,7 +184,7 @@
                 // Fallback config
                 this.config = {
                     color: "#667eea",
-                    modeColor: "#ffffff",
+                    bgColor: "#ffffff",
                     position: "bottom right",
                     text: ""
                 };
@@ -229,41 +214,55 @@
         injectStyles() {
             const position = this.config.position.split(" ");
             const rgb = hexToRgb(this.config.color || "#667eea");
-            const bgColor = !this.config.modeColor || this.config.modeColor.trim() === '' 
+            const bgColor = !this.config.bgColor || this.config.bgColor.trim() === '' 
                 ? "#ffffff" 
-                : this.config.modeColor;
+                : this.config.bgColor;
             const textColor = getContrastTextColor(bgColor);
+            const isDarkBg = textColor === '#FFFFFF';
 
             const styles = `
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+                
                 .fw-container {
                     --primary-color: ${this.config.color || "#667eea"};
                     --primary-rgb: ${rgb};
                     --bg-color: ${bgColor};
                     --text-color: ${textColor};
-                    --primary-light: color-mix(in srgb, var(--primary-color) 20%, transparent);
-                    --border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
-                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    --primary-light: rgba(${rgb}, 0.08);
+                    --primary-border: rgba(${rgb}, 0.15);
+                    --primary-hover: rgba(${rgb}, 0.12);
+                    --border-light: ${isDarkBg ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'};
+                    --border-medium: ${isDarkBg ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'};
+                    --surface-1: ${isDarkBg ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'};
+                    --surface-2: ${isDarkBg ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'};
+                    --shadow-clean: 0 2px 8px rgba(0, 0, 0, 0.06);
+                    --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.08);
+                    --shadow-large: 0 8px 32px rgba(0, 0, 0, 0.12);
+                    --gradient-vibrant: linear-gradient(135deg, rgba(${rgb}, 0.2), rgba(${rgb}, 0.35), rgba(${rgb}, 0.15));
+                    --gradient-subtle: linear-gradient(135deg, rgba(${rgb}, 0.08), rgba(${rgb}, 0.12));
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
                 }
-                
-                .fw-container * {
+
+                .fw-container, .fw-container * {
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
                     box-sizing: border-box;
+                    -webkit-font-smoothing: antialiased;
+                    -moz-osx-font-smoothing: grayscale;
                 }
                 
                 .fw-button {
                     position: fixed;
                     ${position[0]}: 24px;
                     ${position[1]}: 24px;
-                    width: 60px;
-                    height: 60px;
-                    background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 80%, #000) 100%);
+                    width: 64px;
+                    height: 64px;
+                    background: linear-gradient(135deg, var(--primary-color), rgba(${rgb}, 0.8));
                     border: none;
-                    border-radius: 50%;
+                    border-radius: 18px;
                     cursor: pointer;
-                    box-shadow: 0 8px 32px color-mix(in srgb, var(--primary-color) 30%, transparent);
+                    box-shadow: var(--shadow-clean);
                     z-index: 999999;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    transition: all 0.2s ease;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -274,19 +273,18 @@
                 }
                 
                 .fw-button:hover {
-                    transform: scale(1.1);
-                    box-shadow: 0 12px 40px color-mix(in srgb, var(--primary-color) 40%, transparent);
+                    transform: translateY(-1px);
+                    box-shadow: var(--shadow-medium);
                 }
                 
-                .fw-button.active {
-                    transform: scale(0.95);
+                .fw-button:active {
+                    transform: translateY(0) scale(0.98);
                 }
                 
-                .fw-button svg,
-                .fw-button i {
+                .fw-button svg {
                     width: 24px;
                     height: 24px;
-                    transition: transform 0.3s ease;
+                    transition: var(--transition);
                 }
                 
                 .fw-overlay {
@@ -295,11 +293,11 @@
                     left: 0;
                     width: 100%;
                     height: 100%;
-                    background: rgba(0, 0, 0, 0.4);
+                    background: rgba(0, 0, 0, 0.3);
                     z-index: 999998;
                     opacity: 0;
                     visibility: hidden;
-                    transition: all 0.3s ease;
+                    transition: var(--transition-smooth);
                     backdrop-filter: blur(8px);
                 }
                 
@@ -312,19 +310,18 @@
                     position: fixed;
                     ${position[0]}: 100px;
                     ${position[1]}: 100px;
-                    width: 380px;
-                    height:540px;
+                    width: 400px;
                     max-width: calc(100vw - 48px);
                     background: var(--bg-color);
                     border-radius: 20px;
-                    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+                    box-shadow: var(--shadow-large);
                     z-index: 999999;
-                    transform: translateY(20px) scale(0.9);
+                    transform: translateY(10px) scale(0.98);
                     opacity: 0;
                     visibility: hidden;
-                    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    transition: all 0.3s ease;
                     overflow: hidden;
-                    border: 2px solid var(--border-color);
+                    border: 1px solid var(--border-light);
                 }
                 
                 .fw-popup.active {
@@ -335,80 +332,96 @@
                 
                 @media (max-width: 480px) {
                     .fw-popup {
-                        ${position[0]}: 24px;
-                        ${position[1]}: 24px;
-                        width: calc(100vw - 48px);
+                        ${position[0]}: 16px;
+                        ${position[1]}: 16px;
+                        width: calc(100vw - 32px);
+                        max-height: calc(100vh - 100px);
                     }
                 }
                 
                 .fw-header {
                     display: flex;
-                    background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 80%, #000) 100%);
+                    background: var(--bg-color);
                     position: relative;
+                    padding: 8px;
+                    border-bottom: 1px solid var(--border-light);
                 }
                 
                 .fw-tab {
                     flex: 1;
-                    padding: 20px 24px;
+                    padding: 12px 20px;
                     background: none;
                     border: none;
                     cursor: pointer;
-                    font-size: 16px;
+                    font-size: 14px;
                     font-weight: 600;
-                    color: rgba(255, 255, 255, 0.7);
-                    transition: all 0.3s ease;
+                    color: rgba(${rgb}, 0.7);
+                    transition: all 0.2s ease;
                     position: relative;
+                    border-radius: 12px;
+                    margin: 0 4px;
+                }
+                
+                .fw-tab:hover {
+                    color: var(--primary-color);
+                    background: var(--primary-light);
                 }
                 
                 .fw-tab.active {
                     color: white;
-                }
-                
-                .fw-tab.active::after {
-                    content: '';
-                    position: absolute;
-                    bottom: 0;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    width: 40px;
-                    height: 3px;
-                    background: white;
-                    border-radius: 3px 3px 0 0;
+                    background: var(--primary-color);
+                    box-shadow: 0 2px 8px rgba(${rgb}, 0.3);
                 }
                 
                 .fw-close {
                     position: absolute;
                     top: 16px;
                     right: 16px;
-                    width: 36px;
-                    height: 36px;
-                    background: rgba(255, 255, 255, 0.1);
-                    border: none;
+                    width: 32px;
+                    height: 32px;
+                    background: var(--surface-1);
+                    border: 1px solid var(--border-light);
                     cursor: pointer;
-                    border-radius: 50%;
+                    border-radius: 8px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     transition: all 0.2s ease;
-                    backdrop-filter: blur(10px);
+                    z-index: 10;
                 }
                 
                 .fw-close:hover {
-                    background: rgba(255, 255, 255, 0.2);
-                    transform: scale(1.1);
+                    background: var(--surface-2);
+                    border-color: var(--border-medium);
+                    transform: scale(1.05);
                 }
                 
                 .fw-close svg {
-                    width: 18px;
-                    height: 18px;
-                    stroke: white;
+                    width: 16px;
+                    height: 16px;
+                    stroke: var(--text-color);
+                    stroke-width: 2;
                 }
                 
                 .fw-content {
-                    padding: 25px;
-                    max-height: 80vh;
-                    overflow-y: scroll;
-    scrollbar-width: none;
+                    padding: 32px 28px 28px;
+                    max-height: 500px;
+                    overflow-y: auto;
+                    scrollbar-width: thin;
+                    scrollbar-color: var(--primary-border) transparent;
+                }
+
+                .fw-content::-webkit-scrollbar {
+                    width: 4px;
+                }
+                
+                .fw-content::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                
+                .fw-content::-webkit-scrollbar-thumb {
+                    background: var(--primary-border);
+                    border-radius: 2px;
                 }
                 
                 .fw-tab-content {
@@ -417,13 +430,13 @@
                 
                 .fw-tab-content.active {
                     display: block;
-                    animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                    animation: fadeInUp 0.3s ease-out;
                 }
                 
                 @keyframes fadeInUp {
                     from {
                         opacity: 0;
-                        transform: translateY(20px);
+                        transform: translateY(16px);
                     }
                     to {
                         opacity: 1;
@@ -431,17 +444,17 @@
                     }
                 }
                 
-                /* Dropdown Styles */
+                /* Enhanced Dropdown Styles */
                 .fw-dropdown {
                     position: relative;
-                    margin-bottom: 24px;
+                    margin-bottom: 28px;
                 }
                 
                 .fw-dropdown-button {
                     width: 100%;
-                    padding: 12px 15px;
-                    background: var(--bg-color);
-                    border: 2px solid #e2e8f0;
+                    padding: 14px 16px;
+                    background: var(--surface-1);
+                    border: 1px solid var(--border-light);
                     border-radius: 12px;
                     cursor: pointer;
                     display: flex;
@@ -450,22 +463,21 @@
                     font-size: 14px;
                     font-weight: 500;
                     color: var(--text-color);
-                    transition: all 0.3s ease;
+                    transition: all 0.2s ease;
+                    position: relative;
                 }
                 
-                .fw-dropdown-button:hover {
-                    border-color: var(--primary-color);
-                    box-shadow: 0 0 0 3px var(--primary-light);
-                }
-                
+                .fw-dropdown-button:hover,
                 .fw-dropdown-button.active {
                     border-color: var(--primary-color);
                     box-shadow: 0 0 0 3px var(--primary-light);
+                    background: var(--surface-2);
                 }
                 
                 .fw-dropdown-arrow {
-                    transition: transform 0.3s ease;
+                    transition: var(--transition);
                     color: #64748b;
+                    font-size: 12px;
                 }
                 
                 .fw-dropdown-arrow.rotated {
@@ -479,26 +491,29 @@
                     right: 0;
                     background: var(--bg-color);
                     border: 2px solid var(--primary-color);
-                    border-radius: 12px;
-                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+                    border-radius: var(--border-radius);
+                    box-shadow: var(--shadow-medium);
                     max-height: 0;
                     overflow: hidden;
-                    transition: max-height 0.3s ease;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                     z-index: 1000;
                 }
                 
                 .fw-dropdown-content.show {
-                    max-height: 300px;
+                    max-height: 280px;
                 }
                 
                 .fw-dropdown-item {
-                    padding: 12px 15px;
+                    padding: 14px 18px;
                     cursor: pointer;
-                    transition: all 0.2s ease;
-                    border-bottom: 1px solid #f1f5f9;
+                    transition: var(--transition);
+                    border-bottom: 1px solid #f8fafc;
                     color: var(--text-color);
                     font-weight: 500;
-                    font-size:14px;
+                    font-size: 14px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
                 }
                 
                 .fw-dropdown-item:last-child {
@@ -516,12 +531,12 @@
                     font-weight: 600;
                 }
                 
-                /* Rating Styles */
+                /* Enhanced Rating Styles */
                 .fw-rating {
                     display: flex;
                     justify-content: space-between;
                     margin-bottom: 24px;
-                    gap: 12px;
+                    gap: 8px;
                 }
                 
                 .fw-rating-option {
@@ -529,36 +544,24 @@
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    height: 54px;
-                    width: 50px;
+                    height: 58px;
                     border-radius: 16px;
                     cursor: pointer;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    border: 2px solid #e2e8f0;
+                    border: none;
                     position: relative;
                     overflow: hidden;
-                }
-                
-                .fw-rating-option::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: linear-gradient(135deg, var(--primary-color), color-mix(in srgb, var(--primary-color) 70%, white));
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                }
-                
-                .fw-rating-option:hover::before {
-                    opacity: 0.1;
+                    background: transparent;
                 }
                 
                 .fw-rating-option:hover {
-                    transform: translateY(-4px) scale(1.05);
-                    border-color: var(--primary-color);
-                    box-shadow: 0 8px 25px var(--primary-light);
+                    background: var(--gradient-vibrant);
+                    transform: translateY(-3px) scale(1.02);
+                }
+                
+                .fw-rating-option:hover img {
+                    filter: grayscale(0) brightness(1.1) saturate(1.2);
+                    transform: scale(1.15);
                 }
                 
                 .fw-rating-option input {
@@ -566,24 +569,25 @@
                 }
                 
                 .fw-rating-option img {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    transition: all 0.3s ease;
+                    width: 34px;
+                    height: 34px;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                     position: relative;
-                    z-index: 1;
+                    z-index: 2;
+                    filter: grayscale(1) brightness(0.3);
                 }
                 
-                .fw-rating-option input:checked + img {
-                    transform: scale(1.3);
-                    filter: drop-shadow(0 4px 8px var(--primary-color));
+                .fw-rating-option.selected {
+                    background: var(--gradient-vibrant);
+                    transform: translateY(-3px) scale(1.02);
                 }
                 
-                .fw-rating-option input:checked + img {
-                    border: 2px solid var(--primary-color);
+                .fw-rating-option.selected img {
+                    filter: grayscale(0) brightness(1.1) saturate(1.2);
+                    transform: scale(1.15);
                 }
                 
-                /* Form Styles */
+                /* Enhanced Form Styles */
                 .fw-form-group {
                     margin-bottom: 24px;
                 }
@@ -591,91 +595,127 @@
                 .fw-input,
                 .fw-textarea {
                     width: 100%;
-                    padding: 10px 13px;
-                    border: 2px solid #e2e8f0;
-                    border-radius: 12px;
-                    font-size: 14px;
+                    padding: 14px 16px;
+                    border: 2px solid var(--border-light);
+                    border-radius: 14px;
+                    font-size: 15px;
                     font-weight: 400;
                     color: var(--text-color);
-                    background: color-mix(in srgb, var(--bg-color) 95%, var(--primary-color));
-                    transition: all 0.3s ease;
+                    background: var(--bg-color);
+                    transition: all 0.2s ease;
                     font-family: inherit;
+                    resize: none;
+                    box-shadow: var(--shadow-clean);
+                }
+                
+                .fw-input::placeholder,
+                .fw-textarea::placeholder {
+                    color: rgba(${rgb}, 0.5);
+                    font-weight: 400;
                 }
                 
                 .fw-input:focus,
                 .fw-textarea:focus {
                     outline: none;
                     border-color: var(--primary-color);
-                    box-shadow: 0 0 0 3px var(--primary-light);
-                    transform: translateY(-2px);
+                    background: var(--surface-1);
                 }
                 
                 .fw-textarea {
                     min-height: 120px;
                     resize: vertical;
+                    line-height: 1.6;
                 }
                 
                 .fw-submit {
                     width: 100%;
-                    padding: 14px 24px;
-                    background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 80%, #000) 100%);
+                    padding: 16px 24px;
+                    background: linear-gradient(135deg, var(--primary-color), rgba(${rgb}, 0.8));
                     color: white;
                     border: none;
-                    border-radius: 12px;
+                    border-radius: 14px;
                     font-size: 16px;
                     font-weight: 600;
                     cursor: pointer;
-                    transition: all 0.3s ease;
+                    transition: all 0.2s ease;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     gap: 12px;
+                    box-shadow: var(--shadow-clean);
                 }
                 
                 .fw-submit:hover {
-                    transform: translateY(-3px);
-                    box-shadow: 0 10px 30px var(--primary-light);
+                    transform: translateY(-2px);
+                    box-shadow: var(--shadow-medium);
                 }
                 
                 .fw-submit:active {
-                    transform: translateY(-1px);
+                    transform: translateY(0);
+                }
+                    background: linear-gradient(135deg, var(--primary-color), rgba(${rgb}, 0.8));
                 }
                 
-                /* Chat Styles */
+                .fw-submit:active {
+                    transform: translateY(0);
+                }
+                
+                .fw-submit:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                    transform: none;
+                }
+                
+                /* Enhanced Chat Styles */
                 .fw-chat {
-                    height: 400px;
+                    height: 420px;
                     display: flex;
                     flex-direction: column;
                 }
                 
                 .fw-chat-messages {
                     flex: 1;
-                      overflow: scroll;
-    scrollbar-width: none;
-                    background: color-mix(in srgb, var(--bg-color) 98%, var(--primary-color));
-                    border-radius: 16px;
-                    margin-bottom: 20px;
+                    padding: 20px;
                     overflow-y: auto;
+                    scrollbar-width: thin;
+                    scrollbar-color: var(--primary-border) transparent;
+                    background: linear-gradient(135deg, rgba(${rgb}, 0.02), rgba(${rgb}, 0.01));
+                    border-radius: var(--border-radius);
+                    margin-bottom: 20px;
                     display: flex;
                     flex-direction: column;
                     gap: 16px;
-                    
+                    border: 1px solid #f1f5f9;
+                }
+
+                .fw-chat-messages::-webkit-scrollbar {
+                    width: 4px;
+                }
+                
+                .fw-chat-messages::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                
+                .fw-chat-messages::-webkit-scrollbar-thumb {
+                    background: var(--primary-border);
+                    border-radius: 2px;
                 }
                 
                 .fw-message {
                     max-width: 85%;
-                    padding: 14px 18px;
-                    border-radius: 20px;
-                    font-size: 15px;
+                    padding: 12px 16px;
+                    border-radius: 18px;
+                    font-size: 14px;
                     line-height: 1.5;
-                    font-weight: 500;
+                    font-weight: 400;
                     animation: messageSlideIn 0.3s ease;
+                    word-wrap: break-word;
                 }
                 
                 @keyframes messageSlideIn {
                     from {
                         opacity: 0;
-                        transform: translateY(10px);
+                        transform: translateY(8px);
                     }
                     to {
                         opacity: 1;
@@ -686,16 +726,18 @@
                 .fw-message.bot {
                     background: white;
                     color: var(--text-color);
-                    border: 2px solid #f1f5f9;
+                    border: 1px solid var(--border-light);
                     align-self: flex-start;
-                    border-radius: 20px 20px 20px 6px;
+                    border-radius: 18px 18px 18px 4px;
+                    box-shadow: var(--shadow-clean);
                 }
                 
                 .fw-message.user {
-                    background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 80%, #000) 100%);
+                    background: linear-gradient(135deg, var(--primary-color), rgba(${rgb}, 0.9));
                     color: white;
                     align-self: flex-end;
-                    border-radius: 20px 20px 6px 20px;
+                    border-radius: 18px 18px 4px 18px;
+                    box-shadow: var(--shadow-clean);
                 }
                 
                 .fw-chat-input-container {
@@ -706,54 +748,105 @@
                 
                 .fw-chat-input {
                     flex: 1;
-                    padding: 14px 20px;
-                    border: 2px solid #e2e8f0;
-                    border-radius: 25px;
+                    padding: 14px 18px;
+                    border: 2px solid var(--border-light);
+                    border-radius: 22px;
                     font-size: 15px;
                     resize: none;
                     max-height: 100px;
-                    min-height: 50px;
-                    transition: all 0.3s ease;
+                    min-height: 48px;
+                    transition: all 0.2s ease;
                     background: var(--bg-color);
                     color: var(--text-color);
-                        overflow: scroll;
-    scrollbar-width: none;
+                    overflow-y: auto;
+                    scrollbar-width: none;
+                    line-height: 1.4;
+                    box-shadow: var(--shadow-clean);
+                }
+
+                .fw-chat-input::-webkit-scrollbar {
+                    display: none;
+                }
+                
+                .fw-chat-input::placeholder {
+                    color: rgba(${rgb}, 0.5);
                 }
                 
                 .fw-chat-input:focus {
                     outline: none;
                     border-color: var(--primary-color);
-                    box-shadow: 0 0 0 3px var(--primary-light);
+                    background: var(--surface-1);
                 }
                 
                 .fw-chat-send {
-                    width: 50px;
-                    height: 50px;
-                    background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 80%, #000) 100%);
+                    width: 48px;
+                    height: 48px;
+                    background: linear-gradient(135deg, var(--primary-color), rgba(${rgb}, 0.8));
                     border: none;
-                    border-radius: 50%;
+                    border-radius: 16px;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 4px 15px var(--primary-light);
+                    transition: all 0.2s ease;
+                    box-shadow: var(--shadow-clean);
                 }
                 
                 .fw-chat-send:hover {
-                    transform: scale(1.1);
-                    box-shadow: 0 6px 20px var(--primary-light);
+                    transform: translateY(-1px) scale(1.02);
+                    box-shadow: var(--shadow-medium);
+                }
+                
+                .fw-chat-send:active {
+                    transform: translateY(0) scale(0.98);
                 }
                 
                 .fw-chat-send svg {
-                    width: 20px;
-                    height: 20px;
+                    width: 18px;
+                    height: 18px;
                     fill: white;
                 }
 
                 .fw-loader {
                     opacity: 0.6;
                     font-style: italic;
+                }
+
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                
+                /* Mobile optimizations */
+                @media (max-width: 480px) {
+                    .fw-content {
+                        padding: 24px 20px 20px;
+                    }
+                    
+                    .fw-rating {
+                        gap: 6px;
+                    }
+                    
+                    .fw-rating-option {
+                        height: 56px;
+                    }
+                    
+                    .fw-rating-option img {
+                        width: 32px;
+                        height: 32px;
+                    }
+                    
+                    .fw-button {
+                        width: 56px;
+                        height: 56px;
+                        ${position[0]}: 20px;
+                        ${position[1]}: 20px;
+                    }
+                    
+                    .fw-button svg {
+                        width: 20px;
+                        height: 20px;
+                    }
                 }
             `;
             
@@ -771,8 +864,8 @@
             if (this.config.text) {
                 this.btnContent = this.config.text;
             } else {
-                this.btnContent = ` <svg viewBox="0 0 24 24">
-                    <path fill="white" d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                this.btnContent = `<svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
                 </svg>`;
             }
             
@@ -787,15 +880,12 @@
             this.popup = document.createElement('div');
             this.popup.className = 'fw-popup fw-container';
             this.popup.innerHTML = `
-                <button class="fw-close">
-                    <svg viewBox="0 0 24 24" fill="none">
-                        <path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </button>
+                <div class="fw-close">
+                </div>
                 
                 <div class="fw-header">
                     <button class="fw-tab active" data-tab="feedback">Feedback</button>
-                    <button class="fw-tab" data-tab="chat">Chat</button>
+                    <button class="fw-tab" data-tab="chat">Chatbot</button>
                 </div>
                 
                 <div class="fw-content">
@@ -817,11 +907,11 @@
                         <div class="fw-rating">
                             <label class="fw-rating-option">
                                 <input type="radio" name="rating" value="1">
-                                <img src="${CONFIG.BASE_API}/images/unhappy.png" alt="Unhappy">
+                                <img src="${CONFIG.BASE_API}/images/unhappy.png" alt="Very Unhappy">
                             </label>
                             <label class="fw-rating-option">
                                 <input type="radio" name="rating" value="2">
-                                <img src="${CONFIG.BASE_API}/images/upset.png" alt="Upset">
+                                <img src="${CONFIG.BASE_API}/images/upset.png" alt="Unhappy">
                             </label>
                             <label class="fw-rating-option">
                                 <input type="radio" name="rating" value="3">
@@ -833,16 +923,16 @@
                             </label>
                             <label class="fw-rating-option">
                                 <input type="radio" name="rating" value="5">
-                                <img src="${CONFIG.BASE_API}/images/love.png" alt="Love">
+                                <img src="${CONFIG.BASE_API}/images/love.png" alt="Very Happy">
                             </label>
                         </div>
                         
                         <form class="fw-form">
                             <div class="fw-form-group">
-                                <input type="email" class="fw-input" name="email" placeholder="Your email (e.g., 'user@example.comz')" required>
+                                <input type="email" class="fw-input" name="email" placeholder="Your email address" required>
                             </div>
                             <div class="fw-form-group">
-                                <textarea class="fw-textarea" name="description" placeholder="Describe your feedback in detail..." required></textarea>
+                                <textarea class="fw-textarea" name="description" placeholder="Tell us more about your experience..." required></textarea>
                             </div>
                             <button type="submit" class="fw-submit">
                                 <span>Send Feedback</span>
@@ -855,12 +945,12 @@
                         <div class="fw-chat">
                             <div class="fw-chat-messages">
                                 <div class="fw-message bot">
-                                    Hello there! How can I help you today? 👋
+                                    Hello! I'm here to help you with any questions you might have. How can I assist you today? 👋
                                 </div>
                             </div>
                             <div class="fw-chat-input-container">
-                                <textarea class="fw-chat-input" placeholder="Ask your questions..." rows="1"></textarea>
-                                <button class="fw-chat-send">
+                                <textarea class="fw-chat-input" placeholder="Type your message..." rows="1"></textarea>
+                                <button class="fw-chat-send" aria-label="Send message">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
                                     </svg>
@@ -894,6 +984,11 @@
             // Dropdown functionality
             this.setupDropdown();
             
+            // Rating selection
+            this.popup.querySelectorAll('.fw-rating-option').forEach(option => {
+                option.addEventListener('click', () => this.selectRating(option));
+            });
+            
             // Form submission
             this.popup.querySelector('.fw-form').addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -905,6 +1000,13 @@
             
             // Prevent popup close when clicking inside
             this.popup.addEventListener('click', (e) => e.stopPropagation());
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && this.isOpen) {
+                    this.closePopup();
+                }
+            });
         }
 
         setupDropdown() {
@@ -975,6 +1077,19 @@
             };
         }
 
+        selectRating(option) {
+            // Remove previous selection
+            this.popup.querySelectorAll('.fw-rating-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selection to clicked option
+            option.classList.add('selected');
+            this.selectedRating = option.querySelector('input').value;
+            
+            console.log('Selected rating:', this.selectedRating);
+        }
+
         setupChat() {
             const chatInput = this.popup.querySelector('.fw-chat-input');
             const chatSend = this.popup.querySelector('.fw-chat-send');
@@ -990,7 +1105,7 @@
                 chatInput.style.height = 'auto';
 
                 // Add loading message
-                const loadingMsg = this.addChatMessage('Wait a moment...', 'bot');
+                const loadingMsg = this.addChatMessage('Thinking...', 'bot');
                 loadingMsg.classList.add('fw-loader');
 
                 // Send to API
@@ -1012,7 +1127,7 @@
                 .catch(error => {
                     console.error('Error fetching LLM response:', error);
                     loadingMsg.remove();
-                    this.addChatMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                    this.addChatMessage('Sorry, I encountered an error. Please try again later.', 'bot');
                 });
             };
 
@@ -1034,6 +1149,20 @@
             });
         }
 
+        switchTab(tabName) {
+            // Update tab buttons
+            this.popup.querySelectorAll('.fw-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.tab === tabName);
+            });
+
+            // Update tab content
+            this.popup.querySelectorAll('.fw-tab-content').forEach(content => {
+                content.classList.toggle('active', content.dataset.content === tabName);
+            });
+
+            this.activeTab = tabName;
+        }
+
         togglePopup() {
             if (this.isOpen) {
                 this.closePopup();
@@ -1049,10 +1178,11 @@
             this.popup.classList.add('active');
             document.body.style.overflow = 'hidden';
             
-            // Update button icon
+            // Update button icon to close icon
             this.button.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-</svg>`;
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>`;
+            
             if (window.lucide) {
                 lucide.createIcons();
             }
@@ -1072,27 +1202,13 @@
             }
         }
 
-        switchTab(tabName) {
-            // Update tab buttons
-            this.popup.querySelectorAll('.fw-tab').forEach(tab => {
-                tab.classList.toggle('active', tab.dataset.tab === tabName);
-            });
-
-            // Update tab content
-            this.popup.querySelectorAll('.fw-tab-content').forEach(content => {
-                content.classList.toggle('active', content.dataset.content === tabName);
-            });
-
-            this.activeTab = tabName;
-        }
-
         handleFeedbackSubmit(e) {
             const email = this.popup.querySelector("input[name='email']").value;
             const description = this.popup.querySelector("textarea[name='description']").value;
-            const rating = this.popup.querySelector("input[name='rating']:checked")?.value;
+            const rating = this.selectedRating;
 
             if (!this.selectedFeedbackType || !email || !description || !rating) {
-                this.showNotification('Please fill in all fields and select a feedback type.', 'error');
+                this.showNotification('Please fill in all required fields and make your selections.', 'error');
                 return;
             }
 
@@ -1130,7 +1246,7 @@
                 submitButton.innerHTML = `
                     <span>Sent Successfully! ✓</span>
                 `;
-                submitButton.style.background = '#10b981';
+                submitButton.style.background = 'linear-gradient(135deg, #10b981, #059669)';
                 
                 // Reset form after delay
                 setTimeout(() => {
@@ -1190,8 +1306,9 @@
             this.popup.querySelector("textarea[name='description']").value = '';
             
             // Reset rating selection
-            this.popup.querySelectorAll("input[name='rating']").forEach(radio => {
-                radio.checked = false;
+            this.selectedRating = null;
+            this.popup.querySelectorAll('.fw-rating-option').forEach(option => {
+                option.classList.remove('selected');
             });
             
             // Reset dropdown
@@ -1203,46 +1320,65 @@
         }
 
         showNotification(message, type = 'info') {
-            // Simple notification system - you can enhance this
             const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 16px 24px;
-                background: ${type === 'error' ? '#ef4444' : '#10b981'};
+                top: 24px;
+                right: 24px;
+                padding: 16px 20px;
+                background: ${type === 'error' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #10b981, #059669)'};
                 color: white;
                 border-radius: 12px;
-                font-weight: 600;
+                font-weight: 500;
+                font-size: 14px;
                 z-index: 9999999;
-                animation: slideIn 0.3s ease;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+                animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                max-width: 320px;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             `;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(100px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
             notification.textContent = message;
             document.body.appendChild(notification);
 
             setTimeout(() => {
-                notification.remove();
-            }, 4000);
+                notification.style.animation = 'slideInRight 0.3s reverse';
+                setTimeout(() => {
+                    notification.remove();
+                    style.remove();
+                }, 300);
+            }, 3500);
         }
     }
 
     // Initialize widget
-// At the bottom, replace the initialization code with:
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.FeedbackSnippet) {
+                window.FeedbackSnippet.destroy();
+            }
+            window.FeedbackSnippet = new FeedbackSnippet();
+        });
+    } else {
         if (window.FeedbackSnippet) {
             window.FeedbackSnippet.destroy();
         }
         window.FeedbackSnippet = new FeedbackSnippet();
-    });
-} else {
-    if (window.FeedbackSnippet) {
-        window.FeedbackSnippet.destroy();
     }
-    window.FeedbackSnippet = new FeedbackSnippet();
-}
 
 })();
-    </script>
-</body>
-</html>

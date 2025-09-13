@@ -103,7 +103,7 @@ const Overview = () => {
         </div>
 
         {/* Interactive Modules */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid font-sans lg:grid-cols-3 gap-8 mb-16">
           {/* Module 1: Feedback Widget Demo */}
           <Card className="border-2 hover:border-purple-200 bg-white  transition-all duration-300 hover:shadow-lg">
             <CardHeader className="text-center">
@@ -150,7 +150,7 @@ const Overview = () => {
           </Card>
 
           {/* Module 2: Guided Chat + Feedback */}
-          <Card className="border-2 hover:border-blue-200 bg-white transition-all duration-300 hover:shadow-lg">
+          <Card className="border-2 font-sans hover:border-blue-200 bg-white transition-all duration-300 hover:shadow-lg">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageSquare className="w-8 h-8 text-white" />
@@ -219,7 +219,7 @@ const Overview = () => {
           </Card>
 
           {/* Module 3: Advanced AI Guidance */}
-          <Card className="border-2 border-dashed border-gray-300 hover:border-orange-300 transition-all duration-300 relative overflow-hidden">
+          <Card className="border-2 font-sans border-dashed border-gray-300 hover:border-orange-300 transition-all duration-300 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-yellow-50 opacity-50"></div>
             <CardHeader className="text-center relative z-10">
               <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 opacity-60">

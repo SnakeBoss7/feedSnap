@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { FileText, Link2Icon, Mail, MessageSquare, Shield } from "lucide-react";
+import { FileText, Link2Icon, LucideMailOpen, Mail, MailOpen, MessageSquare, Shield } from "lucide-react";
 export const Footer = () => {
   return (
-  <footer className="bg-gray-900 text-white py-12 px-4">
+  <footer className="font-sans bg-gray-900 text-white py-12 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             {/* Brand */}
@@ -73,10 +73,16 @@ export const Footer = () => {
             </p>
             <div className="flex items-center gap-4 mt-4 md:mt-0">
               <a href="mailto:support@feedbackhub.com" className="text-gray-400 hover:text-white transition-colors">
-                <Mail className="w-4 h-4" />
+<div className="flex items-center gap-4">
+        <div className="group relative w-4 h-4">
+          <Mail className="w-4 h-4 transition-all duration-200 group-hover:scale-0 group-hover:opacity-0" />
+          <MailOpen className="w-4 h-4 absolute top-0 left-0 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200" />
+        </div>
+      </div>
               </a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
                 <Link2Icon className="w-4 h-4" />
+   
               </a>
             </div>
           </div>

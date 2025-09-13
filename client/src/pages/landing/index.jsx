@@ -29,7 +29,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto text-center max-w-4xl">
-          <Badge className="mb-6 bg-purple-100 text-purple-700 hover:bg-purple-100">
+          <Badge className="my-6 bg-purple-100 text-purple-700 hover:bg-purple-100">
             ✨ Collect Customer Feedback Effortlessly
           </Badge>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-purple-900 to-blue-900 bg-clip-text text-transparent">

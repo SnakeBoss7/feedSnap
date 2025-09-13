@@ -17,7 +17,7 @@ const app = express();
 connectDB();
 
 app.use(cors({
- origin: ['http://localhost:3000','http://10.227.205.112:3000'],
+ origin: ['http://localhost:3000','http://10.157.84.112:3000'],
   credentials: true,
 }));
 app.use(express.json());

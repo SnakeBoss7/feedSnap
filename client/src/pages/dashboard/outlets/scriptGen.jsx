@@ -17,6 +17,7 @@ import InstructionsPanel from "../../../components/feedbackUi/instruction";
 import MotivationalQuote from "../../../components/feedbackUi/motive";
 
 let apiUrl = process.env.REACT_APP_API_URL;
+let frontendApiUrl = process.env.REACT_APP_API_FRONTEND_URL;
 
 export const ScriptGen = () => {
   //widget color
@@ -72,6 +73,8 @@ export const ScriptGen = () => {
 
   const colorChange = (e) => {
     setUrlsettings((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    console.log(e.target.name);
+    console.log(e.target.value);
   };
 
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -123,7 +126,7 @@ export const ScriptGen = () => {
       {
         setShowDemo(true);
          let script = document.createElement('script');
-      script.src = "http://localhost:5000/integrated.js?webUrl=http://localhost:3000";
+      script.src = `${apiUrl}/integrated.js?webUrl=${frontendApiUrl}`;
       console.log("Script element created:", script);
       document.body.appendChild(script);
       }
@@ -140,7 +143,7 @@ const genDemo = async (e) => {
     }
 
     // THEN: Remove any remaining DOM elements
-    ["script[src^='http://localhost:5000/integrated.js']",
+    [`script[src^='${apiUrl}integrated.js']`,
      ".fw-overlay",
      ".fw-popup", 
      ".fw-button"
@@ -164,7 +167,7 @@ const genDemo = async (e) => {
 
     // Add cache-busting param
     const script = document.createElement("script");
-    script.src = `http://localhost:5000/integrated.js?webUrl=http://localhost:3000&t=${Date.now()}`;
+    script.src = `${apiUrl}/integrated.js?webUrl=${frontendApiUrl}&t=${Date.now()}`;
     script.async = true;
     document.body.appendChild(script);
 

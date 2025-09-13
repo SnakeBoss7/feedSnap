@@ -13,9 +13,11 @@ const widgetConfigProvider =async(req,res)=>
                 return;
             }
             console.log(web);
-        const {color,text,position,modeColor} = web;
-        console.log(color,text,position,modeColor);
-        res.json({color,text,position,modeColor});
+            console.log(web.bgColor);
+
+        const {color,widgetText,position,bgColor} = web;
+        console.log(color,widgetText,position,bgColor);
+        res.json({color,widgetText,position,bgColor});
 
         
     }

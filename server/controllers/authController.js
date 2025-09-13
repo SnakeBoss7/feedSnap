@@ -9,6 +9,20 @@ const cookieConfig = {
             sameSite: 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         };
+
+const getUserData = async(req,res)=>
+    {
+try {
+            let user = req.user;
+        console.log({user});
+        const userData = await User.findOne({_id:user.id})
+        console.log({userData});
+        return res.status(200).json({userData});
+    } catch (error) {
+    return res.status(400).json({mess:error});
+    
+}
+    }
 const firebaseLogin = async (req, res) => {
     const { idToken } = req.body;
     
@@ -21,21 +35,24 @@ const firebaseLogin = async (req, res) => {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const { email, name, uid, displayName } = decodedToken;
         const finalName = displayName || name;
+         const userRecord = await admin.auth().getUser(uid);
+        const photoURL = userRecord.photoURL || null;
         console.log(email)
         let user = await User.findOne({ email: email });
 
         if (!user) {
-            user = await User.create({ email, name: finalName, firebaseId: uid });
+            user = await User.create({ email, name: finalName, firebaseId: uid,profile:photoURL });
         }
         user.firebaseId=uid;
         user.name = finalName;
+        user.profile= photoURL
         await user.save();
         const token = tokenGen(user);
         
         // Fixed cookie configuration
         res.cookie('token', token, cookieConfig);
         
-        res.status(200).json({ user, token });
+        return res.status(200).json({ userData:user, token });
         
     } catch (err) {
         console.log('Firebase login error:', err);
@@ -60,7 +77,7 @@ const registerUser = async(req,res)=>
                   const token = tokenGen(existingUser);
         // Set HTTP-only cookie
         res.cookie('token', token, cookieConfig);
-          return res.status(200).json({message:'working'});
+          return res.status(200).json({message:'working',userData:userData});
                 }
                 
             return res.status(409).json({ 
@@ -85,11 +102,11 @@ const registerUser = async(req,res)=>
 
         // Set HTTP-only cookie
         res.cookie('token', token, cookieConfig);
+        return res.status(200).json({message:'working',userData:savedUser});
     } catch (err) {
         console.log(err);
         return res.status(401).json({ error: 'err' });
     }
-    return res.status(200).json({message:'working'});
 }
 const logIn = async(req,res)=>
     {
@@ -108,7 +125,7 @@ const logIn = async(req,res)=>
             {
                 let token = tokenGen(existingUser);
                     res.cookie('token', token, cookieConfig);
-                      return res.status(200).json({mess:'good to go'});
+                      return res.status(200).json({mess:'good to go',userData:existingUser});
             }
             else
                 {
@@ -120,4 +137,4 @@ const logIn = async(req,res)=>
     }
 }
 
-module.exports = { firebaseLogin,registerUser,logIn };
+module.exports = { firebaseLogin,registerUser,logIn,getUserData };

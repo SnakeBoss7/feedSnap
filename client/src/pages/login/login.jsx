@@ -39,6 +39,7 @@ export const Login = () => {
       );
       console.log("Login success", res);
       navigate("/dashboard");
+      localStorage.setItem('UserData',JSON.stringify(res.data.userData));
     } catch (err) {
         console.log(err);
       console.log("login failed", err);
@@ -58,6 +59,7 @@ const handleLogIn = async (e) => {
       console.log("Login success", res);
                       // setHappening(res.data?.message || 'done yes yes');
       navigate("/dashboard");
+      localStorage.setItem('UserData',JSON.stringify(res.data.userData));
     } catch (err) {
         console.log("login failed", err);//  setHappening(JSON.stringify(err, null, 2));
         setMess(err.response?.data?.mess);

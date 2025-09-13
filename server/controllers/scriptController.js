@@ -4,7 +4,7 @@ const scriptCreate = async (req, res) => {
   if (!req.user) {
     res.status(400).json({ mess: "user not found" });
   }
-  const { webUrl, position, color, text } = req.body.settings;
+  const { webUrl, position, color, text,bgColor } = req.body.settings;
 
   let webdata = await webData.findOne({ webUrl: webUrl });
   // console.log(process.env.SERVER);
@@ -15,6 +15,7 @@ const scriptCreate = async (req, res) => {
       color,
       position,
       text,
+      bgColor,
       owner: req.user.id,
     });
     let scriptInjection = `<script src="${process.env.SERVER}/script.js?webUrl=${webUrl}"></script>`;
@@ -31,8 +32,8 @@ const scriptDemo = async (req, res) => {
   if (!req.user) {
     res.status(400).json({ mess: "user not found" });
   }
-  const { position, color, text } = req.body.settings;
-
+  const { position, color, text,bgColor } = req.body.settings;
+  console.log({bgColor})
   let webdata = await webData.findOne({ webUrl: process.env.FRONTEND });
   if (!webdata) {
     console.log("new data created");
@@ -41,6 +42,7 @@ const scriptDemo = async (req, res) => {
       color,
       position,
       text,
+      bgColor,
       owner: req.user.id,
     });
     return res
@@ -50,7 +52,8 @@ const scriptDemo = async (req, res) => {
     console.log('hers the position',position);
     webdata.color = color;
     webdata.position = position;
-    webdata.text = text;
+    webdata.widgetText = text;
+    webdata.bgColor = bgColor;
 
     await webdata.save();
     return res.status(200).json({ mess: 'updated' });
