@@ -15,7 +15,7 @@ root.render(
     <SidebarContextprovider>
       <App />
     </SidebarContextprovider>
-  </UserProvider>
-  // </React.StrictMode>  ← Comment this out
+   </UserProvider>
+  // {/* </React.StrictMode>  ← Comment this out */}
 );
 reportWebVitals();

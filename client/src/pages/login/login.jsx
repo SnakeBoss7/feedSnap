@@ -15,6 +15,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { useState } from "react";
 import googlesign from "../../img/google.png";
+import { useUserContext } from "../../context/userDataContext";
 const apiUrl = process.env.REACT_APP_API_URL;
 
 export const Login = () => {
@@ -22,7 +23,7 @@ export const Login = () => {
   const [mess,setMess] = useState(null);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
+   const { refreshUserData } = useUserContext();
   const navigate = useNavigate();
   const handleGoogleLogin = async () => {
     try {
@@ -40,6 +41,7 @@ export const Login = () => {
       console.log("Login success", res);
       navigate("/dashboard");
       localStorage.setItem('UserData',JSON.stringify(res.data.userData));
+      refreshUserData();
     } catch (err) {
         console.log(err);
       console.log("login failed", err);
@@ -60,6 +62,7 @@ const handleLogIn = async (e) => {
                       // setHappening(res.data?.message || 'done yes yes');
       navigate("/dashboard");
       localStorage.setItem('UserData',JSON.stringify(res.data.userData));
+      refreshUserData();
     } catch (err) {
         console.log("login failed", err);//  setHappening(JSON.stringify(err, null, 2));
         setMess(err.response?.data?.mess);

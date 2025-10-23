@@ -1,16 +1,20 @@
 import { motion } from "framer-motion";
+import { SimpleHeader } from "../header/header";
 
 const AnalyticsLoader = ({ isVisible = true, message }) => {
   if (!isVisible) return null;
 
   return (
+    <div className="flex flex-col">
+           <SimpleHeader color="#E94057" />
+
     <motion.div
-      initial={{ opacity: 0 }}
+      initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md"
-    >
+      className="fixed inset-0 z-50 flex items-center justify-center "
+      >
       {/* Animated background glow */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -40,15 +44,15 @@ const AnalyticsLoader = ({ isVisible = true, message }) => {
               ease: "linear",
             }}
             className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary/60 border-r-primary/30"
-          />
+            />
 
           {/* Inner morphing shapes */}
           <div className="absolute inset-2">
             {[0, 1, 2].map((index) => (
               <motion.div
-                key={index}
-                animate={{
-                  scale: [0.8, 1.2, 0.8],
+              key={index}
+              animate={{
+                scale: [0.8, 1.2, 0.8],
                   rotate: [0, 120, 240, 360],
                   borderRadius: ["20%", "50%", "20%"],
                 }}
@@ -62,8 +66,8 @@ const AnalyticsLoader = ({ isVisible = true, message }) => {
                 style={{
                   clipPath: `polygon(50% 0%, ${100 - index * 20}% 100%, ${index * 20}% 100%)`,
                 }}
-              />
-            ))}
+                />
+              ))}
           </div>
 
           {/* Center pulsing dot */}
@@ -78,21 +82,21 @@ const AnalyticsLoader = ({ isVisible = true, message }) => {
               ease: "easeInOut",
             }}
             className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary shadow-lg shadow-primary/50"
-          />
+            />
 
           {/* Orbiting particles */}
           {[0, 1, 2, 3].map((index) => (
             <motion.div
-              key={`particle-${index}`}
-              animate={{
-                rotate: 360,
-              }}
-              transition={{
-                duration: 3 + index * 0.5,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              className="absolute inset-0"
+            key={`particle-${index}`}
+            animate={{
+              rotate: 360,
+            }}
+            transition={{
+              duration: 3 + index * 0.5,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="absolute inset-0"
             >
               <motion.div
                 animate={{
@@ -111,7 +115,7 @@ const AnalyticsLoader = ({ isVisible = true, message }) => {
                   left: "50%",
                   transform: "translateX(-50%)",
                 }}
-              />
+                />
             </motion.div>
           ))}
         </div>
@@ -119,10 +123,10 @@ const AnalyticsLoader = ({ isVisible = true, message }) => {
         {/* Loading message */}
         {message && (
           <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-sm font-medium text-muted-foreground"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-sm font-medium text-muted-foreground"
           >
             {message}
           </motion.p>
@@ -132,14 +136,14 @@ const AnalyticsLoader = ({ isVisible = true, message }) => {
         <div className="flex gap-1">
           {[0, 1, 2].map((index) => (
             <motion.div
-              key={`dot-${index}`}
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.5, 1, 0.5],
-              }}
-              transition={{
-                duration: 1,
-                repeat: Infinity,
+            key={`dot-${index}`}
+            animate={{
+              scale: [1, 1.5, 1],
+              opacity: [0.5, 1, 0.5],
+            }}
+            transition={{
+              duration: 1,
+              repeat: Infinity,
                 delay: index * 0.2,
                 ease: "easeInOut",
               }}
@@ -149,6 +153,7 @@ const AnalyticsLoader = ({ isVisible = true, message }) => {
         </div>
       </div>
     </motion.div>
+              </div>
   );
 };
 

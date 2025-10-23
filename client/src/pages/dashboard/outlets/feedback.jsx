@@ -184,37 +184,46 @@ export const Feedback = () => {
     }
   }, [state.isLoading]);
 
-  const handleInput = async () => {
-    if (userPrompt.trim() === "") return;
-    
-    // Add user message
-    setAiResponse((prev) => [...prev, { role: "user", content: userPrompt }]);
-    setUserPrompt("");
-    setIsLoading(true);
-    
-    // Scroll immediately after adding user message
-    setTimeout(scrollToBottomContainer, 100);
-    
-    try {
-      let aiRes = await axios.post(`${apiUrl}/api/llm/askAI`, {
-        aiResponse,
-        userPrompt,
-      });
-      console.log(aiRes.data);
-      setAiResponse((prev) => [
-        ...prev,
-        { role: "assistant", content: aiRes.data.response },
-      ]);
-    } catch (error) {
-      console.log(error);
-      setAiResponse((prev) => [
-        ...prev,
-        { role: "assistant", content: "Sorry, I encountered an error. Please try again." },
-      ]);
-    }
-    setIsLoading(false);
-  };
+ const handleInput = async () => {
+  if (userPrompt.trim() === "") return;
 
+  // Add user message
+  setAiResponse((prev) => [...prev, { role: "user", content: userPrompt }]);
+  setUserPrompt("");
+  setIsLoading(true);
+  console.log(state?.data);
+
+  // Scroll immediately after adding user message
+  setTimeout(scrollToBottomContainer, 100);
+
+  // Filter and optimize data to reduce token size
+  const optimizedData = state?.data?.map(item => ({
+    title: item.title,
+    desc: item.description?.substring(0, 100), // Limit description to 100 chars
+    url: item.webUrl?.replace('http://localhost:3000', 'localhost') // Shorten URL
+  })) || [];
+
+  try {
+    let aiRes = await axios.post(`${apiUrl}/api/llm/askAI`, {
+      aiResponse,
+      userPrompt,
+      feedbackData: optimizedData // Add the filtered data
+    });
+    
+    console.log(aiRes.data.response.content);
+    setAiResponse((prev) => [
+      ...prev,
+      { role: "assistant", content: aiRes.data?.response?.User_response },
+    ]);
+  } catch (error) {
+    console.log(error);
+    setAiResponse((prev) => [
+      ...prev,
+      { role: "assistant", content: "Sorry, I encountered an error. Please try again." },
+    ]);
+  }
+  setIsLoading(false);
+};
   if (state.isLoading) {
     return (
       <div className="h-full w-full font-sans flex items-center justify-center">
@@ -288,7 +297,7 @@ export const Feedback = () => {
             </div>
             
             <div className="w-full flex flex-col py-5 px-2 border border-black rounded-2xl mt-auto lg:mb-0 mb-10">
-              <div className="flex w-full items-end ">
+              <div className="flex w-full items-end   ">
                 <textarea
                   value={userPrompt}
                   onChange={(e) => setUserPrompt(e.target.value)}
@@ -303,7 +312,7 @@ export const Feedback = () => {
                     }
                   }}
                   placeholder="Ask here"
-                  className="w-full border-0 outline-0 bg-transparent  text-black resize-none rounded-md"
+                  className="w-full border-0  max-h-[100px] overflow-y-scroll scrollbar-hide outline-0 bg-transparent  text-black resize-none rounded-md"
                   disabled={isLoading}
                 />
                 <LucideArrowUp 

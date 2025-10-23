@@ -15,6 +15,7 @@ import { Button } from "../../components/ui/button";
 import { useState } from "react";
 import googlesign from "../../img/google.png";
 import RoundLoader from "../../components/loader/roundLoader";
+import { useUserContext } from "../../context/userDataContext";
 const apiUrl = process.env.REACT_APP_API_URL;
 
 export const SignIn = () => {
@@ -24,6 +25,7 @@ export const SignIn = () => {
     password: "",
     confirmPassword: "",
   });
+   const { refreshUserData } = useUserContext();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(0);
   const [mess, setMess] = useState(null);
@@ -55,6 +57,7 @@ export const SignIn = () => {
       console.log("Login success", res);
       navigate("/dashboard");
       setLoading(false);
+      refreshUserData();
     } catch (err) {
       setLoading(false);
       console.log("login failed", err);
@@ -72,6 +75,7 @@ export const SignIn = () => {
       setLoading(false);
       navigate("/dashboard");
       localStorage.setItem('UserData',JSON.stringify(res.data.userData));
+            refreshUserData();
     } catch (err) {
       console.log("login failed", err);
       setLoading(false);

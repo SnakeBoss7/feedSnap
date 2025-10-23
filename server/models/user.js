@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const { route } = require("../routes/scriptRoute");
 const UserSchema = mongoose.Schema({
   name: String,
   profile:String,

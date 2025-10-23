@@ -1,10 +1,9 @@
-// context/userContext.js
+// context/userDataContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
 const UserContext = createContext();
 
-// Custom hook for using user context
 export const useUserContext = () => {
   const context = useContext(UserContext);
   if (!context) {
@@ -13,7 +12,6 @@ export const useUserContext = () => {
   return context;
 };
 
-// User Provider Component
 export const UserProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,91 +19,113 @@ export const UserProvider = ({ children }) => {
 
   const apiUrl = process.env.REACT_APP_API_URL;
 
-  // Function to fetch user data
+  // Load from localStorage immediately
+  const loadFromStorage = () => {
+    try {
+      const stored = localStorage.getItem('UserData');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && (parsed.name || parsed.username)) {
+          setUserData(parsed);
+          return parsed;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load from storage:', err);
+      localStorage.removeItem('UserData');
+    }
+    return null;
+  };
+
+  // Save to localStorage
+  const saveToStorage = (data) => {
+    try {
+      if (data && (data.name || data.username)) {
+        localStorage.setItem('UserData', JSON.stringify(data));
+      }
+    } catch (err) {
+      console.warn('Failed to save to storage:', err);
+    }
+  };
+
+  // Fetch from API
   const fetchUserData = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // First, try to load from localStorage for immediate UI feedback
-      const cachedData = localStorage.getItem('UserData');
-      if (cachedData) {
-        try {
-          const parsed = JSON.parse(cachedData);
-          if (parsed && parsed.name) { // Basic validation
-            setUserData(parsed);
-          }
-        } catch (parseError) {
-          console.warn('Invalid cached user data, removing from localStorage');
-          localStorage.removeItem('UserData');
-        }
-      }
-
-      // Then fetch fresh data from API
       const response = await axios.get(`${apiUrl}/api/auth/getData`, {
         withCredentials: true,
-        timeout: 10000, // 10 second timeout
+        timeout: 10000,
       });
 
       const newUserData = response.data?.userData;
       
-      if (newUserData) {
+      if (newUserData && (newUserData.name || newUserData.username)) {
         setUserData(newUserData);
-        localStorage.setItem('UserData', JSON.stringify(newUserData));
+        saveToStorage(newUserData);
+        return newUserData;
       } else {
-        throw new Error('No user data received from API');
+        throw new Error('Invalid user data received');
       }
-
     } catch (err) {
       console.error('Failed to fetch user data:', err);
-      setError(err);
+      setError(err.message);
       
-      // If API fails but we have cached data, keep using cached data
-      if (!userData) {
-        const fallbackData = localStorage.getItem('UserData');
-        if (fallbackData) {
-          try {
-            setUserData(JSON.parse(fallbackData));
-          } catch (parseError) {
-            console.error('Cached data is also invalid');
-          }
-        }
+      // If API fails, keep using cached data if available
+      const cached = loadFromStorage();
+      if (!cached) {
+        setUserData(null);
       }
+      
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Function to update user data
+  // Update user data
   const updateUserData = (newData) => {
-    setUserData(prevData => {
-      const updatedData = { ...prevData, ...newData };
-      localStorage.setItem('UserData', JSON.stringify(updatedData));
-      return updatedData;
-    });
+    const updated = { ...userData, ...newData };
+    setUserData(updated);
+    saveToStorage(updated);
   };
 
-  // Function to clear user data (for logout)
+  // Clear user data
   const clearUserData = () => {
     setUserData(null);
-    localStorage.removeItem('UserData');
     setError(null);
+    localStorage.removeItem('UserData');
   };
 
-  // Initial data fetch
+  // Force refresh user data (for after login)
+  const refreshUserData = () => {
+    return fetchUserData();
+  };
+
+  // Initial load
   useEffect(() => {
-    fetchUserData();
+    // Load from storage first for immediate UI
+    const cached = loadFromStorage();
+    
+    // Then fetch from API
+    fetchUserData().catch(() => {
+      // If fetch fails and no cached data, we're already handling it above
+    });
   }, []);
 
-  // Listen for storage changes from other tabs
+  // Listen for storage changes (other tabs)
   useEffect(() => {
-    const handleStorageChange = (event) => {
-      if (event.key === 'UserData') {
-        if (event.newValue) {
+    const handleStorageChange = (e) => {
+      if (e.key === 'UserData') {
+        if (e.newValue) {
           try {
-            setUserData(JSON.parse(event.newValue));
-          } catch (error) {
-            console.error('Invalid user data from storage change:', error);
+            const newData = JSON.parse(e.newValue);
+            if (newData && (newData.name || newData.username)) {
+              setUserData(newData);
+            }
+          } catch (err) {
+            console.warn('Invalid storage data:', err);
           }
         } else {
           setUserData(null);
@@ -124,7 +144,7 @@ export const UserProvider = ({ children }) => {
     fetchUserData,
     updateUserData,
     clearUserData,
-    refetchUserData: fetchUserData, // Alias for backward compatibility
+    refreshUserData, // Use this after login/signup
   };
 
   return (

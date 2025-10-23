@@ -13,6 +13,7 @@ import '@fontsource/inter';
 import Overview from './pages/landing/overview';
 import { Login } from './pages/login/login';
 import { SignIn } from './pages/login/signIn';
+import { TeamsOverview } from './pages/dashboard/outlets/teams';
 // import { Login } from './pages/login/login';
 function App() {
 
@@ -27,6 +28,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<DashboardHome/>}/>
           <Route path="feedbacks" element={<Feedback/>} />
+          <Route path="teams" element={<TeamsOverview/>} />
           <Route path="analytics" element={<Analytics/>} />
           <Route path="scriptGen" element={<ScriptGen/>} />
         </Route>

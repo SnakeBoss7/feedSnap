@@ -1,4 +1,4 @@
-import { AlertTriangle, Star, ChevronDown } from "lucide-react";
+import { AlertTriangle, Star, ChevronDown, LucideTrendingDown, LucideTrendingUp } from "lucide-react";
 import { memo, useEffect, useReducer, useState, useMemo } from "react";
 import { MessageSquare, Bug, Lightbulb, TrendingUp } from "lucide-react";
 import Select from 'react-select';
@@ -14,6 +14,7 @@ import { Badge } from "../../../components/ui/badge";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { FeedbackTrendsAreaChart} from "../../../components/charts/FeedbackTrendsAreaChart"
 import axios from "axios";
+import { SimpleHeader } from "../../../components/header/header";
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -92,16 +93,16 @@ const WebsiteSelector = memo(({ sites, selectedSite, onSiteChange }) => {
       ...provided,
       minHeight: '40px',
       maxWidth: '300px',
-      boxShadow: state.isFocused ? '0 0 0 2px #111828' : provided.boxShadow,
+      boxShadow: state.isFocused ? '0 0 0 2px #E94057' : provided.boxShadow,
       '&:hover': {
-        borderColor: '#111828'
+        borderColor: '#E94057'
       },
       outline:0,
     
     }),
     placeholder: (provided) => ({
       ...provided,
-      color: '#111828'
+      color: '#E94057'
     }),
     clearIndicator: () => ({
       display: 'none'
@@ -120,17 +121,17 @@ const WebsiteSelector = memo(({ sites, selectedSite, onSiteChange }) => {
     }),
       option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isSelected ? '#111828' : state.isFocused ? '#f3f4f6' : 'white',
+      backgroundColor: state.isSelected ? '#E94057' : state.isFocused ? '#f3f4f6' : 'white',
       color: state.isSelected ? 'white' : '#374151',
       '&:hover': {
-        backgroundColor: state.isSelected ? '#111828' : '#f3f4f6'
+        backgroundColor: state.isSelected ? '#E94057' : '#f3f4f6'
       }
     })
   };
 
   return (
-    <div className="mb-6">
-      <label className="block text-sm font-bold text-gray-700 w-[300px] mb-2">
+    <div className="mb-6 mt-5">
+      <label className="block text-sm   text-gray-200 w-[300px] mb-2">
         Select Website
       </label>
       <Select
@@ -151,8 +152,8 @@ const WebsiteSelector = memo(({ sites, selectedSite, onSiteChange }) => {
 // Stat Card Component
 const StatCard = memo(({ title, value, change, trend, icon: Icon }) => {
   const badgeClass = trend === "up"
-    ? "text-xs mt-1 w-fit bg-green-100 text-green-800 border-green-200"
-    : "text-xs mt-1 w-fit bg-red-100 text-red-800 border-red-200";
+    ? "text-xs p-1 h-[30px] w-fit rounded-lg  bg-green-200 text-green-800 border-green-200"
+    : "text-xs p-1 h-[30px] w-fit rounded-lg  bg-red-200 text-red-800 border-red-200";
 
   return (
     // <Card className="bg-white border border-gray-200 shadow-sm h-32 flex flex-col">
@@ -173,7 +174,7 @@ const StatCard = memo(({ title, value, change, trend, icon: Icon }) => {
     //     </div>
     //   </CardContent>
     // </Card>
-    <div className="bg-white border rounded-lg p-3 justify-between border-gray-200 shadow-sm h-32 flex ">
+    <div className=" backdrop-blur-md bg-white/80 border border-white/10   rounded-lg p-3 justify-between shadow-sm h-32 flex ">
       <div className="flex flex-col justify-between">
         <h2>{title}</h2>
         <div className="text-2xl font-bold text-gray-900 leading-none">
@@ -184,7 +185,9 @@ const StatCard = memo(({ title, value, change, trend, icon: Icon }) => {
           </Badge>
       </div>
       <div>
-          <Icon className="h-4 w-4 flex-shrink-0 text-blue-500" />
+        
+        {trend ==='up'?<LucideTrendingUp className={`${badgeClass}`}/>:<LucideTrendingDown className={`${badgeClass}`}/>}
+         
       </div>
     </div>
   );
@@ -272,7 +275,7 @@ const DailyBreakdownChart = memo(({ data }) => {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Bar dataKey="bug" stackId="a" fill="#ef4444" name="Bug Reports" />
+        <Bar className="mt-10" dataKey="bug" stackId="a" fill="#ef4444" name="Bug Reports" />
         <Bar dataKey="complaint" stackId="a" fill="#f97316" name="Complaints" />
         <Bar dataKey="feature" stackId="a" fill="#22c55e" name="Feature Requests" />
         <Bar dataKey="general" stackId="a" fill="#3b82f6" name="General" />
@@ -331,7 +334,7 @@ const StatsGrid = memo(({ siteData }) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat) => (
         <StatCard key={stat.title} {...stat} />
       ))}
@@ -343,8 +346,8 @@ const StatsGrid = memo(({ siteData }) => {
 export const Background = memo(() => (
   <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_1050px_at_50%_200px,#c5b5ff,transparent)] pointer-events-none">
     <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#e8e8e8_1px,transparent_2px),linear-gradient(to_bottom,#e8e8e8_0.5px,transparent_2px)] bg-[size:4.5rem_3.5rem]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_700px_at_0%_250px,#111828,transparent)] lg:bg-none"></div>
-      <div className="absolute inset-0 bg-none lg:bg-[radial-gradient(circle_1800px_at_0%_500px,#111828,transparent)]"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_1700px_at_0%_250px,#E94057,transparent)] lg:bg-none"></div>
+                  <div class="absolute inset-0 bg-none lg:bg-[radial-gradient(circle_2000px_at_0%_100px,#E94057,transparent)] #df3d3db2"></div>
     </div>
   </div>
 ));
@@ -421,20 +424,20 @@ export const Analytics = memo(() => {
 
   return (
     <div className="h-full w-full overflow-y-scroll scrollbar-hide  font-sans">
+         <SimpleHeader color="#E94057" />
       <Background />
     
       <div className="relative h-full  md:px-10 px-5 py-8">
         {/* Header */}
-        <div className="mb-8 flex md:flex-row  flex-col justify-between">
-         <div>
-           <h1 className="text-4xl font-bold bg-gradient-to-r tracking-tight from-backgr/70 via-backgr/40 to-white/50 bg-clip-text text-transparent mb-2">
-            Feedback Analytics Dashboard
-          </h1>
-          <p className="text-white text-lg  mb-6">
-            Comprehensive insights into your product feedback and user sentiment
-          </p>
-         </div>
-          
+        <div className=" flex md:flex-row  flex-col justify-between">
+          <div className="heading flex flex-col gap-1">
+                <h1 className="text-4xl  font-extrabold bg-gradient-to-r tracking-tight from-white to-black bg-clip-text text-transparent ">
+                 Analytics Dashboard
+                </h1>
+                <p className="text-md text-gray-700 tracking-tight">
+                  Comprehensive insights into your product feedback and user sentiment
+                </p>
+              </div>
           {/* Website Selector */}
           <WebsiteSelector
             sites={state.sites || []}
@@ -454,11 +457,11 @@ export const Analytics = memo(() => {
               <StatsGrid siteData={selectedSiteData} />
               </div>
             {/* Charts Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 black ">
               {/* Pie Chart */}
-              <Card className="bg-white border border-gray-200 shadow-sm">
+              <Card className=" backdrop-blur-md bg-white/80 border border-white/10  shadow-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex sm:text-2xl text-lg items-center gap-2">
                     <MessageSquare className="h-5 w-5 text-blue-500" />
                     Feedback Type Distribution
                   </CardTitle>
@@ -474,18 +477,18 @@ export const Analytics = memo(() => {
               </Card>
 
               {/* Daily Breakdown Chart */}
-              <Card className="bg-white border border-gray-200 shadow-sm">
+              <Card className=" backdrop-blur-md bg-white/80 border border-white/10   shadow-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex  sm:text-2xl text-lg items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-blue-500" />
                     Daily Feedback Breakdown
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription >
                     Daily feedback distribution for {selectedSiteData.currentMonth?.name}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div style={{ width: "100%", height: "300px" }}>
+                  <div style={{ width: "100%", height: "350px" }}>
                     <DailyBreakdownChart data={selectedSiteData} />
                   </div>
                 </CardContent>

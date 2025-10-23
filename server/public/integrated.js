@@ -156,7 +156,7 @@
                     this.closePopup();
                 }
                 
-                this.loadConfig();
+                // this.loadConfig();
             }
         }
         
@@ -301,14 +301,18 @@
                     left: 0;
                     width: 100%;
                     height: 100%;
-                    background: rgba(0, 0, 0, 0.4);
                     z-index: 999998;
-                    opacity: 0;
+                    
+                   background: rgba(0, 0, 0, 0.4);
                     visibility: hidden;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    backdrop-filter: blur(8px);
                 }
-                
+                .fw-overlay_later
+                {
+                      
+                    opacity: 0;
+                  backdrop-filter: blur(8px);
+                    
+                }
                 .fw-overlay.active {
                     opacity: 1;
                     visibility: visible;

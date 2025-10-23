@@ -40,33 +40,12 @@ export default function Header() {
     return () => window.removeEventListener("resize", handleSize);
   }, [setShowSidebar]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (isMenuOpen) {
-        setShow(true);
-        return;
-      }
-      if (typeof window !== "undefined") {
-        if (window.scrollY > lastScrollY && show) {
-          setShow(false);
-        } else if (window.scrollY < lastScrollY && !show) {
-          setShow(true);
-        }
-        setLastScrollY(window.scrollY);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [isMenuOpen, show, lastScrollY]);
-
   return (
     <header
-      className={`w-full transition-all duration-300 md:px-10  bg-white items-center p-4 absolute ${
+      className={`w-full transition-all z-[99999999999999999999999] duration-300 md:px-10 glass-card bg-white items-center p-4  ${
         show ? "translate-y-0 " : "translate-y-[-100px]"
       }  
-      ${showSidebar ? "h-[300px]" : ""} border-black-600 flex flex-col ${
+      ${showSidebar ? "h-[300px]" : ""} border-black-600 flex  ${
         isMenuOpen ? "h-[100vh]" : ""
       } `}
     >
@@ -77,8 +56,8 @@ export default function Header() {
             SNAP
           </div>
         </div>
-        <div className="right flex items-center gap-5 lg:flex hidden">
-          <div className="flex gap-5 font-sans ">
+  
+          <div className="flex gap-5 font-sans lg:flex hidden">
             <Link
               className="transition-all duration-300 ease-in-out  py-2 text-black rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent"
               to="/"
@@ -92,22 +71,24 @@ export default function Header() {
               Overview
             </Link>
             <Link
-              className="transition-all duration-300 ease-in-out   py-2 text-black rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent"
+              className="transition-all duration-300 ease-in-out   py-2 rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent"
               to="/logIn"
             >
               Log In
             </Link>
           </div>
 
-          <Link
-            className="text-bg_c transition-all duration-300 transition-text  font-bold border  border-black  px-4 py-2 rounded-md  hover:bg-gradient-to-r hover:from-blue-500 hover:via-blue-500 hover:to-purple-600 hover:text-white hover:border-white"
+         <div className="flex gap-5 font-sans lg:flex hidden">
+            <Link
+            className="text-bg_c transition-all duration-300  ease-in-out font-bold border  border-black  px-4 py-2 rounded-md  hover:bg-gradient-to-r hover:from-blue-500 hover:via-blue-500 hover:to-purple-600 hover:text-white hover:border-white"
             to="/signIn"
           >
             Get Started
           </Link>
+          </div>
         </div>
         <Checkbox show={show} color={color} />
-      </div>
+  
       {showSidebar && (
         <div
           onClick={() => setShowSidebar((prev) => !prev)}

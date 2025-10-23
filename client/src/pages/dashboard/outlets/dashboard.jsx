@@ -161,7 +161,7 @@ export const DashboardHome = () => {
               </Link>
             </div>
             {/* <button onClick={()=>console.log(state)}>helo</button> */}
-            <div className="mt-5 w-full gap-3 overallStats grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1">
+            <div className="mt-6 w-full gap-3 overallStats grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1">
               <div className="h-[110px] backdrop-blur-md bg-white/80 border border-white/10 flex rounded-lg items-center justify-between p-3">
                 <div className="left ">
                   <h1 className="text-sm font-bold text-gray-900">

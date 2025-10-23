@@ -217,13 +217,13 @@ const genDemo = async (e) => {
 
   return (
     <div className="h-full w-full font-sans overflow-y-scroll scrollbar-hide">
-      <SimpleHeader color="#E94057" />
+      <SimpleHeader color="#517cd8ff" />
 
       <div className="relative h-full md:px-10 px-5 py-8">
         <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_1050px_at_50%_200px,#c5b5ff,transparent)] pointer-events-none">
           <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#e8e8e8_1px,transparent_2px),linear-gradient(to_bottom,#e8e8e8_0.5px,transparent_2px)] bg-[size:4.5rem_3.5rem]">
             {/* Small screen gradient */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_700px_at_100%_100px,#E94057,transparent)] lg:bg-none"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_700px_at_100%_100px,#173f96,transparent)] lg:bg-none"></div>
             {/* Large screen gradient */}
             <div className="absolute inset-0 bg-none lg:bg-[radial-gradient(circle_1800px_at_100%_100px,#173f96,transparent)]"></div>
           </div>
