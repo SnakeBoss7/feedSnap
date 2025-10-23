@@ -25,7 +25,7 @@ try {
     }
 const firebaseLogin = async (req, res) => {
     const { idToken } = req.body;
-    
+        console.log({idToken})
     if (!idToken) {
         console.log('token not found');
         return res.status(400).send('Invalid token'); // Add return
@@ -51,7 +51,7 @@ const firebaseLogin = async (req, res) => {
         
         // Fixed cookie configuration
         res.cookie('token', token, cookieConfig);
-        
+        console.log('User logged in via Firebase:', user);
         return res.status(200).json({ userData:user, token });
         
     } catch (err) {
@@ -84,6 +84,7 @@ const registerUser = async(req,res)=>
                 error: 'User with this email already exists' 
             });
         }
+        console.log({name,email,password,confirmPassword})
         const saltRounds = 12;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 

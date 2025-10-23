@@ -111,11 +111,11 @@ export const Sidebar = () => {
       <aside ref={sidebarRef} className={sidebarClasses}>
         {/* Logo Section */}
         <div className={`flex p-3 ${sidebarSize ? "justify-center" : "justify-between"}`}>
-          <div className={`flex items-center gap-1 overflow-hidden transition-all duration-300 ${sidebarSize ? "w-0" : "w-fit"}`}>
-            <div className={`text-white text-3xl ${sidebarSize ? "hidden" : "block"}`}>
+          <div className={`flex items-center gap-1 overflow-hidden transition-all ease-in-out ${sidebarSize ? "w-0 opacity-0 duration-200" : "w-fit opacity-100 duration-300 delay-150"}`}>
+            <div className="text-white text-3xl">
               Feed
             </div>
-            <div className={`text-4xl bg-gradient-to-r from-blue-700 to-purple-800 bg-clip-text text-transparent ${sidebarSize ? "hidden" : "block"}`}>
+            <div className="text-4xl bg-gradient-to-r from-blue-700 to-purple-800 bg-clip-text text-transparent">
               SNAP
             </div>
           </div>
@@ -147,10 +147,7 @@ export const Sidebar = () => {
         <nav className="flex flex-col gap-3 px-3 py-4">
           {navItems.map((item) => {
             const Icon = item.icon;
-            // Helper to ensure Tailwind sees all possible text-primaryX classes
             const textColorClass = `text-${item.color}`;
-            // List all possible classes here so Tailwind JIT picks them up
-            // text-primary1 text-primary2 text-primary3 text-primary5
             return (
               <NavLink
                 key={item.to}
@@ -158,17 +155,19 @@ export const Sidebar = () => {
                 end={item.end}
                 onClick={handleNavClick}
                 className={({ isActive }) => `
-  flex items-center gap-3 w-full h-12 font-extrabold text-[15px] p-2 rounded-lg 
+  flex items-center w-full h-12 font-extrabold text-[15px] p-2 rounded-lg 
   transition-all duration-300 tracking-tight
   ${isActive 
     ? `bg-white ${textColorClass}`
     : "text-blue-200 opacity-50 hover:opacity-100 hover:text-white"
   }
-  ${sidebarSize ? "justify-center" : "justify-start"}
+  ${sidebarSize ? "justify-center" : "justify-start gap-3"}
 `}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                {!sidebarSize && <span>{item.label}</span>}
+                <Icon className={`w-5 h-5 flex-shrink-0`} />
+                <span className={`whitespace-nowrap overflow-hidden transition-all ease-in-out ${sidebarSize ? "w-0 opacity-0 duration-200" : "w-auto opacity-100 duration-300 delay-150"}`}>
+                  {item.label}
+                </span>
               </NavLink>
             );
           })}
@@ -183,7 +182,7 @@ export const Sidebar = () => {
               <div className="w-10 h-10 rounded-full bg-gray-300 animate-pulse"></div>
             ) : (
               <img
-                key={userData?.profile || 'default'} // Force re-render on profile change
+                key={userData?.profile || 'default'}
                 src={profileImage}
                 className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
                 alt={`${displayName}'s profile`}
@@ -192,24 +191,22 @@ export const Sidebar = () => {
               />
             )}
             
-            {!sidebarSize && (
-              <div className="flex flex-col">
-                {isLoading ? (
-                  <div className="h-6 w-24 bg-gray-300 animate-pulse rounded"></div>
-                ) : (
-                  <>
-                    <p className="text-white text-lg font-semibold truncate max-w-[120px]">
-                      {displayName}
+            <div className={`flex flex-col overflow-hidden transition-all ease-in-out ${sidebarSize ? "w-0 opacity-0 duration-200" : "w-auto opacity-100 duration-300 delay-150"}`}>
+              {isLoading ? (
+                <div className="h-6 w-24 bg-gray-300 animate-pulse rounded"></div>
+              ) : (
+                <>
+                  <p className="text-white text-lg font-semibold truncate max-w-[120px] whitespace-nowrap">
+                    {displayName}
+                  </p>
+                  {userData?.role && (
+                    <p className="text-gray-300 text-xs capitalize whitespace-nowrap">
+                      {userData.role}
                     </p>
-                    {userData?.role && (
-                      <p className="text-gray-300 text-xs capitalize">
-                        {userData.role}
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </div>
       </aside>

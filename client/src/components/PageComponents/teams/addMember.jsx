@@ -1,61 +1,95 @@
 import React, { useState } from 'react';
-import { RoleSelect } from './roleSelect';
+import { X } from 'lucide-react';
 
-export const AddMemberForm = ({ onAddMember, onCancel }) => {
-  const [memberData, setMemberData] = useState({
-    name: '',
-    email: '',
-    role: 'viewer'
-  });
+export const AddMemberForm = ({ onAddMember, onCancel, isLoading }) => {
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('viewer');
 
-  const handleSubmit = () => {
-    if (memberData.name.trim() && memberData.email.trim()) {
-      onAddMember(memberData);
-      setMemberData({ name: '', email: '', role: 'viewer' });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!email.trim()) {
+      alert('Please enter an email address');
+      return;
     }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      alert('Please enter a valid email address');
+      return;
+    }
+
+    onAddMember({ email: email.trim(), role });
   };
 
   return (
-    <div className="p-4 border-t border-gray-200 bg-gray-50">
-      <h4 className="text-lg font-semibold text-gray-900 mb-4">Add New Member</h4>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <input
-          type="text"
-          value={memberData.name}
-          onChange={(e) => setMemberData({ ...memberData, name: e.target.value })}
-          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Full Name"
-          onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-        />
-        <input
-          type="email"
-          value={memberData.email}
-          onChange={(e) => setMemberData({ ...memberData, email: e.target.value })}
-          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Email Address"
-          onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-        />
-        <RoleSelect
-          value={memberData.role}
-          onChange={(role) => setMemberData({ ...memberData, role })}
-        />
-      </div>
-      <div className="flex gap-3">
+    <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+      <div className="flex justify-between items-center mb-3">
+        <h5 className="font-medium text-gray-900">Add New Member</h5>
         <button
-          type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg"
-        >
-          Cancel
-        </button>
-        <button
+          disabled={isLoading}
+          className="p-1 hover:bg-green-100 rounded disabled:opacity-50"
           type="button"
-          onClick={handleSubmit}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg"
         >
-          Add Member
+          <X className="h-4 w-4 text-gray-500" />
         </button>
       </div>
+      
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email Address <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="member@example.com"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            disabled={isLoading}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Role
+          </label>
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            disabled={isLoading}
+          >
+            <option value="viewer">Viewer</option>
+            <option value="editor">Editor</option>
+            <option value="owner">Owner</option>
+          </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Viewers can only view, Editors can edit, Owners have full control
+          </p>
+        </div>
+
+        <div className="flex gap-2 pt-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isLoading}
+            className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="flex-1 px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? 'Adding...' : 'Add Member'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

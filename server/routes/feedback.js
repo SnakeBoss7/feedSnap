@@ -8,4 +8,5 @@ router.get('/getfeedback',verifyUser,getFeed)
 router.get('/getAnalytics',verifyUser,display)
 router.get('/getFeedbacks',verifyUser,allFeedback)
 router.get('/export',verifyUser,exportFeedback)
+router.get('/allFeedback', verifyUser, allFeedback);
 module.exports = router;

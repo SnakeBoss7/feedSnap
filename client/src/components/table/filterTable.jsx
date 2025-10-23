@@ -14,6 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LucideFilter,
+  RefreshCcw,
+  Download,
 } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
@@ -32,13 +34,51 @@ import ButtonDownload from "../button/button"
 import { exportData } from "../../services/exportData"
 
 const severityLabels = {
-  0: { label: "Unknown", color: "bg-zinc-500 text-white hover:bg-zinc-600  hover:text-white" },
-  1: { label: "Low", color: "bg-green-300/40 text-green-700/80 hover:bg-green-300/40  hover:text-green-700/80" },
-  2: { label: "Medium", color: "bg-yellow-100 text-yellow-700 hover:bg-yellow-100 hover:text-yellow-700" },
-  3: { label: "High", color: "bg-orange-300/40 text-orange-700/80 hover:bg-orange-300/40  hover:text-orange-700/80" },
-  4: { label: "Critical", color: "bg-red-300/40 text-red-700/80 hover:bg-red-300/40  hover:text-red-700/80" },
+  0: { 
+    label: "Unknown", 
+    color: "bg-gray-500 text-white hover:bg-gray-600" 
+  },
+  1: { 
+    label: "Low", 
+    color: "bg-green-300 text-green-800 hover:bg-green-400" 
+  },
+  2: { 
+    label: "Low", 
+    color: "bg-green-300 text-green-800 hover:bg-green-400" 
+  },
+  3: { 
+    label: "Medium", 
+    color: "bg-yellow-100 text-orange-800 hover:bg-yellow-200" 
+  },
+  4: { 
+    label: "Medium", 
+    color: "bg-yellow-100 text-orange-800 hover:bg-yellow-200" 
+  },
+  5: { 
+    label: "Medium", 
+    color: "bg-yellow-100 text-orange-800 hover:bg-yellow-200" 
+  },
+  6: { 
+    label: "High", 
+    color: "bg-orange-100 text-orange-800 hover:bg-orange-200" 
+  },
+  7: { 
+    label: "High", 
+    color: "bg-orange-100 text-orange-800 hover:bg-orange-200" 
+  },
+  8: { 
+    label: "Critical", 
+    color: "bg-red-300 text-red-900 hover:bg-red-400" 
+  },
+  9: { 
+    label: "Critical", 
+    color: "bg-red-300 text-red-900 hover:bg-red-400" 
+  },
+  10: { 
+    label: "Critical", 
+    color: "bg-red-300 text-red-900 hover:bg-red-400" 
+  },
 }
-
 // Helper function to get severity label safely
 const getSeverityLabel = (severity) => {
   return severityLabels[severity] || severityLabels[0]
@@ -132,32 +172,49 @@ const [formatType, setFormatType] = useState('csv');
 
     
     <div className="w-full overflow-y-scroll scrollbar-hide md:px-10 px-5 py-8  font-sans">
-           <div className=" flex md:flex-row flex-col mb-14 justify-between ">
-        <div className="mb-5">
-          <h1 className="text-4xl font-bold text-backgr p-0 mb-2">
-          Data Management
-        </h1>
-        <p className="text-backgr text-md tracking-tight">
-          Monitor and filter your application data with advanced controls
-        </p>
-        </div>
+           <div className=" flex md:flex-row flex-col mb-0 md:mb-5 justify-between  ">
+          <div className="heading flex flex-col pb-4 gap-1">
+                <h1 className="text-4xl pb-1   font-extrabold text-black tracking-tight ">
+                   Feedback Management
+                </h1>
+                <p className="text-md text-gray-700 tracking-tight">
+                  Welcome back! Here's your feedback overview.
+                </p>
+              </div>
         <div>
  
-          <ButtonDownload formatType={formatType} content={'Export All'}/>
+          {/* <ButtonDownload formatType={formatType} content={'Export All'}/> */}
+         <div className="flex gap-4">
+      <button className="flex items-center gap-2 text-sm border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50 transition-all group">
+  <RefreshCcw 
+    size={15} 
+    className="text-black transition-transform duration-300 group-hover:rotate-180" 
+  />
+  <span className="text-black font-medium">Refresh</span>
+</button>
+          <button onClick={()=>exportData(formatType)}  className="flex items-center gap-2 text-sm border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50 transition-all group">
+  <Download 
+    size={15} 
+    className="text-black transition-transform duration-300 group-hover:-translate-y-1" 
+  />
+  <span className="text-black font-medium">Export All</span>
+</button>
+
+         </div>
         </div>
       </div>
-      <div className=" flex flex-col bg-white  rounded-t-lg gap-5">
+      <div className=" flex flex-col bg-white  rounded-t-lg gap-5 border border-blue-100 p-0">
+        <div className="p-3">
+
         <div className="flex font-medium mb-3 justify-between sm:flex-row h-5 sm:items-center gap-4">
-          <div className="flex p-3 md:text-2xl text-md items-center gap-2">
-            <LucideFilter/> Filters & Search</div>
             
-          {selectedItems.size > 0 && (
+          {selectedItems.size > 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-2"
+              className="flex mt-6 mb-3 items-center gap-2"
             >
-              <div className="w-[30px] text-center md:w-fit md:py-1 md:h-fit text-[12px] bg-backgr rounded-3xl text-white px-2 h-[20px] hover:text-white">
+              <div className="w-[30px]  text-center md:w-fit md:py-1 md:h-fit text-[12px] bg-backgr rounded-3xl text-white px-2 h-[20px] hover:text-white">
                 {selectedItems.size} selected
               </div>
               <DropdownMenu>
@@ -200,39 +257,47 @@ const [formatType, setFormatType] = useState('csv');
                 </DropdownMenuContent>
               </DropdownMenu>
             </motion.div>
-          )}
+          ):<><h2 className="mb-3 text-lg font-bold mt-6 p-3  ">Feedbacks data </h2></>}
         </div>
-
+ <div className="">
         {/* Filters */}
         <div className="grid grid-cols-1 sm:grid-cols-2 bg-white lg:grid-cols-4  gap-4">
           {/* Search */}
-          <div className="relative sm:col-span-2 bg-whtie">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-<Input
-  placeholder="Search titles, descriptions, emails..."
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-  className="pl-10  focus:border-0"
-/>
-          </div>
-
+<div className="relative sm:col-span-2 bg-white rounded-md border border-gray-200 focus-within:border-blue-200 transition-colors">
+  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+  <Input
+    placeholder="Search titles, descriptions, emails..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="pl-10 bg-white border-0 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+  />
+</div>
           {/* Severity Filter */}
-          <Select value={severityFilter} onValueChange={setSeverityFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Severity" />
-            </SelectTrigger>
-            <SelectContent className="bg-white font-sans">
-              <SelectItem value="all"  className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" >All Severities</SelectItem>
-              <SelectItem value="1"  className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" >Low</SelectItem>
-              <SelectItem value="2"  className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" >Medium</SelectItem>
-              <SelectItem value="3" className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" >High</SelectItem>
-              <SelectItem value="4" className="hover:bg-primary/10  hover:text-black p-1 rounded-lg" >Critical</SelectItem>
-            </SelectContent>
-          </Select>
-
+<Select value={severityFilter} onValueChange={setSeverityFilter}>
+  <SelectTrigger className="bg-white border border-gray-200 focus:border-gray-200 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors">
+    <SelectValue placeholder="Severity" />
+  </SelectTrigger>
+  <SelectContent className="bg-white font-sans">
+    <SelectItem value="all" className="hover:bg-primary/10 hover:text-black p-1 rounded-lg">
+      All Severities
+    </SelectItem>
+    <SelectItem value="1" className="hover:bg-primary/10 hover:text-black p-1 rounded-lg">
+      Low
+    </SelectItem>
+    <SelectItem value="2" className="hover:bg-primary/10 hover:text-black p-1 rounded-lg">
+      Medium
+    </SelectItem>
+    <SelectItem value="3" className="hover:bg-primary/10 hover:text-black p-1 rounded-lg">
+      High
+    </SelectItem>
+    <SelectItem value="4" className="hover:bg-primary/10 hover:text-black p-1 rounded-lg">
+      Critical
+    </SelectItem>
+  </SelectContent>
+</Select>
           {/* Web URL Filter */}
           <Select value={webUrlFilter} onValueChange={setWebUrlFilter}>
-            <SelectTrigger>
+            <SelectTrigger className="bg-white border border-gray-200 focus:border-gray-200 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors">
               <SelectValue placeholder="Web URL" />
             </SelectTrigger>
             <SelectContent className="bg-white font-sans">
@@ -247,7 +312,7 @@ const [formatType, setFormatType] = useState('csv');
         </div>
 
         {/* Date Range and Clear Filters */}
-        <div className="flex flex-row items-center bg-white sm:flex-row sm:items-center  mb-5 justify-between gap-4">
+        <div className="flex flex-row items-center bg-white sm:flex-row sm:items-center  mb-5 mt-3 justify-between gap-4">
           <div className="flex flex-col sm:flex-row items-start bg-white sm:items-center gap-2">
             <Popover  open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
               <PopoverTrigger asChild>
@@ -299,8 +364,9 @@ const [formatType, setFormatType] = useState('csv');
           </div>
         </div>
       </div>
-
-      <div className="bg-white  overflow-hidden rounded-b-lg  ">
+</div>
+    
+       <div className="bg-white  overflow-hidden rounded-b-lg  ">
         <div className="overflow-x-auto overflow-hidden">
           <table className="w-full min-w-[800px]">
             <thead className="border-b bg-muted/50">
@@ -312,17 +378,17 @@ const [formatType, setFormatType] = useState('csv');
                     aria-label="Select all"
                   />
                 </th>
-                <th className="p-3 sm:p-4 text-left max-w-[100px] font-medium">Title</th>
-                <th className="p-3 sm:p-4 text-left font-medium">Severity</th>
-                <th className="p-3 sm:p-4 text-left font-medium">Rating</th>
-                <th className="p-3 sm:p-4 text-left font-medium">Web URL</th>
-                <th className="p-3 sm:p-4 text-left font-medium">Email</th>
-                <th className=" text-left min-w-[100px] font-medium">Created</th>
-                <th className="p-3 sm:p-4 text-left font-medium">Actions</th>
+                <th className="p-3 sm:p-4 text-left max-w-[100px] font-bold text-gray-700">Title</th>
+                <th className="p-3 sm:p-4 text-left font-bold text-gray-700">Severity</th>
+                <th className="p-3 sm:p-4 text-left font-bold text-gray-700">Rating</th>
+                <th className="p-3 sm:p-4 text-left font-bold text-gray-700">Web URL</th>
+                <th className="p-3 sm:p-4 text-left font-bold text-gray-700">Email</th>
+                <th className=" text-left min-w-[100px] font-bold text-gray-700">Created</th>
+                <th className="p-3 sm:p-4 text-left font-bold text-gray-700">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <AnimatePresence mode="wait">
+              <AnimatePresence>
                 {paginatedData.map((item, index) => (
                   <motion.tr
                     key={`${item._id}-${currentPage}`}
@@ -483,6 +549,7 @@ const [formatType, setFormatType] = useState('csv');
         )}
       </div>
 
+     </div>
       <Dialog open={!!viewDetailsItem} onOpenChange={() => setViewDetailsItem(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto font-sans">
           <DialogHeader>

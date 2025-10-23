@@ -806,6 +806,64 @@
                 .animate-pulse {
                     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
                 }
+                    .fw-message.bot h1,
+.fw-message.bot h2,
+.fw-message.bot h3 {
+    margin: 8px 0 4px 0;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.fw-message.bot h1 { font-size: 18px; }
+.fw-message.bot h2 { font-size: 15px; }
+.fw-message.bot h3 { font-size: 13px; }
+
+.fw-message.bot strong,
+.fw-message.bot b {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.fw-message.bot ul,
+.fw-message.bot ol {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.fw-message.bot li {
+    margin: 4px 0;
+}
+
+.fw-message.bot p {
+    margin: 6px 0;
+}
+
+.fw-message.bot code {
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+}
+
+.fw-message.bot pre {
+    background: var(--surface);
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 8px 0;
+}
+
+.fw-message.bot a {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+.fw-message.bot br {
+    display: block;
+    margin: 4px 0;
+    content: "";
+}
             `;
             
             const styleSheet = document.createElement('style');
@@ -916,6 +974,7 @@
                         </div>
                     </div>
                 </div>
+                
             `;
             
             document.body.appendChild(this.overlay);
@@ -1071,7 +1130,9 @@
                     loadingMsg.remove();
                     
                     // Add bot response
-                    this.addChatMessage(data.data.replaceAll('/n', ''), 'bot');
+                     const formattedMessage = data.data.replace(/\\n/g, '<br>');
+                     console.log(formattedMessage)
+    this.addChatMessage(formattedMessage, 'bot');
                 })
                 .catch(error => {
                     console.error('Error fetching LLM response:', error);
@@ -1180,6 +1241,7 @@
                     email,
                     description,
                     rating,
+                    config:this.config
                 }),
             })
             .then(response => response.json())
@@ -1239,14 +1301,21 @@
         }
 
         addChatMessage(message, type) {
-            const messagesContainer = this.popup.querySelector('.fw-chat-messages');
-            const messageEl = document.createElement('div');
-            messageEl.className = `fw-message ${type}`;
-            messageEl.textContent = message;
-            messagesContainer.appendChild(messageEl);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            return messageEl;
-        }
+    const messagesContainer = this.popup.querySelector('.fw-chat-messages');
+    const messageEl = document.createElement('div');
+    messageEl.className = `fw-message ${type}`;
+    
+    // Use innerHTML instead of textContent to render HTML tags
+    if (type === 'bot') {
+        messageEl.innerHTML = message;
+    } else {
+        messageEl.textContent = message;
+    }
+    
+    messagesContainer.appendChild(messageEl);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    return messageEl;
+}
 
         resetForm() {
             // Reset form fields

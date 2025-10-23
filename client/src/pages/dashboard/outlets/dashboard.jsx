@@ -17,6 +17,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { RatingStar } from "../../../components/star/star";
 import { Link } from "react-router-dom";
 import { EmptyDash } from "../../../components/empty/emptyDash";
+import AddButton from "../../../components/button/addButton";
 //backedn_api
 const apiUrl = process.env.REACT_APP_API_URL;
 const getCachedData = () => {
@@ -143,9 +144,9 @@ export const DashboardHome = () => {
           </SkeletonTheme>
         ) : (
           <>
-            <div className="relative header flex flex-col gap-5 sm:flex-row justify-between items-start">
+            <div className="relative header flex flex-col gap-5 sm:flex-row justify-between items-start md:items-center">
               <div className="heading flex flex-col gap-1">
-                <h1 className="text-4xl  font-extrabold bg-gradient-to-r tracking-tight from-blue-500 via-purple-400  to-purple-800 bg-clip-text text-transparent ">
+                <h1 className="text-5xl  font-extrabold bg-gradient-to-r tracking-tight from-blue-500 via-purple-400  to-purple-800 bg-clip-text text-transparent ">
                   Dashboard
                 </h1>
                 <p className="text-md text-gray-700 tracking-tight">
@@ -154,14 +155,14 @@ export const DashboardHome = () => {
               </div>
               <Link
                 to="scriptGen"
-                className="flex items-center px-2 py-3 text-white tracking-tight gap-2 rounded-lg bg-gradient-to-r from-blue-600  to-purple-600"
+                className="flex items-center justify-center"
               >
                 {" "}
-                <PlusCircle /> Add New widget
+               <AddButton/>
               </Link>
             </div>
             {/* <button onClick={()=>console.log(state)}>helo</button> */}
-            <div className="mt-6 w-full gap-3 overallStats grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1">
+            <div className="mt-14 w-full gap-3 overallStats grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1">
               <div className="h-[110px] backdrop-blur-md bg-white/80 border border-white/10 flex rounded-lg items-center justify-between p-3">
                 <div className="left ">
                   <h1 className="text-sm font-bold text-gray-900">
@@ -254,12 +255,12 @@ export const DashboardHome = () => {
                                 .replace(/["']/g, "")}
                             </p>
                           </div>
-                          <RatingStar value={data.rating} />
-                          <div className="description text-sm font-normal text-gray-600 flex flex-col">
-                            <p>{data.description}</p>
-
-                            <p>Page : {data.pathname}</p>
-                          </div>
+                          <div className="description text-sm font-normal text-gray-600 flex flex-col gap-1">
+  <p className="overflow-hidden break-words overflow-wrap-anywhere">
+    {data.description}
+  </p>
+  <p className="text-xs text-gray-500">Page: {data.pathname}</p>
+</div>
                         </div>
                       );
                     })}

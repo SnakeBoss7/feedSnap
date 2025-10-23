@@ -9,11 +9,11 @@ const scriptSchema = new mongoose.Schema({
   position: String,
   widgetText:String,
   metadata: String,
+  ackMail: Boolean,
   bgColor:String,
   email: Boolean,
+  botContext:String,
    owner: [{ type: mongoose.Types.ObjectId, ref: "User", required: true }],
-  members: [{ type: mongoose.Types.ObjectId, ref: "User" }], // allow sharing
-
 }, 
 {
   timestamps: true, // Optional: adds createdAt & updatedAt

@@ -1,518 +1,262 @@
-import { AlertTriangle, Star, ChevronDown, LucideTrendingDown, LucideTrendingUp } from "lucide-react";
-import { memo, useEffect, useReducer, useState, useMemo } from "react";
-import { MessageSquare, Bug, Lightbulb, TrendingUp } from "lucide-react";
-import Select from 'react-select';
-import AnalyticsLoader, { BackgroundGrid } from "../../../components/loader/Analyticsloader";
+"use client"
+
+import { useState, useMemo, useEffect } from "react"
+import { MetricCard } from "../../../components/newCharts/MetricCard"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../../components/ui/card";
-import { Badge } from "../../../components/ui/badge";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
-import { FeedbackTrendsAreaChart} from "../../../components/charts/FeedbackTrendsAreaChart"
-import axios from "axios";
-import { SimpleHeader } from "../../../components/header/header";
+  ChartCard,
+  ReportsByTypeChart,
+  ReportsOverTimeChart,
+  ActiveVsResolvedChart,
+  SeverityRatingChart,
+  SeverityVsRatingChart,
+  AvgRatingBySeverityChart,
+} from "../../../components/newCharts/ChartCard"
+import { Selectors } from "../../../components/newCharts/Selector"
+import { filterDataByTimeframe, getChartData, getMetrics } from "../../../components/newCharts/utils"
+import { initializeDashboardData } from "../../../components/newCharts/dataAdapter"
+import AddButton from "../../../components/button/addButton"
+import { Link } from "react-router-dom"
+import { Background } from "../../../components/background/background"
+import { SimpleHeader } from "../../../components/header/header"
 
-const apiUrl = process.env.REACT_APP_API_URL;
-
-// Cache helper function
-const getCachedData = () => {
-  const type = localStorage.getItem('type');
-  const cachedData = localStorage.getItem('AnalyticsData');
-  
-  if(type === 'FETCH_SUCCESS' && cachedData) {
-    try {
-      const parsed = JSON.parse(cachedData);
-      const isRecent = Date.now() - parsed.timestamp < 5 * 60 * 1000; // 5 minutes
-      
-      if(isRecent && parsed.data) {
-        return {
-          ...parsed.data,
-          isLoading: false
-        };
-      }
-    } catch(e) {
-      console.log('Cache parse error:', e);
-    }
-  }
-  return {
-    sites: [],
-    data: {},
-    success: false,
-    isLoading: true,
-  };
-};
-
-const dashboardReducer = (state, action) => {
-  switch (action.type) {
-    case 'FETCH_SUCCESS':
-      return {
-        ...state,
-        ...action.payload,
-        isLoading: false
-      };
-    case 'FETCH_FAIL':
-      return {
-        ...state,
-        isLoading: false,
-      };
-    default:
-      return state;
-  }
-};
-
-const wait = (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms));
-};
-
-// Website Selector Component with React Select
-const WebsiteSelector = memo(({ sites, selectedSite, onSiteChange }) => {
-  const formatSiteName = (url) => {
-    try {
-      return new URL(url).hostname;
-    } catch {
-      return url;
-    }
-  };
-
-  const options = sites.map(site => ({
-    value: site,
-    label: formatSiteName(site)
-  }));
-
-  const selectedOption = selectedSite ? {
-    value: selectedSite,
-    label: formatSiteName(selectedSite)
-  } : null;
-
-  const customStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      minHeight: '40px',
-      maxWidth: '300px',
-      boxShadow: state.isFocused ? '0 0 0 2px #E94057' : provided.boxShadow,
-      '&:hover': {
-        borderColor: '#E94057'
-      },
-      outline:0,
-    
-    }),
-    placeholder: (provided) => ({
-      ...provided,
-      color: '#E94057'
-    }),
-    clearIndicator: () => ({
-      display: 'none'
-    }),
-    menu: (provided) => ({
-      ...provided,
-      marginTop: '5px',
-      marginBottom: 0,
-      borderRadius: '5px',
-      
-    }),
-    menuList: (provided) => ({
-      ...provided,
-      padding: 0,
-      borderRadius: '5px',
-    }),
-      option: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.isSelected ? '#E94057' : state.isFocused ? '#f3f4f6' : 'white',
-      color: state.isSelected ? 'white' : '#374151',
-      '&:hover': {
-        backgroundColor: state.isSelected ? '#E94057' : '#f3f4f6'
-      }
-    })
-  };
-
-  return (
-    <div className="mb-6 mt-5">
-      <label className="block text-sm   text-gray-200 w-[300px] mb-2">
-        Select Website
-      </label>
-      <Select
-        options={options}
-        value={selectedOption}
-        onChange={(option) => onSiteChange(option?.value)}
-        placeholder="Select a website"
-        isSearchable
-        isClearable
-        styles={customStyles}
-        className="react-select-container"
-        classNamePrefix="react-select"
-      />
-    </div>
-  );
-});
-
-// Stat Card Component
-const StatCard = memo(({ title, value, change, trend, icon: Icon }) => {
-  const badgeClass = trend === "up"
-    ? "text-xs p-1 h-[30px] w-fit rounded-lg  bg-green-200 text-green-800 border-green-200"
-    : "text-xs p-1 h-[30px] w-fit rounded-lg  bg-red-200 text-red-800 border-red-200";
-
-  return (
-    // <Card className="bg-white border border-gray-200 shadow-sm h-32 flex flex-col">
-    //   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 flex-shrink-0">
-    //     <CardTitle className="text-sm font-medium text-gray-600 leading-tight">
-    //       {title}
-    //     </CardTitle>
-    //     <div className="w-4 h-4 flex items-center justify-center">
-    //       <Icon className="h-4 w-4 flex-shrink-0 text-blue-500" />
-    //     </div>
-    //   </CardHeader>
-    //   <CardContent className="flex-grow flex flex-col justify-between">
-    //     <div className="text-2xl font-bold text-gray-900 leading-none">
-    //       {value}
-    //     </div>
-    //     <div>
-
-    //     </div>
-    //   </CardContent>
-    // </Card>
-    <div className=" backdrop-blur-md bg-white/80 border border-white/10   rounded-lg p-3 justify-between shadow-sm h-32 flex ">
-      <div className="flex flex-col justify-between">
-        <h2>{title}</h2>
-        <div className="text-2xl font-bold text-gray-900 leading-none">
-           {value}
-    </div>
-                     <Badge variant="outline" className={badgeClass}>
-            {change}
-          </Badge>
-      </div>
-      <div>
-        
-        {trend ==='up'?<LucideTrendingUp className={`${badgeClass}`}/>:<LucideTrendingDown className={`${badgeClass}`}/>}
-         
-      </div>
-    </div>
-  );
-});
-
-// Pie Chart Component
-const FeedbackPieChart = memo(({ data }) => {
-  const COLORS = {
-    bug: '#ef4444',
-    complaint: '#f97316', 
-    feature: '#22c55e',
-    general: '#3b82f6',
-    improvement: '#8b5cf6',
-    other: '#6b7280'
-  };
-
-  const pieData = Object.entries(data.categories || {})
-    .filter(([_, value]) => value > 0)
-    .map(([name, value]) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      value,
-      fill: COLORS[name]
-    }));
-
-  if (pieData.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full text-gray-500">
-        No feedback data available
-      </div>
-    );
-  }
-
-  return (
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        <Pie
-          data={pieData}
-          cx="50%"
-          cy="50%"
-          innerRadius={60}
-          outerRadius={100}
-          paddingAngle={2}
-          dataKey="value"
-        >
-          {pieData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.fill} />
-          ))}
-        </Pie>
-        <Tooltip />
-        <Legend />
-      </PieChart>
-    </ResponsiveContainer>
-  );
-});
-
-// Daily Breakdown Chart Component
-const DailyBreakdownChart = memo(({ data }) => {
-  const dailyData = useMemo(() => {
-    console.log(data)
-    if (!data.dailyBreakdown) return [];
-
-    return Object.entries(data.dailyBreakdown).map(([day, breakdown]) => {
-      const total = Object.values(breakdown).reduce((sum, count) => sum + count, 0);
-      return {
-        day: `Day ${day}`,
-        ...breakdown,
-        total
-      };
-    }).filter(item => item.total > 0); // Only show days with feedback
-  }, [data.dailyBreakdown]);
-
-  if (dailyData.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full text-gray-500">
-        No daily feedback data available
-      </div>
-    );
-  }
-
-  return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={dailyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="day" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar className="mt-10" dataKey="bug" stackId="a" fill="#ef4444" name="Bug Reports" />
-        <Bar dataKey="complaint" stackId="a" fill="#f97316" name="Complaints" />
-        <Bar dataKey="feature" stackId="a" fill="#22c55e" name="Feature Requests" />
-        <Bar dataKey="general" stackId="a" fill="#3b82f6" name="General" />
-        <Bar dataKey="improvement" stackId="a" fill="#8b5cf6" name="Improvements" />
-        <Bar dataKey="other" stackId="a" fill="#6b7280" name="Other" />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-});
-
-// Stats Grid Component
-const StatsGrid = memo(({ siteData }) => {
-  if (!siteData) return null;
-
-  const calculateChange = (current, last) => {
-    if (last === 0) return current > 0 ? "+100%" : "0%";
-    const change = ((current - last) / last * 100).toFixed(1);
-    return `${change >= 0 ? '+' : ''}${change}%`;
-  };
-
-  const stats = [
-    {
-      title: "Total Feedback",
-      value: siteData.totalFeedback?.toString() || "0",
-      change: calculateChange(siteData.currentMonth?.count || 0, siteData.lastMonth?.count || 0),
-      trend: (siteData.currentMonth?.count || 0) >= (siteData.lastMonth?.count || 0) ? "up" : "down",
-      icon: MessageSquare,
-    },
-    {
-      title: "Bug Reports",
-      value: siteData.categories?.bug?.toString() || "0",
-      change: calculateChange(
-        siteData.monthlyBreakdown?.[siteData.currentMonth?.name]?.bug || 0,
-        siteData.monthlyBreakdown?.[siteData.lastMonth?.name]?.bug || 0
-      ),
-      trend: (siteData.monthlyBreakdown?.[siteData.currentMonth?.name]?.bug || 0) >= (siteData.monthlyBreakdown?.[siteData.lastMonth?.name]?.bug || 0) ? "down" : "up",
-      icon: Bug,
-    },
-    {
-      title: "Feature Requests",
-      value: siteData.categories?.feature?.toString() || "0",
-      change: calculateChange(
-        siteData.monthlyBreakdown?.[siteData.currentMonth?.name]?.feature || 0,
-        siteData.monthlyBreakdown?.[siteData.lastMonth?.name]?.feature || 0
-      ),
-      trend: (siteData.monthlyBreakdown?.[siteData.currentMonth?.name]?.feature || 0) >= (siteData.monthlyBreakdown?.[siteData.lastMonth?.name]?.feature || 0) ? "up" : "down",
-      icon: Lightbulb,
-    },
-    {
-      title: "Avg Resolution Time",
-      value: "N/A",
-      change: "N/A",
-      trend: "up",
-      icon: TrendingUp,
-    },
-  ];
-
-  return (
-    <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {stats.map((stat) => (
-        <StatCard key={stat.title} {...stat} />
-      ))}
-    </div>
-  );
-});
-
-// Background Component
-export const Background = memo(() => (
-  <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_1050px_at_50%_200px,#c5b5ff,transparent)] pointer-events-none">
-    <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#e8e8e8_1px,transparent_2px),linear-gradient(to_bottom,#e8e8e8_0.5px,transparent_2px)] bg-[size:4.5rem_3.5rem]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_1700px_at_0%_250px,#E94057,transparent)] lg:bg-none"></div>
-                  <div class="absolute inset-0 bg-none lg:bg-[radial-gradient(circle_2000px_at_0%_100px,#E94057,transparent)] #df3d3db2"></div>
-    </div>
-  </div>
-));
-
-// Main Analytics Component
-export const Analytics = memo(() => {
-  const [state, dispatch] = useReducer(dashboardReducer, getCachedData());
-  const [selectedSite, setSelectedSite] = useState(null);
-
-  // Set first site as selected when data loads
-  useEffect(() => {
-    if (state.sites?.length > 0 && !selectedSite) {
-      setSelectedSite(state.sites[0]);
-    }
-  }, [state.sites, selectedSite]);
+export const Analytics = () => {
+  const [selectedWebsite, setSelectedWebsite] = useState("all")
+  const [selectedTimeframe, setSelectedTimeframe] = useState("all")
+  const [allData, setAllData] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    async function fetchData() {
+    const loadData = async () => {
+      setIsLoading(true)
+      setError(null)
+      
       try {
-        console.log('Fetching fresh analytics data...');
-        const res = await axios.get(`${apiUrl}/api/feedback/getAnalytics`, {
-          withCredentials: true
-        });
-        await wait(2000);
-        console.log(res);
-        dispatch({
-          type: 'FETCH_SUCCESS',
-          payload: res.data,
-        });
+        console.log("[v0] Starting data load...")
+        const backendData = await initializeDashboardData()
         
-        // Store with timestamp
-        const cacheData = {
-          data: res.data,
-          timestamp: Date.now()
-        };
-
-        localStorage.setItem("AnalyticsData", JSON.stringify(cacheData));
-        localStorage.setItem("type", 'FETCH_SUCCESS');
-      }
-      catch(err) {
-        dispatch({
-          type: 'FETCH_FAIL',
-          payload: err.response?.data,
-        });
-        console.log(err);
-        localStorage.setItem("type", 'FETCH_FAIL');
+        console.log("[v0] Received data:", backendData)
+        
+        if (!backendData) {
+          throw new Error("No data returned from backend")
+        }
+        
+        if (!Array.isArray(backendData)) {
+          throw new Error(`Expected array but got ${typeof backendData}`)
+        }
+        
+        if (backendData.length === 0) {
+          setError("No feedback data available. Please add some feedback first.")
+          setAllData([])
+          setIsLoading(false)
+          return
+        }
+        
+        console.log(`[v0] Successfully loaded ${backendData.length} records`)
+        setAllData(backendData)
+        
+      } catch (error) {
+        console.error("[v0] Error loading data:", error)
+        setError(error.message || "Failed to load analytics data")
+        setAllData([])
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    // Fetch fresh data if cache is missing, old, or invalid
-    if(state.isLoading) {
-      fetchData();
-    }
-  }, [state.isLoading]);
+    loadData()
+  }, [])
 
-  const selectedSiteData = useMemo(() => {
-    return selectedSite && state.data ? state.data[selectedSite] : null;
-  }, [selectedSite, state.data]);
+  const websites = useMemo(() => {
+    if (!Array.isArray(allData) || allData.length === 0) return []
+    const uniqueWebsites = [...new Set(allData.map((item) => item.website))]
+    return uniqueWebsites.sort()
+  }, [allData])
 
-  const consoleShow = () => {
-    const type = localStorage.getItem('type');
-    const cachedData = localStorage.getItem('AnalyticsData');
-    console.log(JSON.parse(cachedData));
-  };
+  const filteredData = useMemo(() => {
+    if (!Array.isArray(allData) || allData.length === 0) return []
+    const filtered = filterDataByTimeframe(allData, selectedTimeframe)
+    console.log(`[v0] Filtered data: ${filtered.length} records for timeframe: ${selectedTimeframe}`)
+    return filtered
+  }, [allData, selectedTimeframe])
 
-  if (state.isLoading) {
+  const chartData = useMemo(() => {
+    const data = getChartData(filteredData, selectedWebsite)
+    console.log(`[v0] Chart data:`, data)
+    return data
+  }, [filteredData, selectedWebsite])
+
+  const metrics = useMemo(() => {
+    const data = getMetrics(filteredData, selectedWebsite)
+    console.log(`[v0] Metrics:`, data)
+    return data
+  }, [filteredData, selectedWebsite])
+
+  if (isLoading) {
     return (
-     <AnalyticsLoader
-        isVisible={true} 
-        message="Loading your content..." 
-      />
-    );
+      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <svg className="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Analytics</h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!Array.isArray(allData) || allData.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <svg className="w-12 h-12 text-blue-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Data Available</h3>
+            <p className="text-gray-600">No feedback data found. Start collecting feedback to see analytics.</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Allow rendering with empty filtered data (will show graphs with 0 values)
+  const hasFilteredData = filteredData.length > 0
+  
+  // Always ensure we have valid data structures
+  const displayChartData = chartData || {
+    reportsByType: [],
+    reportsOverTime: [],
+    reportsByTitle: [],
+    activeVsResolved: [
+      { name: "Active", value: 0, fill: "#F59E0B" },
+      { name: "Resolved", value: 0, fill: "#5BAE83" },
+    ],
+    avgSeverity: 0,
+    avgRating: 0,
+    severityVsRating: [],
+    avgRatingBySeverity: [
+      { level: "Low", avgRating: 0, count: 0 },
+      { level: "Medium", avgRating: 0, count: 0 },
+      { level: "High", avgRating: 0, count: 0 },
+      { level: "Critical", avgRating: 0, count: 0 },
+    ],
+  }
+  
+  const displayMetrics = metrics || {
+    totalReports: 0,
+    activeReports: 0,
+    resolvedReports: 0,
+    websites: 0,
   }
 
   return (
-    <div className="h-full w-full overflow-y-scroll scrollbar-hide  font-sans">
-         <SimpleHeader color="#E94057" />
-      <Background />
-    
+    <div className="min-h-screen  overflow-y-scroll scrollbar-hide font-sans">
+           {/* <Background color={'/#e0e0e0ff'}/> */}
+            <SimpleHeader color={'#c5b5ff'}/>
       <div className="relative h-full  md:px-10 px-5 py-8">
         {/* Header */}
-        <div className=" flex md:flex-row  flex-col justify-between">
-          <div className="heading flex flex-col gap-1">
-                <h1 className="text-4xl  font-extrabold bg-gradient-to-r tracking-tight from-white to-black bg-clip-text text-transparent ">
-                 Analytics Dashboard
+        <div className="mb-0">
+         <div className="relative header flex flex-col gap-5 sm:flex-row justify-between items-start md:items-center">
+              <div className="heading flex flex-col gap-1">
+                <h1 className="text-5xl md:text-5xl md font-bold bg-gradient-to-r tracking-tight from-blue-500 via-purple-400  to-purple-800 bg-clip-text text-transparent ">
+                  Analytics Dashboard
                 </h1>
                 <p className="text-md text-gray-700 tracking-tight">
-                  Comprehensive insights into your product feedback and user sentiment
+                  Welcome back! Here's your Analytics Overview.
                 </p>
               </div>
-          {/* Website Selector */}
-          <WebsiteSelector
-            sites={state.sites || []}
-            selectedSite={selectedSite}
-            onSiteChange={setSelectedSite}
+              <Link
+                to="scriptGen"
+                className="flex items-center justify-center hidden md:flex"
+              >
+                {" "}
+               <AddButton/>
+              </Link>
+            </div>
+          {!hasFilteredData && (
+            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                No data available for the selected timeframe. Showing empty charts. Try selecting "All Time" to see all data.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Selectors */}
+        <Selectors
+          websites={websites}
+          selectedWebsite={selectedWebsite}
+          onWebsiteChange={setSelectedWebsite}
+          selectedTimeframe={selectedTimeframe}
+          onTimeframeChange={setSelectedTimeframe}
+        />
+
+        {/* Metrics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 p-4 gap-4 mb-8">
+          <MetricCard label="Total Reports" value={displayMetrics.totalReports || 0} color="total" />
+          <MetricCard label="Active" value={displayMetrics.activeReports || 0} color="active" />
+          <MetricCard label="Resolved" value={displayMetrics.resolvedReports || 0} color="resolved" />
+          <MetricCard
+            label="Critical"
+            value={filteredData.filter((item) => item.severity && item.severity >= 4).length}
+            color="critical"
+          />
+          <MetricCard
+            label="Avg Rating"
+            value={displayChartData.avgRating > 0 ? displayChartData.avgRating.toFixed(1) : "N/A"}
+            color="rating"
           />
         </div>
 
-        {selectedSiteData ? (
-          <>
-            {/* Stats Overview */}
-            {/* <div className="mb-8">
-              <StatsGrid siteData={selectedSiteData} />
-            </div> */}
-              <div className="mb-5">
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ChartCard title="Reports by Type">
+            <ReportsByTypeChart data={displayChartData.reportsByType} />
+          </ChartCard>
 
-              <StatsGrid siteData={selectedSiteData} />
-              </div>
-            {/* Charts Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 black ">
-              {/* Pie Chart */}
-              <Card className=" backdrop-blur-md bg-white/80 border border-white/10  shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex sm:text-2xl text-lg items-center gap-2">
-                    <MessageSquare className="h-5 w-5 text-blue-500" />
-                    Feedback Type Distribution
-                  </CardTitle>
-                  <CardDescription>
-                    Breakdown of feedback categories for {selectedSite}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div style={{ width: "100%", height: "300px" }}>
-                    <FeedbackPieChart data={selectedSiteData} />
-                  </div>
-                </CardContent>
-              </Card>
+          <ChartCard title="Reports Over Time">
+            <ReportsOverTimeChart data={displayChartData.reportsOverTime} />
+          </ChartCard>
 
-              {/* Daily Breakdown Chart */}
-              <Card className=" backdrop-blur-md bg-white/80 border border-white/10   shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex  sm:text-2xl text-lg items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-500" />
-                    Daily Feedback Breakdown
-                  </CardTitle>
-                  <CardDescription >
-                    Daily feedback distribution for {selectedSiteData.currentMonth?.name}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div style={{ width: "100%", height: "350px" }}>
-                    <DailyBreakdownChart data={selectedSiteData} />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-gray-500">
-              {state.sites?.length === 0 ? 'No websites found' : 'Select a website to view analytics'}
-            </div>
-          </div>
-        )}
-        {/* <FeedbackTrendsAreaChart
-          data={selectedSiteData}
-          onClick={() => console.log(selectedSiteData)}
-        /> */}
-        <button 
-          onClick={consoleShow}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Show Cached Data
-        </button>
+          <ChartCard title="Average Rating by Severity">
+            <AvgRatingBySeverityChart data={displayChartData.avgRatingBySeverity} />
+          </ChartCard>
+
+          <ChartCard title="Active vs Resolved">
+            <ActiveVsResolvedChart data={displayChartData.activeVsResolved} />
+          </ChartCard>
+
+          <ChartCard title="Average Severity & Rating">
+            <SeverityRatingChart avgSeverity={displayChartData.avgSeverity} avgRating={displayChartData.avgRating} />
+          </ChartCard>
+
+          <ChartCard title="Severity vs Rating">
+            <SeverityVsRatingChart data={displayChartData.severityVsRating} />
+          </ChartCard>
+        </div>
       </div>
     </div>
-  );
-});
+  )
+}

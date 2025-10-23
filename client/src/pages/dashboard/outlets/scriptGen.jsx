@@ -30,31 +30,19 @@ export const ScriptGen = () => {
     color: "#2563EB",
     bgColor: "#ffffff",
     text: "Feedback",
-    loaded: false,
+    loading: false,
     botContext: "",
+    ackMail:true,
   });
 
-  const copyToClipboard = async (text) => {
+  const copyToClipboard = async (opt,text) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopied(true);
+      setCopied(opt);
       setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
     } catch (err) {
       console.error('Failed to copy text: ', err);
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try {
-        document.execCommand('copy');
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (fallbackErr) {
-        console.error('Fallback copy failed: ', fallbackErr);
-      }
-      document.body.removeChild(textArea);
+
     }
   };
 
@@ -102,7 +90,7 @@ export const ScriptGen = () => {
 
     try {
       console.log("Starting API call...");
-      setUrlsettings((prev) => ({ ...prev, loaded: true }));
+      setUrlsettings((prev) => ({ ...prev, loading: true }));
 
       let res = await axios.post(
         `${apiUrl}/api/script/create`,
@@ -115,10 +103,10 @@ export const ScriptGen = () => {
       console.log("API response:", res);
       setScriptInj(res.data.injection);
       await wait(4000);
-      setUrlsettings((prev) => ({ ...prev, loaded: false }));
+      setUrlsettings((prev) => ({ ...prev, loading: false }));
     } catch (err) {
       console.error("API error:", err);
-      setUrlsettings((prev) => ({ ...prev, loaded: false }));
+      setUrlsettings((prev) => ({ ...prev, loading: false }));
     }
   };
   useEffect(()=>{
@@ -229,8 +217,8 @@ const genDemo = async (e) => {
           </div>
         </div>
         
-        <div className="relative mb-6">
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-primary5 via-black/80 to-black bg-clip-text text-transparent">
+        <div className="relative mb-12">
+          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-primary5 via-black/80 to-black bg-clip-text text-transparent">
             Script Generator
           </h1>
           <p className="text-md text-black tracking-tight">
@@ -247,8 +235,11 @@ const genDemo = async (e) => {
                 UrlSettings={UrlSettings}
                 setUrlsettings={setUrlsettings}
                 genScript={genScript}
+                scriptInj={scriptInj}
                 genDemo={genDemo}
+                copied={copied}
                 showDemo={showDemo}
+                copyToClipboard={copyToClipboard}
               />
             </div>
             
@@ -261,13 +252,13 @@ const genDemo = async (e) => {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => copyToClipboard(scriptInj)}
+                      onClick={() => copyToClipboard(2,scriptInj)}
                       className={`text-gray-300 hover:rotate-12  rounded-md hover:text-primary2 transition-all ease-in-out duration-300  hover:bg-white hover:text-primary2 p-1 cursor-pointer ${!scriptInj ? 'opacity-50 cursor-not-allowed' : ''}`}
                       disabled={!scriptInj}
                       title="Copy to clipboard"
                     
                     >
-                      {copied ? <Check size={20} /> : <LucideCopy size={20} />}
+                      {copied==2 ? <Check size={20} /> : <LucideCopy size={20} />}
                     </button>
                     <button
                       onClick={() => {
@@ -285,7 +276,7 @@ const genDemo = async (e) => {
                 </div>
                 
                 <div className=" h-[80%] ">
-                  {UrlSettings.loaded ? (
+                  {UrlSettings.loading ? (
                     <div className="px-4 w-full h-full bg-gray-900 flex flex-col items-center justify-center">
                       <Loader />
                       {/* <p className="text-white mt-4">Generating script...</p> */}

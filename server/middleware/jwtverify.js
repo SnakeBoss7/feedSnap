@@ -7,7 +7,7 @@ const verifyUser = (req, res, next) => {
         // console.log('Headers:', req.headers);
         
         const token = req.cookies.token;
-        // console.log('Extracted token:', token);
+        console.log('Extracted token:', token);
         
         if (!token) {
             console.log('Token not found in cookies');

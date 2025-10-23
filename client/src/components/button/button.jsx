@@ -1,76 +1,104 @@
+
+    import { exportData } from '../../services/exportData';
 import React from 'react';
 import styled from 'styled-components';
-import { exportData } from '../../services/exportData';
 
 const ButtonDownload = ({formatType,content}) => {
   return (
     <StyledWrapper onClick={()=>{exportData(formatType)}}>
-      <button className="button" type="button">
-        <span className="button__text">{content}</span>
-        <span className="button__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35" id="bdd05811-e15d-428c-bb53-8661459f9307" data-name="Layer 2" className="svg"><path d="M17.5,22.131a1.249,1.249,0,0,1-1.25-1.25V2.187a1.25,1.25,0,0,1,2.5,0V20.881A1.25,1.25,0,0,1,17.5,22.131Z" /><path d="M17.5,22.693a3.189,3.189,0,0,1-2.262-.936L8.487,15.006a1.249,1.249,0,0,1,1.767-1.767l6.751,6.751a.7.7,0,0,0,.99,0l6.751-6.751a1.25,1.25,0,0,1,1.768,1.767l-6.752,6.751A3.191,3.191,0,0,1,17.5,22.693Z" /><path d="M31.436,34.063H3.564A3.318,3.318,0,0,1,.25,30.749V22.011a1.25,1.25,0,0,1,2.5,0v8.738a.815.815,0,0,0,.814.814H31.436a.815.815,0,0,0,.814-.814V22.011a1.25,1.25,0,1,1,2.5,0v8.738A3.318,3.318,0,0,1,31.436,34.063Z" /></svg></span>
+      <button className="download-button">
+        <div className="docs">
+          <svg viewBox="0 0 24 24" width={20} height={20} stroke="currentColor" strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" className="css-i6dzq1">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1={16} y1={13} x2={8} y2={13} />
+            <line x1={16} y1={17} x2={8} y2={17} />
+            <polyline points="10 9 9 9 8 9" />
+          </svg>
+          {content}
+        </div>
+        <div className="download">
+          <svg viewBox="0 0 24 24" width={24} height={24} stroke="currentColor" strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" className="css-i6dzq1">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1={12} y1={15} x2={12} y2={3} />
+          </svg>
+        </div>
       </button>
     </StyledWrapper>
   );
 }
 
 const StyledWrapper = styled.div`
-  .button {
+  .download-button {
     position: relative;
-    width: 150px;
-    height: 40px;
-    cursor: pointer;
+    border-width: 0;
+    color: rgb(19, 19, 19);
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 4px;
+    z-index: 1;
+  }
+
+  .download-button .docs {
     display: flex;
     align-items: center;
-    border: 1px solid #111828;
-    background-color: #525e6f;
-    overflow: hidden;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 40px;
+    padding: 0 10px;
+    border-radius: 4px;
+    z-index: 1;
+    background-color: #ffffff;
+    border: solid 1px #e8e8e82d;
+    transition: all 0.5s cubic-bezier(0.77, 0, 0.175, 1);
   }
 
-  .button, .button__icon, .button__text {
-    transition: all 0.3s;
+  .download-button:hover {
+    box-shadow: rgba(233, 233, 233, 0.555) 0px 54px 55px,
+      rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px,
+      rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
   }
 
-  .button .button__text {
-    transform: translateX(22px);
-    color: #fff;
-    font-weight: 600;
-  }
-
-  .button .button__icon {
+  .download {
     position: absolute;
-    transform: translateX(109px);
-    height: 100%;
-    width: 39px;
-    background-color: #111828;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    max-width: 90%;
+    margin: 0 auto;
+    z-index: -1;
+    border-radius: 0px 0px 4px 4px ;
+    transform: translateY(0%);
+    background-color: #1e82e0ff;
+
+    color:white;
+    transition: all 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    cursor: pointer;
   }
 
-  .button .svg {
-    width: 20px;
-    fill: #fff;
+  .download-button:hover .download {
+    transform: translateY(100%);
   }
 
-  .button:hover {
-    background: #111828;
+  .download svg polyline,
+  .download svg line {
+    animation: docs 1s infinite;
   }
 
-  .button:hover .button__text {
-    color: transparent;
-  }
+  @keyframes docs {
+    0% {
+      transform: translateY(0%);
+    }
 
-  .button:hover .button__icon {
-    width: 148px;
-    transform: translateX(0);
-  }
+    50% {
+      transform: translateY(-15%);
+    }
 
-  .button:active .button__icon {
-    background-color: #1E2939;
-  }
-
-  .button:active {
-    border: 1px solid #1E2939;
+    100% {
+      transform: translateY(0%);
+    }
   }`;
 
 export default ButtonDownload;

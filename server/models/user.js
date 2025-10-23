@@ -11,4 +11,4 @@ const UserSchema = mongoose.Schema({
   firebaseId: String,
   createdAt: { type: Date, default: Date.now },
 });
-module.exports = mongoose.model("user", UserSchema);
+module.exports = mongoose.model("User", UserSchema);

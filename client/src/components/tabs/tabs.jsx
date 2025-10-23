@@ -1,13 +1,14 @@
 import { useState, useCallback, useMemo, memo } from "react";
-import { Paintbrush, LucideInfo, Globe2Icon, LucideStars, LucideTvMinimalPlay, LucideArrowUpLeftFromSquare, LucideShield, Bot } from "lucide-react";
+import { Paintbrush, LucideInfo, Globe2Icon, LucideStars, LucideTvMinimalPlay, LucideArrowUpLeftFromSquare, LucideShield, Bot, Copy, Brain, TicketCheckIcon, MailCheck } from "lucide-react";
 import Select from "react-select";
+import Switch from "../button/switch";
 
 // Memoized tab button component
 const TabButton = memo(({ tab, index, isActive, onClick }) => (
   <button
     type="button"
     onClick={onClick}
-    className={`relative flex-1 tracking-tight text-center py-2 font-medium transition-colors duration-300 z-10 ${
+    className={`relative flex-1 tracking-tight text-center py-2 text-sm md:text-lg font-medium transition-colors duration-300 z-10 ${
       isActive ? "text-white" : "text-gray-600"
     }`}
   >
@@ -94,14 +95,14 @@ const SELECT_STYLES = {
 };
 
 // Main component
-export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlsettings, genScript, genDemo, showDemo }) {
+export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlsettings,copied, genScript,scriptInj,copyToClipboard, genDemo, showDemo }) {
   const [active, setActive] = useState(0);
   
   // Static tabs array
   const tabs = useMemo(() => [
     { label: "Configuration" },
     { label: "Customization" },
-    { label: "Preview" },
+    { label: "Installation" },
   ], []);
 
   // Memoized callbacks
@@ -175,9 +176,14 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
                 </p>
               </div>
 
-              <div className="flex flex-col gap-8 py-3">
+              <div className="flex flex-col justify-between gap-3">
                 <WebUrlInput value={UrlSettings.webUrl} onChange={handleInputChange} />
-                
+                <div>
+                   <label htmlFor="web_url" className="flex pb-2 items-center gap-2 tracking-tight text-lg font-bold">
+      <MailCheck size={18}/> Acknowledgment email.
+    </label>
+                  <Switch UrlSettings={UrlSettings} setUrlsettings={setUrlsettings}/>
+                </div>
                 {/* <div>
                   <h2 className="flex items-center gap-2 tracking-tight text-lg font-bold">
                     <LucideShield className="text-primary" size={18}/>
@@ -198,13 +204,13 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
                  <textarea name="botContext" id=""  onChange={handleInputChange} className="h-[120px] w-full p-2 backdrop-blur-md bg-[#fff] border border-black/30 rounded-md mt-2 relative z-10" placeholder="Tell us about your website..."></textarea>
                </div>
 
-                <div className="w-full rounded-lg border border-primary5        bg-primary/10 px-1 flex gap-2">
+                {/* <div className="w-full rounded-lg border border-primary5        bg-primary/10 px-1 flex gap-2">
                   <LucideStars size={30} className="text-primary"/>
                   <span className="font-bold tracking-tight lg:text-sm text-[10px] text-primary">
                     For Live Demo: 
                     <span className="font-[100] lg:text-[12px] text-[10px] text-black"> Complete the customization in the next tab, then use the Preview tab to see your widget in action before going live.</span>
                   </span>
-                </div>
+                </div> */}
               </div>
             </>
           )}
@@ -212,13 +218,13 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
           {/* Customization Tab */}
           {active === 1 && (
             <>
-              <h1 className="tracking-tight text-[22px] font-extrabold flex items-center gap-2">
+             <div> <h1 className="tracking-tight text-[22px] font-extrabold flex items-center gap-2">
                 <Paintbrush className="text-white rounded-md bg-primary1 p-1 h-6 w-6" size={30} />
                 Widget Customization
               </h1>
               <p className="mb-9 tracking-tight text-gray-600 text-sm pt-1">
                 Customize the appearance and behavior of your widget
-              </p>
+              </p></div>
 
               <div className="flex flex-col justify-between gap-2">
                 <label htmlFor="position" className="text-lg font-extrabold block z-[9999999999]">
@@ -245,9 +251,48 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
 
           {/* Preview Tab */}
           {active === 2 && (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-gray-600">Preview content goes here</p>
-            </div>
+            <>
+    
+      <div>
+        <h1 className="tracking-tight text-[22px] font-extrabold flex items-center gap-2">
+        <Brain  className="text-white rounded-md bg-primary5 p-1 h-6 w-6" size={30}/> Widget Installation
+      </h1>
+
+      <p className="mb-9 tracking-tight text-gray-600 text-sm pt-1">
+        Follow these simple steps to integrate FeedSnap into your website 👇
+      </p>
+      </div>
+
+      <ol className="list-decimal list-inside text-md text-gray-700 space-y-2 mb-6">
+        <li>Copy the script shown below.</li>
+        <li>
+          Paste it just before the{" "}
+          <code className="bg-gray-600 text-white  px-2 py-1 rounded-sm">
+            &lt;/body&gt;
+          </code>{" "}
+          tag of your website.
+        </li>
+        <li>Save your page and refresh — your widget should appear instantly </li>
+      </ol>
+
+      {/* Script Display */}
+      <div className="relative bg-gray-200  border border-blue-200  rounded-lg p-3 font-mono text-sm text-gray-800 ">
+        <pre className="overflow-x-auto whitespace-pre-wrap">{scriptInj?scriptInj:`<script src="datahereRandomDataIM_MR_ROBTO">THis isa demo script so calm the fuck down </script>`}</pre>
+        <button
+        type="button"
+          onClick={()=>copyToClipboard(1,scriptInj)}
+          className="absolute top-2 right-2 text-xs bg-gray-200  text-gray-800  p-2 rounded-xl hover:bg-blue-200 transition-colors flex items-center gap-1"
+        >
+         {copied == 1? <TicketCheckIcon size={15}  className="text-primary5 bg-blue-100"/>: <Copy size={15}  className="text-primary5 bg-blue-100"/>}
+          {/* {copied ? "Copied!" : "Copy"} */}
+        </button>
+      </div>
+
+      <p className="text-xs text-gray-600 mt-3">
+        💡 Tip: You can re-generate this script anytime from the “Script Generator” page.
+      </p>
+
+            </>
           )}
         </div>
 

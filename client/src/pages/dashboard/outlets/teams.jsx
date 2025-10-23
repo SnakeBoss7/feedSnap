@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Header } from '../../../components/PageComponents/teams/header';
 import { StatsGrid } from '../../../components/PageComponents/teams/statsGrid';
 import { TeamCard } from '../../../components/PageComponents/teams//teamCard';
@@ -6,39 +6,57 @@ import { CreateTeamPopup } from '../../../components/PageComponents/teams/create
 import { TeamManagementPopup } from '../../../components/PageComponents/teams/teamPopUp';
 import { Background } from '../../../components/background/background';
 import { SimpleHeader } from '../../../components/header/header';
-
+import axios from 'axios';
+const apiUrl = process.env.REACT_APP_API_URL;
 // Sample data
-const mockTeams = [
-  {
-    id: 1,
-    name: "Frontend Development",
-    description: "Building amazing user interfaces",
-    memberCount: 8,
-    createdAt: "2024-01-15",
-    members: [
-      { id: 1, name: "John Doe", email: "john@company.com", role: "owner" },
-      { id: 2, name: "Jane Smith", email: "jane@company.com", role: "editor" },
-      { id: 3, name: "Mike Johnson", email: "mike@company.com", role: "viewer" },
-      { id: 4, name: "Sarah Wilson", email: "sarah@company.com", role: "editor" },
-      { id: 5, name: "Tom Brown", email: "tom@company.com", role: "viewer" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Backend Development",
-    description: "Server-side architecture and APIs",
-    memberCount: 6,
-    createdAt: "2024-01-10",
-    members: [
-      { id: 4, name: "Sarah Wilson", email: "sarah@company.com", role: "owner" },
-      { id: 5, name: "Tom Brown", email: "tom@company.com", role: "editor" },
-      { id: 6, name: "Lisa Davis", email: "lisa@company.com", role: "editor" },
-    ],
-  },
-];
+
+
+// const demoData = [
+//   {
+//     id: 1,
+//     name: "Frontend Development",
+//     description: "Building amazing user interfaces",
+//     memberCount: 8,
+//     createdAt: "2024-01-15",
+//     members: [
+//       { id: 1, name: "John Doe", email: "john@company.com", role: "owner" },
+//       { id: 2, name: "Jane Smith", email: "jane@company.com", role: "editor" },
+//       { id: 3, name: "Mike Johnson", email: "mike@company.com", role: "viewer" },
+//       { id: 4, name: "Sarah Wilson", email: "sarah@company.com", role: "editor" },
+//       { id: 5, name: "Tom Brown", email: "tom@company.com", role: "viewer" },
+//     ],
+//   },
+//   {
+//     id: 2,
+//     name: "Backend Development",
+//     description: "Server-side architecture and APIs",
+//     memberCount: 6,
+//     createdAt: "2024-01-10",
+//     members: [
+//       { id: 4, name: "Sarah Wilson", email: "sarah@company.com", role: "owner" },
+//       { id: 5, name: "Tom Brown", email: "tom@company.com", role: "editor" },
+//       { id: 6, name: "Lisa Davis", email: "lisa@company.com", role: "editor" },
+//     ],
+//   },
+// ];
 
 // Main Component
 export const TeamsOverview = () => {
+  const [teamData, setTeamData] = useState([]);
+  useEffect(()=>
+  {
+    const fetchTeams = async () => {
+      try {
+      const res = await axios.get(`${apiUrl}/api/team/getTeams`, { withCredentials: true });
+      console.log('Fetched teams:', res.data.teams);
+      setTeamData(res.data.teams);
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+    }
+
+    }
+    fetchTeams();
+  },[])
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [isManagePopupOpen, setIsManagePopupOpen] = useState(false);
   const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
@@ -51,14 +69,7 @@ export const TeamsOverview = () => {
   const handleCreateTeam = async (teamData) => {
     try {
       // Backend call for creating team
-      const response = await fetch('/api/teams', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(teamData),
-      });
-      
+      const response = await axios.post(`${apiUrl}/api/team/createTeam`, teamData, { withCredentials: true });
       if (response.ok) {
         const newTeam = await response.json();
         console.log('Team created successfully:', newTeam);
@@ -123,15 +134,15 @@ export const TeamsOverview = () => {
 
   return (
     <div className="h-full w-full overflow-y-auto  font-sans">
-      <Background color={'#5BAE83'}/>
-      <SimpleHeader color={'#5BAE83'}/>
+      <Background color={'#085730ff'}/>
+      <SimpleHeader color={'#139152ff'}/>
       <div className=" md:px-10 px-5 py-8">
         <Header onCreateTeam={() => setIsCreatePopupOpen(true)} />
-        <StatsGrid teams={mockTeams} />
+        <StatsGrid teams={teamData} />
         
         <div className="rounded-lg shadow-sm ">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {mockTeams.map((team) => (
+            {teamData.map((team) => (
               <TeamCard
                 key={team.id}
                 team={team}
@@ -143,6 +154,8 @@ export const TeamsOverview = () => {
       </div>
 
       <CreateTeamPopup
+      teams={teamData}
+      setTeam={setTeamData}
         isOpen={isCreatePopupOpen}
         onClose={() => setIsCreatePopupOpen(false)}
         onCreateTeam={handleCreateTeam}

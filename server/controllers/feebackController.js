@@ -1,29 +1,65 @@
 const user = require("../models/user");
 const webData = require("../models/WebData");
 const feedback = require("../models/feedback");
+const Team = require("../models/teamSchema"); // Add this import
 const cloudinary = require("../config/cloudinary");
 const { Parser } = require("json2csv");
 const PDFDocument = require("pdfkit");
+const { sendFeedbackEmail } = require("../utils/ackMails");
+
+// Helper function to get all websites accessible to a user
+const getUserAccessibleWebsites = async (userId) => {
+  try {
+    // 1. Get websites directly owned by or shared with the user
+    const directWebData = await webData.find({
+      $or: [
+        { owner: userId },
+        { members: userId }
+      ]
+    });
+
+    // 2. Get teams where user is a member
+    const userTeams = await Team.find({
+      'members.user': userId
+    }).select('webData');
+
+    // 3. Combine direct websites and team websites
+    const directSites = directWebData.map(web => web.webUrl);
+    const teamSites = userTeams
+      .map(team => team.webData)
+      .filter(webData => webData); // Filter out null/undefined
+
+    // 4. Merge and deduplicate
+    const allSites = [...new Set([...directSites, ...teamSites])];
+
+    return {
+      sites: allSites,
+      webDataObjects: directWebData,
+      teams: userTeams
+    };
+  } catch (error) {
+    console.error("Error fetching user accessible websites:", error);
+    throw error;
+  }
+};
 
 //creating exportable file
 const exportFeedback = async (req, res) => {
-    try {
-          const user = req.user;
-        const userWebData = await webData.find({
-    $or: [
-      { owner: user.id },
-      { members: user.id }
-    ]
-  });
-  const sites = userWebData.map((web) => web.webUrl);
-  const feedbacks = await feedback
-    .find({ webUrl: { $in: sites } })
-    .sort({ createdOn: -1 ,webUrl:1});
+  try {
+    const user = req.user;
+    
+    // Use the helper function to get all accessible websites
+    const { sites } = await getUserAccessibleWebsites(user.id);
+    
+    const feedbacks = await feedback
+      .find({ webUrl: { $in: sites } })
+      .sort({ createdOn: -1, webUrl: 1 });
 
     const { format } = req.query; // csv | pdf | json
-  console.log(format);
+    console.log(format);
+
     if (format === "csv") {
-      const fields = ["title", "description", "rating", "webUrl","pathname", "createdOn"];
+      const fields = ["title", "description", "rating", "webUrl", "pathname", "createdOn"];
       const parser = new Parser({ fields });
       const csv = parser.parse(feedbacks);
 
@@ -43,7 +79,7 @@ const exportFeedback = async (req, res) => {
 
       feedbacks.forEach((fb, i) => {
         doc.fontSize(12).text(
-          `${i + 1}. [${fb.website}] ⭐${fb.rating}\nTitle: ${fb.title}\nDesc: ${fb.description}\nDate: ${fb.createdAt}\n`
+          `${i + 1}. [${fb.webUrl}] ⭐${fb.rating}\nTitle: ${fb.title}\nDesc: ${fb.description}\nDate: ${fb.createdOn}\n`
         );
         doc.moveDown();
       });
@@ -61,33 +97,107 @@ const exportFeedback = async (req, res) => {
     res.status(500).json({ message: "Error exporting feedback" });
   }
 };
+
 //adding feedback to mongo
 const createFeed = async (req, res) => {
   console.log(req.body);
+  const {webUrl,pathname,title,email,description,rating,config}= req.body
   res.status(200).json({ mess: "cooked" });
   let data = await feedback.create(req.body);
+  if(req.body.config.ackMail)
+    {
+      const currentDate = new Date().toLocaleString("en-IN", {
+  timeZone: "Asia/Kolkata",
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+      let mail = `<html>
+  <body style=\"font-family: 'Helvetica Neue', Arial, sans-serif; color:#111; margin:0; padding:0;\">
+    <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f6f7fb; padding:28px 0;\">
+      <tr>
+        <td align=\"center\">
+          <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff; border-radius:8px; overflow:hidden;\">
+            <tr>
+              <td style=\"padding:28px;\">
+                <h1 style=\"margin:0 0 8px 0; font-size:20px;\">We received your feedback — thank you👏</h1>
+                <p style=\"margin:0 0 18px 0; color:#555;\">We’ve recorded your submission and a member of our team will review it shortly.</p>
+
+                <h3 style=\"margin:12px 0 6px 0; font-size:14px; color:#333;\">What you sent</h3>
+                <table cellpadding=\"6\" cellspacing=\"0\" style=\"width:100%; border-collapse:collapse; font-size:14px; color:#333;\">
+                  <tr>
+                    <td style=\"width:130px; color:#666;\">Type</td>
+                    <td><strong>${title}</strong></td>
+                  </tr>
+                  <tr style=\"background:#fafafa;\">
+                    <td style=\"color:#666;\">Rating</td>
+                    <td><strong>${rating} / 5</strong></td>
+                  </tr>
+                  <tr>
+                    <td style=\"color:#666; vertical-align:top;\">Title</td>
+                    <td>${title}</td>
+                  </tr>
+                  <tr style=\"background:#fafafa;\">
+                    <td style=\"color:#666; vertical-align:top;\">Comment</td>
+                    <td style=\"white-space:pre-wrap;\">${description}</td>
+                  </tr>
+                  <tr>
+                    <td style=\"color:#666;\">Website</td>
+                    <td><a href=\"${webUrl}\" target=\"_blank\" style=\"color:#0366d6; text-decoration:none;\">${webUrl}</a></td>
+                  </tr>
+                  <tr style=\"background:#fafafa;\">
+                    <td style=\"color:#666;\">Page</td>
+                    <td>${pathname}</td>
+                  </tr>
+                  <tr>
+                    <td style=\"color:#666;\">Submitted</td>
+                    <td>${currentDate}</td>
+                  </tr>
+                </table>
+
+                <p style=\"margin:18px 0 0 0; color:#555; font-size:13px;\">
+                  We take your privacy seriously — your email will only be used to follow up on this feedback. If you’d like a direct reply, simply hit reply to this message.
+                </p>
+
+                <div style=\"margin-top:20px; display:flex; gap:12px; align-items:center;\">
+                  <a href=\"mailto:support@${email}\" style=\"color:#0366d6; text-decoration:none; font-size:13px;\">Contact support</a>
+                </div>
+
+                <hr style=\"border:none;border-top:1px solid #eee;margin:22px 0;\" />
+                <p style=\"margin:0; font-size:13px; color:#777;\">Thanks — FeedSnap Team<br/><small style=\"color:#aaa;\">FeedSnap• Built with ❤️</small></p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`
+      
+sendFeedbackEmail(email,`Thanks for your feedback on ${webUrl}`,mail);
+}
+
   console.log(data);
 };
 
 const getFeed = async (req, res) => {
   const user = req.user;
   console.log(user);
-  //getting user websites
-      const userWebData = await webData.find({
-    $or: [
-      { owner: user.id },
-      { members: user.id }
-    ]
-  });
-  console.log(userWebData)
-  const sites = userWebData.map((web) => web.webUrl);
-  // console.log(sites);
+  
+  // Use the helper function to get all accessible websites
+  const { sites, webDataObjects } = await getUserAccessibleWebsites(user.id);
+  
+  console.log("All accessible sites:", sites);
 
   //getting users feedback
   const userfeedback = await feedback
     .find({ webUrl: { $in: sites } })
     .sort({ createdOn: -1 });
-  // console.log(userfeedback)
+
   const avgRating1 = await feedback.aggregate([
     {
       $match: {
@@ -111,7 +221,7 @@ const getFeed = async (req, res) => {
       },
     },
   ]);
-  // Alternative approach: More efficient for large datasets
+
   const totalFeedbacks1 = await webData.aggregate([
     {
       $match: {
@@ -120,12 +230,12 @@ const getFeed = async (req, res) => {
     },
     {
       $lookup: {
-        from: "feedback",
+        from: "feedbacks",
         let: { webUrl: "$webUrl" },
         pipeline: [
           {
             $match: {
-              $expr: { $eq: ["$webUrl", "$$webUrl"] },
+              $expr: { $eq: ["$webUrl", "$webUrl"] },
             },
           },
           {
@@ -145,61 +255,53 @@ const getFeed = async (req, res) => {
       },
     },
   ]);
+
   console.log(totalFeedbacks1);
   console.log(avgRating1);
+
   //rating of each site
   const ratingPerSite = {};
   const avgRatingPerSite = {};
   const ratingCountPerSite = {};
   const feedbackPerSite = {};
   let totalFeedbacks = userfeedback.length;
+
   userfeedback.forEach((fb) => {
     const { webUrl, rating } = fb;
     feedbackPerSite[webUrl] = (feedbackPerSite[webUrl] || 0) + 1;
     if (!isNaN(rating) && rating && rating !== "" && rating !== " ") {
-      // console.log(rating);
       ratingPerSite[webUrl] = (ratingPerSite[webUrl] || 0) + rating;
       ratingCountPerSite[webUrl] = (ratingCountPerSite[webUrl] || 0) + 1;
     }
   });
+
   sites.forEach((site) => {
     avgRatingPerSite[site] = (
       ratingPerSite[site] / ratingCountPerSite[site]
     ).toFixed(1);
   });
+
   const values = Object.values(avgRatingPerSite).map(Number);
   const total = values.reduce((acc, val) => acc + val, 0);
   const avgRating = (total / values.length).toFixed(1);
-  // console.log(avgRatingPerSite);
-  res
-    .status(200)
-    .json({
-      sites,
-      userfeedback,
-      totalFeedbacks,
-      avgRatingPerSite,
-      avgRating,
-      feedbackPerSite,
-      mess: "data fetched succesfully",
-    });
-  // res.status(400).json({mess:'fetch failed ,Looks like you have no data'})
+
+
+  res.status(200).json({
+    sites,
+    userfeedback,
+    totalFeedbacks,
+    avgRatingPerSite,
+    avgRating,
+    feedbackPerSite,
+    mess: "data fetched succesfully",
+  });
 };
 
 // getting last and current months total
 const getMonthName = (monthIndex) => {
   const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
   ];
   return months[monthIndex];
 };
@@ -219,7 +321,6 @@ const getDateRanges = () => {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth();
 
-  // Calculate last month
   let lastMonth = currentMonth - 1;
   let lastYear = currentYear;
   if (lastMonth < 0) {
@@ -230,9 +331,7 @@ const getDateRanges = () => {
   return {
     current: {
       start: new Date(Date.UTC(currentYear, currentMonth, 1, 0, 0, 0, 0)),
-      end: new Date(
-        Date.UTC(currentYear, currentMonth + 1, 0, 23, 59, 59, 999)
-      ),
+      end: new Date(Date.UTC(currentYear, currentMonth + 1, 0, 23, 59, 59, 999)),
       monthIndex: currentMonth,
       year: currentYear,
     },
@@ -268,10 +367,7 @@ const getFeedbackCountByPeriod = async (webUrl, startDate, endDate) => {
     });
     return count;
   } catch (error) {
-    console.error(
-      `Error getting feedback count by period for ${webUrl}:`,
-      error
-    );
+    console.error(`Error getting feedback count by period for ${webUrl}:`, error);
     return 0;
   }
 };
@@ -299,7 +395,6 @@ const getFeedbackBreakdownByPeriod = async (webUrl, startDate, endDate) => {
 
     const results = await feedback.aggregate(pipeline);
 
-    // Initialize all categories with 0
     const breakdown = {
       bug: 0,
       complaint: 0,
@@ -309,7 +404,6 @@ const getFeedbackBreakdownByPeriod = async (webUrl, startDate, endDate) => {
       other: 0,
     };
 
-    // Map results to our categories
     results.forEach((result) => {
       const category = FEEDBACK_CATEGORIES[result._id] || "other";
       breakdown[category] = result.count;
@@ -346,7 +440,6 @@ const getOverallCategoryBreakdown = async (webUrl) => {
 
     const results = await feedback.aggregate(pipeline);
 
-    // Initialize all categories with 0
     const breakdown = {
       bug: 0,
       complaint: 0,
@@ -356,7 +449,6 @@ const getOverallCategoryBreakdown = async (webUrl) => {
       other: 0,
     };
 
-    // Map results to our categories
     results.forEach((result) => {
       const category = FEEDBACK_CATEGORIES[result._id] || "other";
       breakdown[category] = result.count;
@@ -376,12 +468,11 @@ const getOverallCategoryBreakdown = async (webUrl) => {
   }
 };
 
-// NEW: Helper function to get daily breakdown for current month
+// Helper function to get daily breakdown for current month
 const getCurrentMonthDailyBreakdown = async (webUrl) => {
   try {
     const dateRanges = getDateRanges();
 
-    // Get the number of days in current month
     const daysInMonth = new Date(
       dateRanges.current.year,
       dateRanges.current.monthIndex + 1,
@@ -400,7 +491,6 @@ const getCurrentMonthDailyBreakdown = async (webUrl) => {
       },
       {
         $addFields: {
-          // Convert createdOn to Date if it's a string
           createdOnDate: {
             $cond: {
               if: { $eq: [{ $type: "$createdOn" }, "string"] },
@@ -426,7 +516,6 @@ const getCurrentMonthDailyBreakdown = async (webUrl) => {
 
     const results = await feedback.aggregate(pipeline);
 
-    // Initialize all days with zero counts
     const dailyBreakdown = {};
     for (let day = 1; day <= daysInMonth; day++) {
       dailyBreakdown[day] = {
@@ -439,7 +528,6 @@ const getCurrentMonthDailyBreakdown = async (webUrl) => {
       };
     }
 
-    // Fill in actual feedback counts
     results.forEach((result) => {
       const day = result._id.day;
       const title = result._id.title;
@@ -461,7 +549,6 @@ const getWebsiteFeedbackAnalytics = async (webUrl) => {
   try {
     const dateRanges = getDateRanges();
 
-    // Get all the data in parallel for better performance
     const [
       totalFeedback,
       currentMonthCount,
@@ -472,27 +559,11 @@ const getWebsiteFeedbackAnalytics = async (webUrl) => {
       dailyBreakdown,
     ] = await Promise.all([
       getTotalFeedbackCount(webUrl),
-      getFeedbackCountByPeriod(
-        webUrl,
-        dateRanges.current.start,
-        dateRanges.current.end
-      ),
-      getFeedbackCountByPeriod(
-        webUrl,
-        dateRanges.last.start,
-        dateRanges.last.end
-      ),
+      getFeedbackCountByPeriod(webUrl, dateRanges.current.start, dateRanges.current.end),
+      getFeedbackCountByPeriod(webUrl, dateRanges.last.start, dateRanges.last.end),
       getOverallCategoryBreakdown(webUrl),
-      getFeedbackBreakdownByPeriod(
-        webUrl,
-        dateRanges.current.start,
-        dateRanges.current.end
-      ),
-      getFeedbackBreakdownByPeriod(
-        webUrl,
-        dateRanges.last.start,
-        dateRanges.last.end
-      ),
+      getFeedbackBreakdownByPeriod(webUrl, dateRanges.current.start, dateRanges.current.end),
+      getFeedbackBreakdownByPeriod(webUrl, dateRanges.last.start, dateRanges.last.end),
       getCurrentMonthDailyBreakdown(webUrl),
     ]);
 
@@ -506,14 +577,11 @@ const getWebsiteFeedbackAnalytics = async (webUrl) => {
         count: lastMonthCount,
         name: getMonthName(dateRanges.last.monthIndex),
       },
-      // Overall category breakdown
       categories: overallBreakdown,
-      // Monthly breakdowns (keeping for compatibility)
       monthlyBreakdown: {
         [getMonthName(dateRanges.current.monthIndex)]: currentMonthBreakdown,
         [getMonthName(dateRanges.last.monthIndex)]: lastMonthBreakdown,
       },
-      // NEW: Daily breakdown for current month
       dailyBreakdown: dailyBreakdown,
     };
   } catch (error) {
@@ -529,7 +597,6 @@ const getDetailedFeedbackAnalytics = async (webUrls) => {
 
     const analytics = {};
 
-    // Process each website
     for (const webUrl of webUrls) {
       console.log(`Processing analytics for: ${webUrl}`);
       analytics[webUrl] = await getWebsiteFeedbackAnalytics(webUrl);
@@ -542,13 +609,10 @@ const getDetailedFeedbackAnalytics = async (webUrls) => {
   }
 };
 
-// Alternative function using aggregation for better performance (single query per website)
+// Optimized function using aggregation for better performance
 const getDetailedFeedbackAnalyticsOptimized = async (webUrls) => {
   try {
-    console.log(
-      "Getting optimized detailed feedback analytics for websites:",
-      webUrls
-    );
+    console.log("Getting optimized detailed feedback analytics for websites:", webUrls);
 
     const dateRanges = getDateRanges();
     const analytics = {};
@@ -558,7 +622,6 @@ const getDetailedFeedbackAnalyticsOptimized = async (webUrls) => {
         { $match: { webUrl } },
         {
           $addFields: {
-            // Convert createdOn to Date if it's a string
             createdOnDate: {
               $cond: {
                 if: { $eq: [{ $type: "$createdOn" }, "string"] },
@@ -611,7 +674,6 @@ const getDetailedFeedbackAnalyticsOptimized = async (webUrls) => {
                 },
               },
             ],
-            // NEW: Daily breakdown for current month
             dailyBreakdown: [
               {
                 $match: {
@@ -641,10 +703,8 @@ const getDetailedFeedbackAnalyticsOptimized = async (webUrls) => {
       const results = await feedback.aggregate(pipeline);
       const result = results[0];
 
-      // Process results
       const totalFeedback = result.total.length > 0 ? result.total[0].count : 0;
 
-      // Helper function to convert aggregation results to our format
       const convertToBreakdown = (aggregationResults) => {
         const breakdown = {
           bug: 0,
@@ -663,16 +723,13 @@ const getDetailedFeedbackAnalyticsOptimized = async (webUrls) => {
         return breakdown;
       };
 
-      // Process daily breakdown
       const processDailyBreakdown = (dailyResults) => {
-        // Get the number of days in current month
         const daysInMonth = new Date(
           dateRanges.current.year,
           dateRanges.current.monthIndex + 1,
           0
         ).getDate();
 
-        // Initialize all days with zero counts
         const dailyBreakdown = {};
         for (let day = 1; day <= daysInMonth; day++) {
           dailyBreakdown[day] = {
@@ -685,7 +742,6 @@ const getDetailedFeedbackAnalyticsOptimized = async (webUrls) => {
           };
         }
 
-        // Fill in actual feedback counts
         dailyResults.forEach((item) => {
           const day = item._id.day;
           const title = item._id.title;
@@ -703,15 +759,8 @@ const getDetailedFeedbackAnalyticsOptimized = async (webUrls) => {
       const lastMonthBreakdown = convertToBreakdown(result.lastMonth);
       const dailyBreakdown = processDailyBreakdown(result.dailyBreakdown);
 
-      // Calculate month totals
-      const currentMonthTotal = result.currentMonth.reduce(
-        (sum, item) => sum + item.count,
-        0
-      );
-      const lastMonthTotal = result.lastMonth.reduce(
-        (sum, item) => sum + item.count,
-        0
-      );
+      const currentMonthTotal = result.currentMonth.reduce((sum, item) => sum + item.count, 0);
+      const lastMonthTotal = result.lastMonth.reduce((sum, item) => sum + item.count, 0);
 
       analytics[webUrl] = {
         totalFeedback,
@@ -728,37 +777,26 @@ const getDetailedFeedbackAnalyticsOptimized = async (webUrls) => {
           [getMonthName(dateRanges.current.monthIndex)]: currentMonthBreakdown,
           [getMonthName(dateRanges.last.monthIndex)]: lastMonthBreakdown,
         },
-        // NEW: Daily breakdown for current month
         dailyBreakdown: dailyBreakdown,
       };
     }
 
     return analytics;
   } catch (error) {
-    console.error(
-      "Error getting optimized detailed feedback analytics:",
-      error
-    );
+    console.error("Error getting optimized detailed feedback analytics:", error);
     throw error;
   }
 };
 
-// Updated display function with detailed analytics
+// Updated display function with team support
 const display = async (req, res) => {
   console.log("Display detailed analytics function called");
   try {
     const user = req.user;
 
-    // Getting user websites
-      const userWebData = await webData.find({
-    $or: [
-      { owner: user.id },
-      { members: user.id }
-    ]
-  });
-  console.log('webdata',userWebData);
-    const sites = userWebData.map((web) => web.webUrl);
-
+    // Use the helper function to get all accessible websites
+    const { sites } = await getUserAccessibleWebsites(user.id);
+    
     console.log("Sites for detailed analytics:", sites);
 
     if (sites.length === 0) {
@@ -769,12 +807,9 @@ const display = async (req, res) => {
       });
     }
 
-    // Get detailed analytics (use optimized version for better performance)
     const analytics = await getDetailedFeedbackAnalyticsOptimized(sites);
-    console.log(
-      "Detailed analytics result:",
-      JSON.stringify(analytics, null, 2)
-    );
+    console.log("Detailed analytics result:", JSON.stringify(analytics, null, 2));
+    
     res.json({
       success: true,
       data: analytics,
@@ -788,36 +823,46 @@ const display = async (req, res) => {
     });
   }
 };
+
+// Updated allFeedback function with team support
 const allFeedback = async (req, res) => {
-  console.log("Display detailed analytics function called");
+  console.log("allFeedback function called");
   try {
     const user = req.user;
 
-    // Getting user websites
-     const userWebData = await webData.find({
-    $or: [
-      { owner: user.id },
-      { members: user.id }
-    ]
-  });
-    const sites = userWebData.map((web) => web.webUrl);
+    // Use the helper function to get all accessible websites
+    const { sites } = await getUserAccessibleWebsites(user.id);
+    
+    console.log("All accessible sites for feedback:", sites);
+    
     let data = await feedback.aggregate([
       { $match: { webUrl: { $in: sites } } },
       { $sort: { createdOn: -1 } },
-    ])
-    console.log(data);
+    ]);
+    
+    console.log('Fetched feedback count:', data.length);
+    const userTeams = await Team.find({
+  'members.user': user.id,
+  'members.role': { $in: ['owner', 'editor'] },
+});
+const teamOptions = userTeams.map(team => ({
+  value: team.mail,   // the email will be the value
+  label: team.name    // the team name will be shown in the dropdown
+}));
+  console.log({userTeams})
     return res.status(200).json({
       success: true,
       sites: sites,
+      userTeams:teamOptions,
       data: data,
     });
   } catch (err) {
-    console.error("Error in display detailed analytics function:", error);
+    console.error("Error in allFeedback function:", err);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: err.message,
     });
   }
 };
 
-module.exports = { createFeed, getFeed, display, allFeedback,exportFeedback };
+module.exports = { createFeed, getFeed, display, allFeedback, exportFeedback }

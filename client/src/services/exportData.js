@@ -8,7 +8,7 @@ export const exportData = async ( formatType ) => {
     `${apiUrl}/api/feedback/export?format=${formatType}`,
     {
       withCredentials: true,
-      responseType: "blob", // 👈 IMPORTANT
+      responseType: "blob", 
     }
   );
 

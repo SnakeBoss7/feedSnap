@@ -10,7 +10,9 @@ const authRoute = require('./routes/authRoutes');
 const scriptRoute = require('./routes/scriptRoute');
 const widgetRoute = require('./routes/widgetRoute');
 const feedRoute = require('./routes/feedback');
-const llmRoute = require('./routes/LLMRoutes');  
+const llmRoute = require('./routes/LLMRoutes'); 
+const mailRoute = require('./routes/mailRoutes');
+const  teamRoute = require('./routes/teamRoutes'); 
 const app = express();
 
 // Connect DB
@@ -28,6 +30,16 @@ app.use('/api/auth', authRoute);
 app.use('/api/script', scriptRoute);
 app.use('/api/widget', widgetRoute);
 app.use('/api/feedback', feedRoute);
+
+//mail route
+app.use('/api/mail',mailRoute);
+app.use('/check', ()=>{
+  console.log("Check route hit");
+});
+
+//team routes
+app.use('/api/team', teamRoute);
+
 app.use('/api/llm', llmRoute);
 //  Test if server is up
 app.get('/api/test', (req, res) => {
