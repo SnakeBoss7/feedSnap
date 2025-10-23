@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
-import { X } from 'lucide-react';
+import { CircleQuestionMarkIcon, ShieldQuestion, X } from 'lucide-react';
 import axios from 'axios';
 
 const apiUrl = process.env.REACT_APP_API_URL;
@@ -34,6 +34,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
   });
   
   const [memberEmails, setMemberEmails] = useState('');
+  const [mail, setMail] = useState('');
   const [webUrls, setWebUrls] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -74,6 +75,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
         id: userData._id,
         name: userData.name,
         email: userData.email,
+        mail:userData.mail,
         profile: userData.profile
       };
       console.log('5. Created currentUser:', currentUser);
@@ -197,13 +199,15 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <form action="">
+          <div className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Team Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
+              required={1}
               value={newTeamData.name}
               onChange={(e) => setNewTeamData({ ...newTeamData, name: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 focus:outline-primary2 rounded-md"
@@ -218,6 +222,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
               Description
             </label>
             <textarea
+            required={true}
               value={newTeamData.description}
               onChange={(e) => setNewTeamData({ ...newTeamData, description: e.target.value })}
               rows={3}
@@ -232,7 +237,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
               Website <span className="text-red-500">*</span>
             </label>
             <Select
-              required
+              required={true}
               options={webUrls.map((u) => ({ value: u, label: u }))}
               value={webUrls.find((u) => u === newTeamData.webDataId) ? { value: newTeamData.webDataId, label: newTeamData.webDataId } : null}
               onChange={(option) => setNewTeamData({ ...newTeamData, webDataId: option ? option.value : '' })}
@@ -244,11 +249,29 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
           </div>
 
           <div>
+            <label className="flex gap-2 items-center  group text-sm font-medium text-gray-700 mb-2 relative ">
+              Mail
+              <CircleQuestionMarkIcon  size={15}/>
+              <p className='group-hover:flex hidden absolute left-[70px] text-white bg-zinc-600 p-1 text-xs rounded-sm'>mail address where to send reports</p>
+            </label>
+            
+            <input
+            required={true}
+              type="mail"
+              value={mail}
+              onChange={(e) => setMail(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 focus:outline-primary2 rounded-md"
+              placeholder="email1@example.com"
+              disabled={isLoading}
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Add Members (Optional)
             </label>
             <input
               type="text"
+              required={true}
               value={memberEmails}
               onChange={(e) => setMemberEmails(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 focus:outline-primary2 rounded-md"
@@ -269,8 +292,9 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
             >
               Cancel
             </button>
+            
             <button
-              type="button"
+              type="submit"
               onClick={() => {
                 console.log('Create Team Button clicked!');
                 createTeam();
@@ -282,6 +306,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
             </button>
           </div>
         </div>
+        </form>
       </div>
     </div>
   );

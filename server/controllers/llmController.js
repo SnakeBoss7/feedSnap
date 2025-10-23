@@ -29,7 +29,7 @@ function extractCleanJSON(aiResponse) {
 
 // Example usage:
 const openai_NVIDIA = new OpenAI({
-  apiKey: process.env.NV_API_KEY || "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",
+  apiKey: process.env.NVIDIA_API_KEY,
   baseURL: "https://integrate.api.nvidia.com/v1",
 });
 
@@ -40,7 +40,7 @@ const openai = new OpenAI({
 });
 const openaiChatBot = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: "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",
+  apiKey: process.env.OPENROUTER_API_KEY,
   defaultHeaders: {
     "HTTP-Referer": "<YOUR_SITE_URL>", // Optional. Site URL for rankings on openrouter.ai.
     "X-Title": "<YOUR_SITE_NAME>", // Optional. Site title for rankings on openrouter.ai.
