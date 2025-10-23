@@ -9,7 +9,7 @@ const createTeam = async (req, res) => {
   console.log('User from req.user:', req.user);
   
   try {
-    const { name, webDataId, motive, memberEmails } = req.body;
+    const { name, webDataId, motive, memberEmails,mail } = req.body;
     console.log('Extracted values:', { name, webDataId, motive, memberEmails });
     
     const userId = req.user.id;
@@ -36,6 +36,7 @@ const createTeam = async (req, res) => {
       name,
       webData: webDataId,
       motive,
+      mail,
       members
     });
     

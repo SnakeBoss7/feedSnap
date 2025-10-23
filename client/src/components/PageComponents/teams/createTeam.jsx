@@ -113,6 +113,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
         name: newTeamData.name,
         webDataId: newTeamData.webDataId,
         description: newTeamData.description,
+        mail:newTeamData.mail,
         memberEmails: memberEmails
           .split(',')
           .map(email => email.trim())
