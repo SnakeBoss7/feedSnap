@@ -19,7 +19,7 @@ const app = express();
 connectDB();
 
 app.use(cors({
- origin: ['http://localhost:3000','http://10.157.84.112:3000','https://feedsnap-client.onrender.com'],
+ origin: ['http://localhost:3000','http://10.157.84.112:3000',process.env.FRONTEND],
   credentials: true,
 }));
 app.use(express.json());
