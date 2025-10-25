@@ -1,5 +1,5 @@
 var admin = require("firebase-admin");
-if(process.env.MODE === "dev")
+if(process.env.NODE_ENV === "dev")
   {
     var serviceAccount = require("../firebase-adminsdk.json");
   }
