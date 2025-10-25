@@ -38,7 +38,7 @@ const scriptDemo = async (req, res) => {
   if (!webdata) {
     console.log("new data created");
     let webdata = await webData.create({
-      webUrl,
+      webUrl: process.env.FRONTEND,
       color,
       position,
       text,
