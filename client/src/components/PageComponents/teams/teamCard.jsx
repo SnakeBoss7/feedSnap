@@ -13,7 +13,7 @@ export const TeamCard = ({ team, onManage }) => (
         <Users className="h-4 w-4" />
         <span>{team.members.length} members</span>
       </div>
-
+      <button onClick={()=>{console.log(team)}}>hello</button>
       <div className="flex -space-x-2 mb-4">
         {team.members.slice(0, 4).map((member) => (
           <div

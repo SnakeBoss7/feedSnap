@@ -1,7 +1,6 @@
 import React, { useEffect, useReducer, useRef, useState } from "react";
 import DOMPurify from 'dompurify';
 import {
-  BotMessageSquareIcon,
   LucideArrowUp,
   LucideBot,
   LucideCopy,
@@ -11,7 +10,6 @@ import {
 import axios from "axios";
 import { SimpleHeader } from "../../../components/header/header";
 import { FilterTable } from "../../../components/table/filterTable";
-import SendButton from "../../../components/button/sendButton";
 import Select from "react-select";
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -93,14 +91,6 @@ export const Feedback = () => {
   const messagesEndRef = useRef(null);
 
   // Scroll functions
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ 
-        behavior: "smooth", 
-        block: "end" 
-      });
-    }
-  };
 
   const scrollToBottomContainer = () => {
     if (chatRefContainer.current) {
@@ -324,7 +314,7 @@ const handleSendEmail = async (emailData, index, selectedTeam) => {
         </div>
 
         <div className="lg:w-[25%] bg-white w-full h-full lg:min-h-screen min-h-[800px] overflow-hidden" style={{borderLeft: '1px solid #eee',boxShadow: '-3px 0 15px rgba(0, 0, 0, 0.1), -1px 0 6px rgba(0, 0, 0, 0.06)'}}>
-  <div className="h-full w-full p-5 pb-10 flex flex-col overflow-hidden">
+  <div className="min-h-screen w-full p-5 pb-10 flex flex-col overflow-hidden">
             <div className="flex-1 flex flex-col">
               <div>
                 <h1 className="text-xl mb-1 font-bold text-black flex items-center gap-3">
@@ -435,9 +425,6 @@ const handleSendEmail = async (emailData, index, selectedTeam) => {
                   disabled={isLoading}
                 />
 
-            <button onClick={()=>{console.log(promptSuggestion)}}>click me lol</button>
-                <button onClick={()=> console.log(aiResponse)}>dsfadsf</button>
-                  <button onClick={()=> console.log(state)}>dsfadsf</button>
                 <LucideArrowUp 
                   onClick={handleInput}
                   className={`ml-2 hover:mb-1 hover:scale-[1.1] transition-all ease-in-out duration-300 ${

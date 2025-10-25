@@ -30,7 +30,8 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
   const [newTeamData, setNewTeamData] = useState({
     name: '',
     description: '',
-    webDataId: ''
+    webDataId: '',
+    mail:''
   });
   
   const [memberEmails, setMemberEmails] = useState('');
@@ -86,6 +87,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
         teamName: newTeamData.name,
         description: newTeamData.description,
         createdAt: new Date().toISOString(),
+        mail:newTeamData.mail,
         yourRole: 'owner',
         webData: {
           id: newTeamData.webDataId,
@@ -113,7 +115,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
         name: newTeamData.name,
         webDataId: newTeamData.webDataId,
         description: newTeamData.description,
-        mail:newTeamData.mail,
+        mail:mail,
         memberEmails: memberEmails
           .split(',')
           .map(email => email.trim())
@@ -129,8 +131,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
         `${apiUrl}/api/team/createTeam`,
         payload,  // <-- Request body data
         { 
-          withCredentials: true,  // <-- Config options
-          timeout: 10000
+          withCredentials: true,  // <-- Config option
         }
       );
       
@@ -149,7 +150,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
       console.log('15. Resetting form');
       setNewTeamData({ name: '', description: '', webDataId: '' });
       setMemberEmails('');
-      
+      setMail('')
       console.log('16. Team created successfully!');
       
       // Close modal only after successful creation

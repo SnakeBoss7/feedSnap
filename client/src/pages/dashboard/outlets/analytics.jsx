@@ -16,7 +16,6 @@ import { filterDataByTimeframe, getChartData, getMetrics } from "../../../compon
 import { initializeDashboardData } from "../../../components/newCharts/dataAdapter"
 import AddButton from "../../../components/button/addButton"
 import { Link } from "react-router-dom"
-import { Background } from "../../../components/background/background"
 import { SimpleHeader } from "../../../components/header/header"
 
 export const Analytics = () => {

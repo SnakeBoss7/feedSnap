@@ -4,17 +4,13 @@ import {
   Code,
   LucideCopy,
   LucideDownload,
-  LucideBookCopy,
   Check,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import QuickTips from "../../../components/feedbackUi/quicktips";
 import { HighlightedGridIcon } from "../../../utils/gridIcons";
 import Loader from "../../../components/loader/loader";
 import WidgetTabs from "../../../components/tabs/tabs";
-import InstructionsPanel from "../../../components/feedbackUi/instruction";
-import MotivationalQuote from "../../../components/feedbackUi/motive";
 
 let apiUrl = process.env.REACT_APP_API_URL;
 let frontendApiUrl = process.env.REACT_APP_API_FRONTEND_URL;
@@ -258,7 +254,7 @@ const genDemo = async (e) => {
                       title="Copy to clipboard"
                     
                     >
-                      {copied==2 ? <Check size={20} /> : <LucideCopy size={20} />}
+                      {copied===2 ? <Check size={20} /> : <LucideCopy size={20} />}
                     </button>
                     <button
                       onClick={() => {
