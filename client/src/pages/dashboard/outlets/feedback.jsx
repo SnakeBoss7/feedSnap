@@ -254,10 +254,6 @@ export const Feedback = () => {
   };
 
 const handleSendEmail = async (emailData, index, selectedTeam) => {
-  if (!selectedTeam) {
-    alert('Please select a team to send the email');
-    return;
-  }
 
   try {
     // Call your API to send email

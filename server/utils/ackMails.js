@@ -2,11 +2,16 @@ const nodemailer = require("nodemailer");
 const SendmailTransport = require("nodemailer/lib/sendmail-transport");
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: 'smtp.gmail.com', // or your SMTP host
+  port: 587, // Try 587 (STARTTLS) instead of 465 (SSL)
+  secure: false, // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL,
-    pass: process.env.EMAIL_PASS,
+    pass: process.env.EMAIL_PASS // Use app password for Gmail
   },
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 10000,
+  socketTimeout: 10000
 });
 
 async function sendFeedbackEmail(to, title, desc) {
