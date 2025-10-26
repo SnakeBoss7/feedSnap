@@ -460,7 +460,7 @@ const handleSendEmail = async (emailData, index, selectedTeam) => {
           />
         </div>
       </div>
-          <div className="lg:hidden h-10"></div>
+       
     </div>
   </div>
 </div>
