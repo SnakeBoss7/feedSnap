@@ -6,6 +6,8 @@ import {
   LucideCopy,
   LucideCheck,
   LucideSend,
+  LucideMailCheck,
+  LucidePanelRightClose,
 } from "lucide-react";
 import axios from "axios";
 import { SimpleHeader } from "../../../components/header/header";
@@ -80,6 +82,7 @@ export const Feedback = () => {
   
   const [state, dispatch] = useReducer(dashboardReducer, getCachedData());
   const [userPrompt, setUserPrompt] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [promptSuggestion, setPromptSuggestion] = useState({
     sug1:'',
     sug2:''
@@ -306,21 +309,26 @@ const handleSendEmail = async (emailData, index, selectedTeam) => {
 
   return (
     <div className="h-full overflow-hidden font-sans">
-      <SimpleHeader color="#c5b5ff" />
+      <SimpleHeader color="#2b5fceff" />
 
-      <div className="flex lg:flex-row flex-col overflow-y-auto scrollbar-hide max-h-screen">
+      <div className="flex flex-row overflow-y-auto scrollbar-hide max-h-screen">
         <div className="flex flex-col w-full lg:w-[75%]">
           <FilterTable data={state?.data}/>
+        <div className={`absolute bottom-[70px] right-[30px] p-3 bg-[#2b5fceff] rounded-full shadow-lg cursor-pointer z-50 lg:hidden ${isSidebarOpen?'hidden':'block'} `} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          <LucideBot size={26} className="text-white"/> </div>
         </div>
 
-        <div className="lg:w-[25%] bg-white w-full h-full lg:min-h-screen min-h-[800px] overflow-hidden" style={{borderLeft: '1px solid #eee',boxShadow: '-3px 0 15px rgba(0, 0, 0, 0.1), -1px 0 6px rgba(0, 0, 0, 0.06)'}}>
+        <div className={` ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'} transition-all ease-in-out duration-300 lg:w-[25%] bg-white w-full absolute lg:relative h-full lg:min-h-screen min-h-[800px] overflow-hidden`} style={{borderLeft: '1px solid #eee',boxShadow: '-3px 0 15px rgba(0, 0, 0, 0.1), -1px 0 6px rgba(0, 0, 0, 0.06)'}}>
   <div className="min-h-screen w-full p-5 pb-10 flex flex-col overflow-hidden">
             <div className="flex-1 flex flex-col">
-              <div>
-                <h1 className="text-xl mb-1 font-bold text-black flex items-center gap-3">
+              <div className="flex justify-between ">
+                <div>
+                  <h1 className="text-xl mb-1 font-bold text-black flex items-center gap-3">
                   <LucideBot color="#000000" /> Feedback Assistant
                 </h1>
                 <p className="text-sm mb-6 text-gray-500">Get insights and help with your feedback data</p>
+                </div>
+                <div onClick={()=>{setIsSidebarOpen(prev=>!prev)}}><LucidePanelRightClose size={25}/></div>
               </div>
               
               <div 
@@ -368,9 +376,10 @@ const handleSendEmail = async (emailData, index, selectedTeam) => {
                     );
                   } else if (chat.role === "emailSent") {
                     return (
-                      <div key={idx} className="w-full my-2 flex justify-center">
-                        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded-lg text-sm">
-                          ✓ {chat.content}
+                      <div key={idx} className="w-full my-2 flex justify-center items-center gap-2">
+                      <LucideMailCheck className="text-sm text-green-500" size={20} />
+                        <div className=" border italic   text-gray-700 text-sm py-2 rounded-lg text-sm">
+                           {chat.content}
                         </div>
                       </div>
                     );
@@ -433,6 +442,7 @@ const handleSendEmail = async (emailData, index, selectedTeam) => {
                 />
               </div>
             </div>
+                 <div className="lg:hidden h-16"></div>
           </div>
         </div>
       </div>
