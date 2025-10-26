@@ -53,7 +53,7 @@
     }
 
     const CONFIG = {
-        BASE_API: "http://localhost:5000",
+        BASE_API: "https://feedsnap.onrender.com",
     };
     
     class FeedbackSnippet {

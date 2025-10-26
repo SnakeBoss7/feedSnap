@@ -47,7 +47,7 @@ const scriptDemo = async (req, res) => {
     });
     return res
       .status(200)
-      .json({ mess: "web data created", injection: scriptInjection });
+      .json({ mess: "web data created" });
   } else {
     console.log('hers the position',position);
     webdata.color = color;
