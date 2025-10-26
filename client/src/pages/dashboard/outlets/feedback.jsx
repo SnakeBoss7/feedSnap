@@ -8,6 +8,8 @@ import {
   LucideSend,
   LucideMailCheck,
   LucidePanelRightClose,
+  LucideEdit,
+  LucideEye,
 } from "lucide-react";
 import axios from "axios";
 import { SimpleHeader } from "../../../components/header/header";
@@ -318,133 +320,150 @@ const handleSendEmail = async (emailData, index, selectedTeam) => {
           <LucideBot size={26} className="text-white"/> </div>
         </div>
 
-        <div className={` ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'} transition-all ease-in-out duration-300 lg:w-[25%] bg-white w-full absolute lg:relative h-full lg:min-h-screen min-h-[800px] overflow-hidden`} style={{borderLeft: '1px solid #eee',boxShadow: '-3px 0 15px rgba(0, 0, 0, 0.1), -1px 0 6px rgba(0, 0, 0, 0.06)'}}>
-  <div className="min-h-screen w-full p-5 pb-10 flex flex-col overflow-hidden">
-            <div className="flex-1 flex flex-col">
-              <div className="flex justify-between ">
-                <div>
-                  <h1 className="text-xl mb-1 font-bold text-black flex items-center gap-3">
-                  <LucideBot color="#000000" /> Feedback Assistant
-                </h1>
-                <p className="text-sm mb-6 text-gray-500">Get insights and help with your feedback data</p>
-                </div>
-                <div onClick={()=>{setIsSidebarOpen(prev=>!prev)}}><LucidePanelRightClose size={25}/></div>
-              </div>
-              
-              <div 
-  ref={chatRefContainer}
-  className="chats flex-1 overflow-y-auto scrollbar-hide mb-4 pr-2"
-  style={{ 
-    maxHeight: 'calc(100vh - 280px)',
-    minHeight: '400px'
+        <div
+  className={` ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'} 
+    transition-all ease-in-out duration-300 lg:w-[25%] bg-white w-full 
+    fixed lg:relative top-0 right-0 bottom-0  overflow-hidden z-50`} 
+  style={{
+    borderLeft: '1px solid #eee',
+    boxShadow: '-3px 0 15px rgba(0, 0, 0, 0.1), -1px 0 6px rgba(0, 0, 0, 0.06)'
   }}
 >
-                {displayedMessages.map((chat, idx) => {
-                  if (chat.role === "assistant" || chat.role === "user") {
-                    return (
-                      <div
-                        key={idx}
-                        className={`w-full my-2 flex text-md ${
-                          chat.role === "assistant" ? "justify-start" : "justify-end"
-                        }`}
-                      >
-                        <div
-                          className={`max-w-[70%] p-3 rounded-2xl shadow-sm ${
-                            chat.role === "assistant"
-                              ? "text-black bg-gray-100"
-                              : "bg-primary5 text-white rounded-br-md"
-                          }`}
-                        >
-                          <div 
-                            className="whitespace-pre-wrap text-sm break-words text-left"
-                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(chat.content) }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  } else if (chat.role === "emailPrep") {
-                    return (
-                      <EmailCard
-                        key={idx}
-                        chat={chat}
-                        index={idx}
-                        teams={state.userTeams}
-                        copiedIndex={copiedIndex}
-                        onCopy={handleCopyEmail}
-                        onSend={handleSendEmail}
-                      />
-                    );
-                  } else if (chat.role === "emailSent") {
-                    return (
-                      <div key={idx} className="w-full my-2 flex justify-center items-center gap-2">
-                      <LucideMailCheck className="text-sm text-green-500" size={20} />
-                        <div className=" border italic   text-gray-700 text-sm py-2 rounded-lg text-sm">
-                           {chat.content}
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
-                
-                {isLoading && (
-                  <div className="w-full my-2 flex justify-start">
-                    <div className="max-w-[70%] p-3 rounded-2xl shadow-sm text-black bg-gray-100">
-                      <p className="text-gray-500">Typing...</p>
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            </div>
-            
-            <div className="text-[12px] flex flex-col pb-2 gap-2">
-              <button 
-                onClick={(e) => setUserPrompt(e.target.innerText)} 
-                className="border border-gray-400 text-gray-600 hover:scale-[1.01] cursor-pointer transition-all ease-in-out duration-300 p-1 w-fit rounded-lg"
+  {/* Main container - use flex column with fixed height */}
+  <div className="h-full w-full flex flex-col">
+    
+    {/* Header - fixed height */}
+    <div className="flex-shrink-0 p-5 border-b border-gray-200">
+      <div className="flex justify-between items-start">
+        <div >
+          <h1 className="text-2xl mb-1 tracking-tight text-black  flex items-center gap-2">
+            <LucideBot size={30} /> Feedback Assistant
+          </h1>
+          <p className="text-sm text-gray-500">Get insights and help with your feedback data</p>
+        </div>
+        <div onClick={() => setIsSidebarOpen(prev => !prev)} className="mt-2 lg:hidden cursor-pointer">
+          <LucidePanelRightClose size={25}/>
+        </div>
+      </div>
+    </div>
+    
+    {/* Chat messages - scrollable area */}
+    <div 
+      ref={chatRefContainer}
+      className="flex-1 overflow-y-auto scrollbar-hide px-5"
+    >
+      {displayedMessages.map((chat, idx) => {
+        if (chat.role === "assistant" || chat.role === "user") {
+          return (
+            <div
+              key={idx}
+              className={`w-full my-2 flex text-md ${
+                chat.role === "assistant" ? "justify-start" : "justify-end"
+              }`}
+            >
+              <div
+                className={`max-w-[70%] p-3 rounded-2xl shadow-sm ${
+                  chat.role === "assistant"
+                    ? "text-black bg-gray-100"
+                    : "bg-primary5 text-white rounded-br-md"
+                }`}
               >
-                {promptSuggestion.sug1 ? promptSuggestion.sug1 : `Make a report for my ${state?.userTeams[0]?.label} team`}
-              </button>
-
-              <button 
-                onClick={(e) => setUserPrompt(e.target.innerText)} 
-                className="border border-gray-400 text-gray-600 hover:scale-[1.01] cursor-pointer transition-all ease-in-out duration-300 p-1 w-fit rounded-lg"
-              >
-                {promptSuggestion.sug2 ? promptSuggestion.sug2 : `How's the user response?`}
-              </button>
-            </div>
-            
-            <div className="w-full flex flex-col py-5 px-2 border border-black rounded-2xl mt-auto lg:mb-0 mb-10">
-              <div className="flex w-full items-end">
-                <textarea
-                  value={userPrompt}
-                  onChange={(e) => setUserPrompt(e.target.value)}
-                  onInput={(e) => {
-                    e.target.style.height = "auto";
-                    e.target.style.height = e.target.scrollHeight + "px";
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleInput();
-                    }
-                  }}
-                  placeholder="Ask here"
-                  className="w-full border-0 max-h-[100px] overflow-y-scroll scrollbar-hide outline-0 bg-transparent text-black resize-none rounded-md"
-                  disabled={isLoading}
-                />
-
-                <LucideArrowUp 
-                  onClick={handleInput}
-                  className={`ml-2 hover:mb-1 hover:scale-[1.1] transition-all ease-in-out duration-300 ${
-                    isLoading ? "cursor-not-allowed text-gray-400" : "cursor-pointer text-black"
-                  }`}
+                <div 
+                  className="whitespace-pre-wrap text-sm break-words text-left"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(chat.content) }}
                 />
               </div>
             </div>
-                 <div className="lg:hidden h-16"></div>
+          );
+        } else if (chat.role === "emailPrep") {
+          return (
+            <EmailCard
+              key={idx}
+              chat={chat}
+              index={idx}
+              teams={state.userTeams}
+              copiedIndex={copiedIndex}
+              onCopy={handleCopyEmail}
+              onSend={handleSendEmail}
+            />
+          );
+        } else if (chat.role === "emailSent") {
+          return (
+            <div key={idx} className="w-full my-2 flex justify-center items-center gap-2">
+              <LucideMailCheck className="text-sm text-green-500" size={20} />
+              <div className="border italic text-gray-700 text-sm py-2 rounded-lg">
+                {chat.content}
+              </div>
+            </div>
+          );
+        }
+        return null;
+      })}
+      
+      {isLoading && (
+        <div className="w-full my-2 flex justify-start">
+          <div className="max-w-[70%] p-3 rounded-2xl shadow-sm text-black bg-gray-100">
+            <p className="text-gray-500">Typing...</p>
           </div>
         </div>
+      )}
+      <div ref={messagesEndRef} />
+    </div>
+    
+    {/* Suggestions - fixed height */}
+    <div className="flex-shrink-0 px-5 py-2 border-t border-gray-100">
+      <div className="text-[12px] flex flex-col gap-2">
+        <button 
+          onClick={(e) => setUserPrompt(e.target.innerText)} 
+          className="border border-gray-400 text-gray-600 hover:scale-[1.01] cursor-pointer transition-all ease-in-out duration-300 p-1 w-fit rounded-lg"
+        >
+          {promptSuggestion.sug1 ? promptSuggestion.sug1 : `Make a report for my ${state?.userTeams[0]?.label} team`}
+        </button>
+
+        <button 
+          onClick={(e) => setUserPrompt(e.target.innerText)} 
+          className="border border-gray-400 text-gray-600 hover:scale-[1.01] cursor-pointer transition-all ease-in-out duration-300 p-1 w-fit rounded-lg"
+        >
+          {promptSuggestion.sug2 ? promptSuggestion.sug2 : `How's the user response?`}
+        </button>
+      </div>
+    </div>
+    
+    {/* Input box - fixed at bottom */}
+    <div className="flex-shrink-0 px-5 pb-5 pt-3 border-t border-gray-200">
+      <div className="w-full flex flex-col py-3 px-2 border border-black rounded-2xl">
+        <div className="flex w-full items-end">
+          <textarea
+            value={userPrompt}
+            onChange={(e) => setUserPrompt(e.target.value)}
+            onInput={(e) => {
+              e.target.style.height = "auto";
+              e.target.style.height = Math.min(e.target.scrollHeight, 100) + "px";
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleInput();
+              }
+            }}
+            placeholder="Ask here"
+            className="w-full border-0 min-h-[60px] overflow-y-auto scrollbar-hide outline-0 bg-transparent text-black resize-none rounded-md"
+            disabled={isLoading}
+            rows={1}
+          />
+
+          <LucideArrowUp 
+            onClick={handleInput}
+            className={`ml-2 hover:mb-1 hover:scale-[1.1] transition-all ease-in-out duration-300 flex-shrink-0 ${
+              isLoading ? "cursor-not-allowed text-gray-400" : "cursor-pointer text-black"
+            }`}
+          />
+        </div>
+      </div>
+          <div className="lg:hidden h-10"></div>
+    </div>
+  </div>
+</div>
       </div>
     </div>
   );
@@ -468,29 +487,34 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
       ...base,
       minHeight: '38px',
       fontSize: '14px',
-      borderColor: state.isFocused ? '#a78bfa' : '#d1d5db',
-      boxShadow: state.isFocused ? '0 0 0 1px #a78bfa' : 'none',
+      borderColor: state.isFocused ? '#2563EB' : '#d1d5db',
+      boxShadow: state.isFocused ? '0 0 0 1px #2563EB' : 'none',
       '&:hover': {
-        borderColor: '#a78bfa'
-      }
+        borderColor: '#2563EB'
+      },
+      borderRadius: '7px',
     }),
     option: (base, state) => ({
       ...base,
+       borderRadius: '7px',
       backgroundColor: state.isSelected 
-        ? '#9333ea' 
+        ? '#2563EB' 
         : state.isFocused 
         ? '#f3e8ff' 
         : 'white',
       color: state.isSelected ? 'white' : '#1f2937',
       cursor: 'pointer',
+      
       fontSize: '14px',
       padding: '10px 12px',
       '&:active': {
-        backgroundColor: '#a78bfa'
+        backgroundColor: '#91b2f8ff'
       }
     }),
     menu: (base) => ({
       ...base,
+      borderRadius: '7px',
+       border: '1px solid #2563EB',
       zIndex: 9999,
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
       border: '1px solid #e5e7eb'
@@ -511,9 +535,9 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
     }),
     dropdownIndicator: (base, state) => ({
       ...base,
-      color: state.isFocused ? '#9333ea' : '#6b7280',
+      color: state.isFocused ? '#2563EB' : '#6b7280',
       '&:hover': {
-        color: '#9333ea'
+        color: '#2563EB'
       }
     }),
     indicatorSeparator: (base) => ({
@@ -551,7 +575,7 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
               disabled={!selectedTeam}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium text-xs transition-all ${
                 selectedTeam
-                  ? 'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-md'
+                  ? 'bg-primary5 text-white hover:bg-purple-700 hover:shadow-md'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
@@ -596,9 +620,9 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
           <p className="text-xs text-gray-500 font-medium">Body:</p>
           <button
             onClick={() => setIsEditingBody(!isEditingBody)}
-            className="text-xs text-purple-600 hover:text-purple-700 font-semibold px-2 py-1 hover:bg-purple-50 rounded transition-all"
+            className="text-xs text-primary5 hover:text-primary5 font-semibold px-2 flex items-center gap-2 py-1 hover:bg-blue-50 rounded transition-all"
           >
-            {isEditingBody ? '👁️ Preview' : '✏️ Edit'}
+            {isEditingBody ? <><LucideEye size={12}/>Preview</> : <><LucideEdit size={12}/>Edit</> }
           </button>
         </div>
         
@@ -606,7 +630,7 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
           <textarea
             value={body}
             onChange={handleBodyChange}
-            className="w-full h-[280px] text-sm text-gray-700 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all resize-none font-mono"
+            className="w-full h-[280px] text-sm text-gray-700 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-primary5 focus:ring-2 focus:ring-blue-200 transition-all resize-none font-mono"
             placeholder="Enter email body..."
           />
         ) : (
@@ -637,7 +661,7 @@ style.textContent = `
     color: #1f2937;
   }
   .email-body a {
-    color: #7c3aed;
+    color: #2563EB;
     text-decoration: underline;
   }
   .email-body div[style*="border-top"] {
