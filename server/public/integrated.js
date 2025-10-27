@@ -140,14 +140,14 @@
             this.routeObserver?.disconnect();
             this.isOpen = false;
             
-            //.log("FeedbackSnippet destroyed and cleared from window");
+            console.log("FeedbackSnippet destroyed and cleared from window");
         }
 
         handleRouteChange(source) {
             const newPath = window.location.pathname;
             
             if (newPath !== this.currentPath) {
-                //.log(`Route changed from ${this.currentPath} to ${newPath} (via ${source})`);
+                console.log(`Route changed from ${this.currentPath} to ${newPath} (via ${source})`);
                 
                 this.currentPath = newPath;
                 this.pathname = newPath;
@@ -166,7 +166,7 @@
                 this.createWidget();
                 this.bindEvents();
             } catch (err) {
-                //.log(err);
+                console.log(err);
             }
         }
 
@@ -179,9 +179,9 @@
                     }
                 );
                 this.config = await res.json();
-                //.log(this.config)
+                console.log(this.config)
             } catch (err) {
-                //.log(err);
+                console.log(err);
                 // Fallback config
                 this.config = {
                     color: "#667eea",
@@ -876,7 +876,7 @@
             this.button.className = 'fw-button fw-container';
             this.button.title = 'Send Feedback';
             this.button.setAttribute('aria-label', 'Open feedback widget');
-            //.log()
+            console.log()
             if (this.config.widgetText) {
                 this.btnContent = this.config.widgetText;
             } else {
@@ -1081,7 +1081,7 @@
                 // Close dropdown
                 this.closeDropdown();
                 
-                //.log('Selected feedback type:', this.selectedFeedbackType);
+                console.log('Selected feedback type:', this.selectedFeedbackType);
             };
         }
 
@@ -1095,7 +1095,7 @@
             option.classList.add('selected');
             this.selectedRating = option.querySelector('input').value;
             
-            //.log('Selected rating:', this.selectedRating);
+            console.log('Selected rating:', this.selectedRating);
         }
 
         setupChat() {
@@ -1131,11 +1131,11 @@
                     
                     // Add bot response
                      const formattedMessage = data.data.replace(/\\n/g, '<br>');
-                     //.log(formattedMessage)
+                     console.log(formattedMessage)
     this.addChatMessage(formattedMessage, 'bot');
                 })
                 .catch(error => {
-                    //.error('Error fetching LLM response:', error);
+                    console.error('Error fetching LLM response:', error);
                     loadingMsg.remove();
                     this.addChatMessage('Sorry, I encountered an error. Please try again.', 'bot');
                 });
@@ -1228,7 +1228,7 @@
             submitButton.disabled = true;
 
             // Submit feedback
-            //.log(this.selectedFeedbackType)
+            console.log(this.selectedFeedbackType)
             fetch(`${CONFIG.BASE_API}/api/feedback/addfeedback`, {
                 method: 'POST',
                 headers: {
@@ -1246,7 +1246,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                //.log('Feedback submitted successfully:', data);
+                console.log('Feedback submitted successfully:', data);
                 
                 // Show success state
                 submitButton.innerHTML = `
@@ -1271,11 +1271,11 @@
                 try {
                     window.parent.postMessage({ type: 'FEEDBACK_SUBMITTED' }, '*');
                 } catch (e) {
-                    //.log('Could not post message to parent');
+                    console.log('Could not post message to parent');
                 }
             })
             .catch(error => {
-                //.error('Error submitting feedback:', error);
+                console.error('Error submitting feedback:', error);
                 
                 // Show error state
                 submitButton.innerHTML = `
