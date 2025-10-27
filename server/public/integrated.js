@@ -173,7 +173,7 @@
         async loadConfig() {
             try {
                 let res = await fetch(
-                    `${CONFIG.BASE_API}/api/widget/GetWidConfig?webUrl=http://localhost:3000`,
+                    `${CONFIG.BASE_API}/api/widget/GetWidConfig?webUrl=${this.webUrl}`,
                     {
                         method: "GET",
                     }
