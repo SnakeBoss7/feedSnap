@@ -387,7 +387,7 @@ const handleSendEmail = async (emailData, index, selectedTeam) => {
           return (
             <div key={idx} className="w-full my-2 flex justify-center items-center gap-2">
               <LucideMailCheck className="text-sm text-green-500" size={20} />
-              <div className="border italic text-gray-700 text-sm py-2 rounded-lg">
+              <div className="border italic text-gray-700 text-sm py-2 px-1 pr-1 rounded-lg">
                 {chat.content}
               </div>
             </div>

@@ -165,7 +165,7 @@ const genDemo = async (e) => {
     {
       value: "bottom right",
       label: (
-        <div className="flex items-center font-bold gap-3">
+        <div className="flex items-center  gap-3">
           <HighlightedGridIcon color={UrlSettings.color} highlight="bottom-right" />
           Bottom right
         </div>
@@ -174,7 +174,7 @@ const genDemo = async (e) => {
     {
       value: "bottom left",
       label: (
-        <div className="flex items-center font-bold gap-3">
+        <div className="flex items-center  gap-3">
           <HighlightedGridIcon color={UrlSettings.color} highlight="bottom-left" /> Bottom left
         </div>
       ),
@@ -182,7 +182,7 @@ const genDemo = async (e) => {
     {
       value: "top right",
       label: (
-        <div className="flex items-center font-bold gap-3">
+        <div className="flex items-center  gap-3">
           <HighlightedGridIcon color={UrlSettings.color} highlight="top-right" />
           Top right
         </div>
@@ -191,7 +191,7 @@ const genDemo = async (e) => {
     {
       value: "top left",
       label: (
-        <div className="flex items-center font-bold gap-3">
+        <div className="flex items-center  gap-3">
           <HighlightedGridIcon color={UrlSettings.color} highlight="top-left" />
           Top left
         </div>
@@ -244,7 +244,7 @@ const genDemo = async (e) => {
                 <div className="bg-gray-800 h-[20%] text-white px-4 py-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Code color="#5BAE83" size={25} />
-                    <span className="text-lg text-center  tracking-tight font-bold text-white">Script.js</span>
+                    <span className="text-lg text-center  tracking-tight  text-white">Script.js</span>
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -284,7 +284,7 @@ const genDemo = async (e) => {
                   ) : (
                     <div className="px-4 w-full h-full bg-gray-900 flex flex-col items-center justify-center">
                       <LucideCode color="#5BAE83" size={40} />
-                      <p className="text-lg text-center mt-3 tracking-tight font-bold text-white">
+                      <p className="text-lg text-center mt-3 tracking-tight  text-white">
                         No Script Generated Yet
                       </p>
                       <p className="text-sm text-center tracking-tight text-gray-300">

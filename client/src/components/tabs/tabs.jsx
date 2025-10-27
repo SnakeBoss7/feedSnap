@@ -19,7 +19,7 @@ const TabButton = memo(({ tab, index, isActive, onClick }) => (
 // Memoized input components
 const WebUrlInput = memo(({ value, onChange }) => (
   <div className="flex flex-col">
-    <label htmlFor="web_url" className="flex items-center gap-2 tracking-tight text-lg font-bold">
+    <label htmlFor="web_url" className="flex items-center gap-2 tracking-tight text-lg ">
       <LucideArrowUpLeftFromSquare size={18}/> Website Url
     </label>
     <input
@@ -34,7 +34,7 @@ const WebUrlInput = memo(({ value, onChange }) => (
 
 const ColorInput = memo(({ color, onChange ,text,name}) => (
   <>
-    <label htmlFor={name} className="font-extrabold  block">{text}</label>
+    <label htmlFor={name} className="  block">{text}</label>
     <div className="flex gap-3 items-center  relative z-10">
       <input
         type="color"
@@ -167,7 +167,7 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
           {active === 0 && (
             <>
               <div>
-                <h1 className="tracking-tight text-[22px] font-extrabold flex items-center gap-2">
+                <h1 className="tracking-tight text-[22px]  flex items-center gap-2">
                   <Globe2Icon className="text-white rounded-md bg-blue-500 p-1 h-6 w-6" size={30} />
                   Widget Configuration
                 </h1>
@@ -179,13 +179,13 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
               <div className="flex flex-col justify-between gap-3">
                 <WebUrlInput value={UrlSettings.webUrl} onChange={handleInputChange} />
                 <div>
-                   <label htmlFor="web_url" className="flex pb-2 items-center gap-2 tracking-tight text-lg font-bold">
+                   <label htmlFor="web_url" className="flex pb-2 items-center gap-2 tracking-tight text-lg ">
       <MailCheck size={18}/> Acknowledgment email.
     </label>
                   <Switch UrlSettings={UrlSettings} setUrlsettings={setUrlsettings}/>
                 </div>
                 {/* <div>
-                  <h2 className="flex items-center gap-2 tracking-tight text-lg font-bold">
+                  <h2 className="flex items-center gap-2 tracking-tight text-lg ">
                     <LucideShield className="text-primary" size={18}/>
                     Website verification
                   </h2>
@@ -197,7 +197,7 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
                   </div>
                 </div> */}
                <div>
-                <h2 className="flex items-center gap-2 tracking-tight text-lg font-bold">
+                <h2 className="flex items-center gap-2 tracking-tight text-lg ">
                     <Bot className="text-primary" size={25}/>
                     Bot Context
                   </h2>
@@ -206,7 +206,7 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
 
                 {/* <div className="w-full rounded-lg border border-primary5        bg-primary/10 px-1 flex gap-2">
                   <LucideStars size={30} className="text-primary"/>
-                  <span className="font-bold tracking-tight lg:text-sm text-[10px] text-primary">
+                  <span className=" tracking-tight lg:text-sm text-[10px] text-primary">
                     For Live Demo: 
                     <span className="font-[100] lg:text-[12px] text-[10px] text-black"> Complete the customization in the next tab, then use the Preview tab to see your widget in action before going live.</span>
                   </span>
@@ -218,7 +218,7 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
           {/* Customization Tab */}
           {active === 1 && (
             <>
-             <div> <h1 className="tracking-tight text-[22px] font-extrabold flex items-center gap-2">
+             <div> <h1 className="tracking-tight text-[22px]  flex items-center gap-2">
                 <Paintbrush className="text-white rounded-md bg-primary1 p-1 h-6 w-6" size={30} />
                 Widget Customization
               </h1>
@@ -227,7 +227,7 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
               </p></div>
 
               <div className="flex flex-col justify-between gap-2">
-                <label htmlFor="position" className="text-lg font-extrabold block z-[9999999999]">
+                <label htmlFor="position" className="text-lg  block z-[9999999999]">
                   Position
                 </label>
                 <Select
@@ -254,7 +254,7 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
             <>
     
       <div>
-        <h1 className="tracking-tight text-[22px] font-extrabold flex items-center gap-2">
+        <h1 className="tracking-tight text-[22px]  flex items-center gap-2">
         <Brain  className="text-white rounded-md bg-primary5 p-1 h-6 w-6" size={30}/> Widget Installation
       </h1>
 

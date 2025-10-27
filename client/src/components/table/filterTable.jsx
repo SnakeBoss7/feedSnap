@@ -171,7 +171,7 @@ export function FilterTable({ data, onAction }) {
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex mt-6 items-center gap-2"
+                className="flex mt-5  items-center gap-2"
               >
                 <div className="w-[30px] text-center md:w-fit md:py-1 md:h-fit text-[12px] bg-backgr rounded-3xl text-white px-2 h-[20px] hover:text-white">
                   {selectedItems.size} selected
@@ -220,7 +220,7 @@ export function FilterTable({ data, onAction }) {
                 </DropdownMenu>
               </motion.div>
             ) : (
-              <h2 className="mb-3 text-lg font-bold mt-6 p-3">Feedbacks data</h2>
+              <h2 className="mt-2 text-lg font-bold  ">Feedbacks data</h2>
             )}
           </div>
 
