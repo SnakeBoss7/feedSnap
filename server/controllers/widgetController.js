@@ -16,7 +16,7 @@ const widgetConfigProvider =async(req,res)=>
             console.log(web.bgColor);
 
         const {color,widgetText,position,bgColor,botContext,ackMail} = web;
-        console.log(color,widgetText,position,bgColor,botContext,ackMail);
+        // console.log(color,widgetText,position,bgColor,botContext,ackMail);
         res.json({color,widgetText,position,bgColor,botContext,ackMail});
 
         
