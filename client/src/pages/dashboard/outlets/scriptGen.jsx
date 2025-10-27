@@ -121,16 +121,18 @@ const genDemo = async (e) => {
   if (showDemo) {
     setShowDemo(false);
 
-    // FIRST: Call the script's destroy method if it exists
+    // Call the script's destroy method if it exists
     if (window.FeedbackSnippet && typeof window.FeedbackSnippet.destroy === 'function') {
       window.FeedbackSnippet.destroy();
     }
 
-    // THEN: Remove any remaining DOM elements
-    [`script[src^='${apiUrl}integrated.js']`,
-     ".fw-overlay",
-     ".fw-popup", 
-     ".fw-button"
+    // Remove any remaining DOM elements
+    [
+      `script[src^='${apiUrl}/integrated.js']`,
+      ".fw-overlay",
+      ".fw-popup", 
+      ".fw-button",
+      ".fw-container"
     ].forEach(sel => {
       const el = document.querySelector(sel);
       if (el && el.parentNode) el.parentNode.removeChild(el);
@@ -140,27 +142,43 @@ const genDemo = async (e) => {
     return;
   }
 
-  // Rest of your code for adding the script...
-
   try {
-    console.log("Starting API call...");
-    let res = await axios.post(`${apiUrl}/api/script/demo`, { settings: UrlSettings }, { withCredentials: true });
+    console.log("Starting demo with settings:", UrlSettings);
     
+    // FIRST: Update the database with new settings
+    let res = await axios.post(
+      `${apiUrl}/api/script/demo`, 
+      { settings: UrlSettings }, 
+      { withCredentials: true }
+    );
+    
+    console.log("Demo API response:", res);
+
+    // THEN: Add the script with cache-busting timestamp
+    const timestamp = Date.now();
+    const script = document.createElement("script");
+    script.src = `${apiUrl}/integrated.js?webUrl=${frontendApiUrl}&v=${timestamp}`;
+    script.async = true;
+    
+    // Optional: Add onload handler to confirm script loaded
+    script.onload = () => {
+      console.log("Demo script loaded successfully");
+    };
+    
+    script.onerror = () => {
+      console.error("Failed to load demo script");
+    };
+
+    document.body.appendChild(script);
+
     setShowDemo(true);
     localStorage.setItem("demoLive", true);
 
-    // Add cache-busting param
-    const script = document.createElement("script");
-    script.src = `${apiUrl}/integrated.js?webUrl=${frontendApiUrl}&t=${Date.now()}`;
-    script.async = true;
-    document.body.appendChild(script);
-
-    console.log("API response:", res);
   } catch (err) {
-    console.error("API error:", err);
+    console.error("Demo API error:", err);
+    alert("Failed to start demo. Please try again.");
   }
 };
-
   const options = [
     {
       value: "bottom right",
