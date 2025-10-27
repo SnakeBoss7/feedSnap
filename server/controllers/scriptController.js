@@ -2,6 +2,7 @@ const User = require("../models/user");
 const webData = require("../models/WebData");
 const scriptCreate = async (req, res) => {
   if (!req.user) {
+    console.log("no user");
     res.status(400).json({ mess: "user not found" });
   }
   const { webUrl, position, color, text,bgColor } = req.body.settings;
@@ -23,17 +24,17 @@ const scriptCreate = async (req, res) => {
       .status(200)
       .json({ mess: "web data created", injection: scriptInjection });
   } else {
-    console.log("already exist");
+    // console.log("already exist");
     res.status(400).json({ mess: "web data already exists" });
   }
-  console.log("nothing happend");
+  // console.log("nothing happend");
 };
 const scriptDemo = async (req, res) => {
   if (!req.user) {
     res.status(400).json({ mess: "user not found" });
   }
   const { position, color, text,bgColor } = req.body.settings;
-  console.log({bgColor})
+  // console.log({bgColor})
   let webdata = await webData.findOne({ webUrl: process.env.FRONTEND });
   if (!webdata) {
     console.log("new data created");
@@ -49,13 +50,15 @@ const scriptDemo = async (req, res) => {
       .status(200)
       .json({ mess: "web data created" });
   } else {
-    console.log('hers the position',position);
+    // console.log('hers the position',position);
+
     webdata.color = color;
     webdata.position = position;
     webdata.widgetText = text;
     webdata.bgColor = bgColor;
 
     await webdata.save();
+    console.log("web data updated",{webdata});
     return res.status(200).json({ mess: 'updated' });
   }
 };

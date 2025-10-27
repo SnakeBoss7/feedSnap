@@ -5,18 +5,18 @@ const webData = require('../models/WebData');
 const widgetConfigProvider =async(req,res)=>
     {
         let url = req.query.webUrl;
-        console.log(url);
+        //.log(url);
         let web = await webData.findOne({webUrl:url})
         if(!web)
             {
                 res.status(400).send("Service is not provided to this web");
                 return;
             }
-            console.log(web);
-            console.log(web.bgColor);
+            //.log(web);
+            //.log(web.bgColor);
 
         const {color,widgetText,position,bgColor,botContext,ackMail} = web;
-        // console.log(color,widgetText,position,bgColor,botContext,ackMail);
+        // //.log(color,widgetText,position,bgColor,botContext,ackMail);
         res.json({color,widgetText,position,bgColor,botContext,ackMail});
 
         
