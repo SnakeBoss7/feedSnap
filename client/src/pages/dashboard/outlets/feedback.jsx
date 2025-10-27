@@ -115,7 +115,7 @@ export const Feedback = () => {
       return;
     }
 
-    let words = lastMessage.content.split(" ");
+    let words = lastMessage?.content?.split(" ");
     let i = 0;
     const tempMessages = [...displayedMessages];
 

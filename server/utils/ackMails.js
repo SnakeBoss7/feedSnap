@@ -64,6 +64,9 @@ async function sendFeedbackEmail(to, title, desc) {
       `noreply@${process.env.MAILERSEND_DOMAIN}`, 
       "FeedSnap"
     );
+    console.log(process.env.MAILERSEND_API_KEY);
+    console.log(process.env.MAILERSEND_DOMAIN);
+
     
     const recipients = [new Recipient(to)];
 
