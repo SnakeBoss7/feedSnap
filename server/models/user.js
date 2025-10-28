@@ -5,8 +5,7 @@ const UserSchema = mongoose.Schema({
   email: { type: String, unique: true },
   password: {type: String,default:"" },// if not using Firebase only
   role: { type: String, enum: ["admin", "member"], default: "member" },
-  webURl: [String],
-  BotQuote: String,
+  webURL: [String],
   userTier: { type: Number, min: 1, max: 3, default: 2 },
   firebaseId: String,
   createdAt: { type: Date, default: Date.now },

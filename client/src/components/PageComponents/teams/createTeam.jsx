@@ -45,7 +45,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
     if (userDataString) {
       try {
         const userData = JSON.parse(userDataString);
-        setWebUrls(userData.webURl || []);
+        setWebUrls(userData.webURL || []);
       } catch (error) {
         console.error('Error parsing user data:', error);
       }
@@ -201,7 +201,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
           </button>
         </div>
 
-        <form action="">
+        <form >
           <div className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -209,7 +209,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
             </label>
             <input
               type="text"
-              required={1}
+              required
               value={newTeamData.name}
               onChange={(e) => setNewTeamData({ ...newTeamData, name: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 focus:outline-primary2 rounded-md"
@@ -224,7 +224,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
               Description
             </label>
             <textarea
-            required={true}
+            required
               value={newTeamData.description}
               onChange={(e) => setNewTeamData({ ...newTeamData, description: e.target.value })}
               rows={3}
@@ -258,7 +258,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
             </label>
             
             <input
-            required={true}
+            required
               type="mail"
               value={mail}
               onChange={(e) => setMail(e.target.value)}
@@ -273,7 +273,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
             </label>
             <input
               type="text"
-              required={true}
+              required
               value={memberEmails}
               onChange={(e) => setMemberEmails(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 focus:outline-primary2 rounded-md"

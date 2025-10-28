@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Users, Calendar, Mail, UserPlus, Trash2 } from 'lucide-react';
+import { X, Users, Calendar, Mail, UserPlus, Trash2, MoreVertical } from 'lucide-react';
 import { RoleSelect } from './roleSelect';
 import { AddMemberForm } from './addMember';
 import axios from 'axios';
@@ -11,8 +11,8 @@ const ConfirmationModal = ({ isOpen, title, message, onConfirm, onCancel, isLoad
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
-      <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 z-[60]">
+      <div className="bg-white rounded-lg shadow-xl max-w-sm w-[300px] p-5">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
         <p className="text-gray-600 mb-6">{message}</p>
         <div className="flex gap-3 justify-end">
@@ -39,6 +39,65 @@ const ConfirmationModal = ({ isOpen, title, message, onConfirm, onCancel, isLoad
           </button>
         </div>
       </div>
+    </div>
+  );
+};
+
+// Member Actions Menu - Mobile friendly dropdown
+const MemberActionsMenu = ({ member, onRoleChange, onDelete, isDeleting, yourRole, disabled }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        disabled={isDeleting || disabled}
+        className="p-2 hover:bg-gray-200 rounded-lg transition disabled:opacity-50"
+        title="Member actions"
+      >
+        {isDeleting ? (
+          <div className="h-5 w-5 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <MoreVertical className="h-5 w-5 text-gray-600" />
+        )}
+      </button>
+      
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+          <div className="absolute right-0 top-[-150px] mt-1 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-20">
+            <div className="p-2">
+              <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase">Change Role</div>
+              {['editor', 'viewer'].map(role => (
+                <button
+                  key={role}
+                  onClick={() => {
+                    onRoleChange(role);
+                    setIsOpen(false);
+                  }}
+                  disabled={member.role === 'owner' && yourRole !== 'owner'}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 rounded capitalize flex items-center gap-2 disabled:opacity-50"
+                >
+                  <div className={`h-2 w-2 rounded-full ${member.role === role ? 'bg-green-600' : 'bg-gray-300'}`} />
+                  {role}
+                </button>
+              ))}
+            </div>
+            <div className="border-t border-gray-200">
+              <button
+                onClick={() => {
+                  onDelete();
+                  setIsOpen(false);
+                }}
+                className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-b-lg flex items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Remove from team
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -85,10 +144,8 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onUpdateTeam }) => 
       );
 
       if (response.data.success) {
-        // Remove the member from local state
         setMembers(prev => prev.filter(m => m.userId !== memberToDelete.userId));
         
-        // Update parent component
         if (onUpdateTeam) {
           onUpdateTeam(team.teamId, {
             ...team,
@@ -126,11 +183,9 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onUpdateTeam }) => 
       );
 
       if (response.data.success) {
-        // Add the new member to local state
         const newMember = response.data.member;
         setMembers(prev => [...prev, newMember]);
         
-        // Update parent component
         if (onUpdateTeam) {
           onUpdateTeam(team.teamId, {
             ...team,
@@ -154,7 +209,6 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onUpdateTeam }) => 
     setIsSaving(true);
     
     try {
-      // Prepare members data for backend
       const membersData = members.map(m => ({
         userId: m.userId,
         role: m.role
@@ -172,7 +226,6 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onUpdateTeam }) => 
       );
 
       if (response.data.success) {
-        // Update parent component with new team data
         if (onUpdateTeam) {
           onUpdateTeam(team.teamId, response.data.team);
         }
@@ -190,7 +243,6 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onUpdateTeam }) => 
 
   const handleClose = () => {
     if (!isLoading && !isSaving && deletingMemberId === null && !showDeleteConfirm) {
-      // Reset members to original team data
       if (team) {
         setMembers([...team.members]);
       }
@@ -201,12 +253,14 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onUpdateTeam }) => 
 
   if (!isOpen || !team) return null;
 
+  const canEdit = team.yourRole === 'owner' || team.yourRole === 'editor';
+
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-hidden scrollbar-hide">
-          <div className="flex items-center justify-between p-6 border-b border-green-200">
-            <h2 className="text-xl font-semibold text-gray-900">Manage Team</h2>
+          <div className="flex items-center justify-between p-4 md:p-6 border-b border-green-200">
+            <h2 className="text-lg md:text-xl font-semibold text-gray-900">Manage Team</h2>
             <button
               onClick={handleClose}
               disabled={isLoading || isSaving || deletingMemberId !== null || showDeleteConfirm}
@@ -217,10 +271,11 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onUpdateTeam }) => 
           </div>
 
           <div className="overflow-y-auto max-h-[calc(90vh-140px)] scrollbar-hide">
-            <div className="p-6">
-              <h3 className="text-2xl font-bold text-gray-900">{team.teamName}</h3>
-              <p className="text-gray-600 mt-1">{team.motive || 'No description'}</p>
-              <div className="flex items-center gap-4 mt-4 text-sm text-gray-600">
+            <div className="p-4 md:p-6">
+              <h3 className="text-xl md:text-2xl font-bold text-gray-900">{team.teamName}</h3>
+              <p className="text-sm md:text-base text-gray-600 mt-1">{team.description || 'No description'}</p>
+              <p className="text-sm md:text-base text-gray-600 mt-1">{team.mail || 'No description'}</p>
+              <div className="flex items-center gap-3 md:gap-4 mt-3 md:mt-4 text-xs md:text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   <span>{members.length} members</span>
@@ -232,17 +287,18 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onUpdateTeam }) => 
               </div>
             </div>
 
-            <div className="p-6">
+            <div className="p-4 md:p-6">
               <div className="flex justify-between items-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-900">Team Members</h4>
-                {(team.yourRole === 'owner' || team.yourRole === 'editor') && (
+                <h4 className="text-base md:text-lg font-semibold text-gray-900">Team Members</h4>
+                {canEdit && (
                   <button
                     onClick={() => setShowAddMember(true)}
                     disabled={isLoading || isSaving || deletingMemberId !== null || showDeleteConfirm}
-                    className="flex items-center gap-2 px-3 py-2 bg-green-700 text-white rounded-lg text-sm hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-3 py-2 bg-green-700 text-white rounded-lg text-xs md:text-sm hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <UserPlus className="h-4 w-4" />
-                    Add Member
+                    <span className="hidden sm:inline">Add Member</span>
+                    <span className="sm:hidden">Add</span>
                   </button>
                 )}
               </div>
@@ -255,64 +311,75 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onUpdateTeam }) => 
                 />
               )}
 
-              <div className="space-y-3">
-                {members.map((member, index) => (
-                  <div key={member.userId} className="flex items-center gap-3 md:p-4 py-4 bg-gray-50 rounded-lg">
-                    <div className="min-w-8 min-h-8 md:w-10 md:h-10 bg-gray-600 rounded-full flex items-center justify-center text-sm font-medium text-white">
-                      {member.name.split(' ').map(n => n[0]).join('')}
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-sm md:text-lg text-gray-900">{member.name}</div>
-                      <div className="text-xs text-gray-500 flex items-center gap-1">
-                        <Mail className="h-3 w-3" />
-                        {member.email}
+              <div className="space-y-2 md:space-y-3">
+                {members.map((member) => (
+                  <div key={member.userId} className="bg-gray-50 rounded-lg p-3 md:p-4">
+                    <div className="flex items-start gap-3">
+                      {/* Avatar */}
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-600 rounded-full flex items-center justify-center text-sm md:text-base font-medium text-white flex-shrink-0">
+                        {member.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      
+                      {/* Member Info & Actions */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium flex items-center justify-between text-sm md:text-base text-gray-900 truncate">
+                              {member.name}
+                               {canEdit && member.role !== 'owner' && (
+                          <div className="">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-green-100 text-green-800 capitalize">
+                               {member.role}
+                            </span>
+                          </div>
+                        )}
+                            </div>
+                            <div className="text-xs md:text-sm text-gray-500 flex items-center gap-1 mt-0.5">
+                              <Mail className="h-3 w-3 flex-shrink-0" />
+                              <span className="truncate">{member.email}</span>
+                            </div>
+                          </div>
+                          
+                          {/* Role & Actions */}
+                          {canEdit && member.role !== 'owner' ? (
+                            <MemberActionsMenu
+                              member={member}
+                              onRoleChange={(newRole) => handleRoleChange(member.userId, newRole)}
+                              onDelete={() => confirmDeleteMember(member)}
+                              isDeleting={deletingMemberId === member.userId}
+                              yourRole={team.yourRole}
+                              disabled={isLoading || isSaving || showDeleteConfirm}
+                            />
+                          ) : (
+                            <div className="px-2.5 py-1 bg-gray-200 rounded text-xs md:text-sm font-medium text-gray-700 capitalize flex-shrink-0">
+                              {member.role}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Current Role Display - Shows below name on mobile */}
+                       
                       </div>
                     </div>
-                    <div className="w-32">
-                      {(team.yourRole === 'owner' || team.yourRole === 'editor') ? (
-                        <RoleSelect
-                          value={member.role}
-                          onChange={(newRole) => handleRoleChange(member.userId, newRole)}
-                          shouldDropUp={index >= members.length - 2}
-                          disabled={member.role === 'owner' && team.yourRole !== 'owner'}
-                        />
-                      ) : (
-                        <span className="text-sm text-gray-600 capitalize">{member.role}</span>
-                      )}
-                    </div>
-                    {(team.yourRole === 'owner' || team.yourRole === 'editor') && member.role !== 'owner' && (
-                      <button
-                        onClick={() => confirmDeleteMember(member)}
-                        disabled={deletingMemberId === member.userId || isLoading || isSaving || showDeleteConfirm}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Remove member"
-                      >
-                        {deletingMemberId === member.userId ? (
-                          <div className="h-5 w-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Trash2 className="h-5 w-5" />
-                        )}
-                      </button>
-                    )}
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          <div className="p-6 flex md:justify-end justify-center gap-3 border-t border-gray-200">
+          <div className="p-4 md:p-6 flex justify-center md:justify-end gap-3 border-t border-gray-200">
             <button
               onClick={handleClose}
               disabled={isLoading || isSaving || deletingMemberId !== null || showDeleteConfirm}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50"
+              className="px-4 py-2 text-sm md:text-base text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50"
             >
               Cancel
             </button>
-            {(team.yourRole === 'owner' || team.yourRole === 'editor') && (
+            {canEdit && (
               <button 
                 onClick={handleSave}
                 disabled={isLoading || isSaving || deletingMemberId !== null || showDeleteConfirm}
-                className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm md:text-base bg-green-700 text-white rounded-lg hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
@@ -321,7 +388,6 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onUpdateTeam }) => 
         </div>
       </div>
 
-      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={showDeleteConfirm}
         title="Remove Team Member"

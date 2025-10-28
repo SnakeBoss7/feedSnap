@@ -9,8 +9,8 @@ const createTeam = async (req, res) => {
   console.log('User from req.user:', req.user);
   
   try {
-    const { name, webDataId, motive, memberEmails,mail } = req.body;
-    console.log('Extracted values:', { name, webDataId, motive, memberEmails });
+    const { name, webDataId, description, memberEmails,mail } = req.body;
+    console.log('Extracted values:', { name, webDataId, description, memberEmails });
     
     const userId = req.user.id;
     console.log('User ID:', userId);
@@ -35,7 +35,7 @@ const createTeam = async (req, res) => {
     const team = new Team({
       name,
       webData: webDataId,
-      motive,
+      description,
       mail,
       members
     });
@@ -284,7 +284,8 @@ const getUserTeams = async (req, res) => {
     const formattedTeams = teams.map(team => ({
       teamId: team._id,
       teamName: team.name,
-      motive: team.motive,
+      description: team.description,
+      mail:team.mail,
       createdAt: team.createdAt,
       webData: {
         id: team.webData?._id,
@@ -302,6 +303,7 @@ const getUserTeams = async (req, res) => {
       totalMembers: team.members.length,
       yourRole: team.members.find(m => m.user._id.toString() === userId)?.role
     }));
+    console.log(formattedTeams)
 
     res.status(200).json({
       success: true,

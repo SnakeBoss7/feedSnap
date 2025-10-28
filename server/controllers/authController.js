@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const {tokenGen} = require('../utils/jwtTokenGen')
 const isProduction = process.env.NODE_ENV === 'prod';
+const {getUserAccessibleWebsites} = require('../controllers/feebackController');
 
 const cookieConfig = {
   httpOnly: true,
@@ -16,20 +17,30 @@ const getUserData = async(req,res)=>
     {
 try {
             let user = req.user;
-        console.log({user});
+                if (!req.user || !req.user.id) {
+      return res.status(401).json({ 
+        mess: 'User not authenticated',
+        error: 'Missing user information from token'
+      });
+    }
+        //.log({user});
         const userData = await User.findOne({_id:user.id})
+        const webURL = await getUserAccessibleWebsites(user.id);
+        userData.webURL = webURL.sites;
+        console.log({webURL});
         console.log({userData});
         return res.status(200).json({userData});
     } catch (error) {
+        console.log(error)
     return res.status(400).json({mess:error});
     
 }
     }
 const firebaseLogin = async (req, res) => {
     const { idToken } = req.body;
-        console.log({idToken})
+        //.log({idToken})
     if (!idToken) {
-        console.log('token not found');
+        //.log('token not found');
         return res.status(400).send('Invalid token'); // Add return
     }
     
@@ -39,7 +50,7 @@ const firebaseLogin = async (req, res) => {
         const finalName = displayName || name;
          const userRecord = await admin.auth().getUser(uid);
         const photoURL = userRecord.photoURL || null;
-        console.log(email)
+        //.log(email)
         let user = await User.findOne({ email: email });
 
         if (!user) {
@@ -53,11 +64,11 @@ const firebaseLogin = async (req, res) => {
         
         // Fixed cookie configuration
         res.cookie('token', token, cookieConfig);
-        console.log('User logged in via Firebase:', user);
+        //.log('User logged in via Firebase:', user);
         return res.status(200).json({ userData:user, token });
         
     } catch (err) {
-        console.log('Firebase login error:', err);
+        //.log('Firebase login error:', err);
         res.status(401).json({ error: err.message });
     }
 };
@@ -68,7 +79,7 @@ const registerUser = async(req,res)=>
      const { name, email, password, confirmPassword } = req.body;
     try {
         const existingUser = await User.findOne({ email });
-        console.log(existingUser)
+        //.log(existingUser)
         if (existingUser) {
             if( existingUser.password === "")
                 {
@@ -86,7 +97,7 @@ const registerUser = async(req,res)=>
                 error: 'User with this email already exists' 
             });
         }
-        console.log({name,email,password,confirmPassword})
+        //.log({name,email,password,confirmPassword})
         const saltRounds = 12;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -99,7 +110,7 @@ const registerUser = async(req,res)=>
 
         // Save user to database
         const savedUser = await newUser.save();
-        console.log(savedUser);
+        //.log(savedUser);
         // Generate JWT token
         const token = tokenGen(savedUser)
 
@@ -107,17 +118,17 @@ const registerUser = async(req,res)=>
         res.cookie('token', token, cookieConfig);
         return res.status(200).json({message:'working',userData:savedUser});
     } catch (err) {
-        console.log(err);
+        //.log(err);
         return res.status(401).json({ error: 'err' });
     }
 }
 const logIn = async(req,res)=>
     {
           const {email ,password} = req.body;
-          console.log({email,password})
+          //.log({email,password})
           try {
             const existingUser = await User.findOne({ email });
-        console.log(existingUser)
+        //.log(existingUser)
         if (!existingUser) {
             return res.status(401).json({mess:'User does not exist'});
           }
@@ -135,7 +146,7 @@ const logIn = async(req,res)=>
                     return res.status(401).json({mess:'Wrong Password'});
                 }
           } catch (error) {
-             console.log(error);
+             //.log(error);
               return res.status(401).json({mess:'thers some error'});
     }
 }

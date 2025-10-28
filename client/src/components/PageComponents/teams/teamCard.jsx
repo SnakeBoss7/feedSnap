@@ -5,7 +5,7 @@ export const TeamCard = ({ team, onManage }) => (
   <div className="bg-white rounded-lg border border-gray-200 transition-colors">
     <div className="p-6">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">{team.teamName}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 ">{team.teamName}</h3>
         <p className="text-gray-600 text-sm">{team.description}</p>
       </div>
 
@@ -13,7 +13,6 @@ export const TeamCard = ({ team, onManage }) => (
         <Users className="h-4 w-4" />
         <span>{team.members.length} members</span>
       </div>
-      <button onClick={()=>{console.log(team)}}>hello</button>
       <div className="flex -space-x-2 mb-4">
         {team.members.slice(0, 4).map((member) => (
           <div

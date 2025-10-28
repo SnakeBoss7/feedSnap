@@ -516,6 +516,7 @@ export function FilterTable({ data, onAction }) {
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
+               <div className="lg:hidden h-10"></div>
             </motion.div>
           )}
           <div className="lg:h-5 h-10"></div>

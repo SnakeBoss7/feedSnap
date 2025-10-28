@@ -38,7 +38,7 @@ const getUserAccessibleWebsites = async (userId) => {
       teams: userTeams
     };
   } catch (error) {
-    console.error("Error fetching user accessible websites:", error);
+    //.error("Error fetching user accessible websites:", error);
     throw error;
   }
 };
@@ -56,7 +56,7 @@ const exportFeedback = async (req, res) => {
       .sort({ createdOn: -1, webUrl: 1 });
 
     const { format } = req.query; // csv | pdf | json
-    console.log(format);
+    //.log(format);
 
     if (format === "csv") {
       const fields = ["title", "description", "rating", "webUrl", "pathname", "createdOn"];
@@ -93,14 +93,14 @@ const exportFeedback = async (req, res) => {
     }
 
   } catch (err) {
-    console.error(err);
+    //.error(err);
     res.status(500).json({ message: "Error exporting feedback" });
   }
 };
 
 //adding feedback to mongo
 const createFeed = async (req, res) => {
-  console.log(req.body);
+  //.log(req.body);
   const {webUrl,pathname,title,email,description,rating,config}= req.body
   res.status(200).json({ mess: "cooked" });
   let data = await feedback.create(req.body);
@@ -181,17 +181,17 @@ const createFeed = async (req, res) => {
 sendFeedbackEmail(email,`Thanks for your feedback on ${webUrl}`,mail);
 }
 
-  console.log(data);
+  //.log(data);
 };
 
 const getFeed = async (req, res) => {
   const user = req.user;
-  console.log(user);
+  //.log(user);
   
   // Use the helper function to get all accessible websites
   const { sites, webDataObjects } = await getUserAccessibleWebsites(user.id);
   
-  console.log("All accessible sites:", sites);
+  //.log("All accessible sites:", sites);
 
   //getting users feedback
   const userfeedback = await feedback
@@ -256,8 +256,8 @@ const getFeed = async (req, res) => {
     },
   ]);
 
-  console.log(totalFeedbacks1);
-  console.log(avgRating1);
+  //.log(totalFeedbacks1);
+  //.log(avgRating1);
 
   //rating of each site
   const ratingPerSite = {};
@@ -350,7 +350,7 @@ const getTotalFeedbackCount = async (webUrl) => {
     const count = await feedback.countDocuments({ webUrl });
     return count;
   } catch (error) {
-    console.error(`Error getting total feedback for ${webUrl}:`, error);
+    //.error(`Error getting total feedback for ${webUrl}:`, error);
     return 0;
   }
 };
@@ -367,7 +367,7 @@ const getFeedbackCountByPeriod = async (webUrl, startDate, endDate) => {
     });
     return count;
   } catch (error) {
-    console.error(`Error getting feedback count by period for ${webUrl}:`, error);
+    //.error(`Error getting feedback count by period for ${webUrl}:`, error);
     return 0;
   }
 };
@@ -411,7 +411,7 @@ const getFeedbackBreakdownByPeriod = async (webUrl, startDate, endDate) => {
 
     return breakdown;
   } catch (error) {
-    console.error(`Error getting feedback breakdown for ${webUrl}:`, error);
+    //.error(`Error getting feedback breakdown for ${webUrl}:`, error);
     return {
       bug: 0,
       complaint: 0,
@@ -456,7 +456,7 @@ const getOverallCategoryBreakdown = async (webUrl) => {
 
     return breakdown;
   } catch (error) {
-    console.error(`Error getting overall breakdown for ${webUrl}:`, error);
+    //.error(`Error getting overall breakdown for ${webUrl}:`, error);
     return {
       bug: 0,
       complaint: 0,
@@ -539,7 +539,7 @@ const getCurrentMonthDailyBreakdown = async (webUrl) => {
 
     return dailyBreakdown;
   } catch (error) {
-    console.error(`Error getting daily breakdown for ${webUrl}:`, error);
+    //.error(`Error getting daily breakdown for ${webUrl}:`, error);
     return {};
   }
 };
@@ -585,7 +585,7 @@ const getWebsiteFeedbackAnalytics = async (webUrl) => {
       dailyBreakdown: dailyBreakdown,
     };
   } catch (error) {
-    console.error(`Error getting analytics for ${webUrl}:`, error);
+    //.error(`Error getting analytics for ${webUrl}:`, error);
     throw error;
   }
 };
@@ -593,18 +593,18 @@ const getWebsiteFeedbackAnalytics = async (webUrl) => {
 // Main function to get detailed feedback analytics for multiple websites
 const getDetailedFeedbackAnalytics = async (webUrls) => {
   try {
-    console.log("Getting detailed feedback analytics for websites:", webUrls);
+    //.log("Getting detailed feedback analytics for websites:", webUrls);
 
     const analytics = {};
 
     for (const webUrl of webUrls) {
-      console.log(`Processing analytics for: ${webUrl}`);
+      //.log(`Processing analytics for: ${webUrl}`);
       analytics[webUrl] = await getWebsiteFeedbackAnalytics(webUrl);
     }
 
     return analytics;
   } catch (error) {
-    console.error("Error getting detailed feedback analytics:", error);
+    //.error("Error getting detailed feedback analytics:", error);
     throw error;
   }
 };
@@ -612,7 +612,7 @@ const getDetailedFeedbackAnalytics = async (webUrls) => {
 // Optimized function using aggregation for better performance
 const getDetailedFeedbackAnalyticsOptimized = async (webUrls) => {
   try {
-    console.log("Getting optimized detailed feedback analytics for websites:", webUrls);
+    //.log("Getting optimized detailed feedback analytics for websites:", webUrls);
 
     const dateRanges = getDateRanges();
     const analytics = {};
@@ -783,21 +783,21 @@ const getDetailedFeedbackAnalyticsOptimized = async (webUrls) => {
 
     return analytics;
   } catch (error) {
-    console.error("Error getting optimized detailed feedback analytics:", error);
+    //.error("Error getting optimized detailed feedback analytics:", error);
     throw error;
   }
 };
 
 // Updated display function with team support
 const display = async (req, res) => {
-  console.log("Display detailed analytics function called");
+  //.log("Display detailed analytics function called");
   try {
     const user = req.user;
 
     // Use the helper function to get all accessible websites
     const { sites } = await getUserAccessibleWebsites(user.id);
     
-    console.log("Sites for detailed analytics:", sites);
+    //.log("Sites for detailed analytics:", sites);
 
     if (sites.length === 0) {
       return res.json({
@@ -808,7 +808,7 @@ const display = async (req, res) => {
     }
 
     const analytics = await getDetailedFeedbackAnalyticsOptimized(sites);
-    console.log("Detailed analytics result:", JSON.stringify(analytics, null, 2));
+    //.log("Detailed analytics result:", JSON.stringify(analytics, null, 2));
     
     res.json({
       success: true,
@@ -816,7 +816,7 @@ const display = async (req, res) => {
       sites: sites,
     });
   } catch (error) {
-    console.error("Error in display detailed analytics function:", error);
+    //.error("Error in display detailed analytics function:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -826,21 +826,21 @@ const display = async (req, res) => {
 
 // Updated allFeedback function with team support
 const allFeedback = async (req, res) => {
-  console.log("allFeedback function called");
+  //.log("allFeedback function called");
   try {
     const user = req.user;
 
     // Use the helper function to get all accessible websites
     const { sites } = await getUserAccessibleWebsites(user.id);
     
-    console.log("All accessible sites for feedback:", sites);
+    //.log("All accessible sites for feedback:", sites);
     
     let data = await feedback.aggregate([
       { $match: { webUrl: { $in: sites } } },
       { $sort: { createdOn: -1 } },
     ]);
     
-    console.log('Fetched feedback count:', data.length);
+    //.log('Fetched feedback count:', data.length);
     const userTeams = await Team.find({
   'members.user': user.id,
   'members.role': { $in: ['owner', 'editor'] },
@@ -849,7 +849,7 @@ const teamOptions = userTeams.map(team => ({
   value: team.mail,   // the email will be the value
   label: team.name    // the team name will be shown in the dropdown
 }));
-  console.log({userTeams})
+  //.log({userTeams})
     return res.status(200).json({
       success: true,
       sites: sites,
@@ -857,7 +857,7 @@ const teamOptions = userTeams.map(team => ({
       data: data,
     });
   } catch (err) {
-    console.error("Error in allFeedback function:", err);
+    //.error("Error in allFeedback function:", err);
     res.status(500).json({
       success: false,
       message: err.message,
@@ -865,4 +865,4 @@ const teamOptions = userTeams.map(team => ({
   }
 };
 
-module.exports = { createFeed, getFeed, display, allFeedback, exportFeedback }
+module.exports = { createFeed, getFeed, display, allFeedback, exportFeedback,getUserAccessibleWebsites }

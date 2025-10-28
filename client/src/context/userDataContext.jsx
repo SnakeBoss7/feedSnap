@@ -48,7 +48,6 @@ export const UserProvider = ({ children }) => {
       });
 
       const newUserData = response.data?.userData;
-      
       if (newUserData) {
         setUserData(newUserData);
         localStorage.setItem('UserData', JSON.stringify(newUserData));

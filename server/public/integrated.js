@@ -140,14 +140,14 @@
             this.routeObserver?.disconnect();
             this.isOpen = false;
             
-            console.log("FeedbackSnippet destroyed and cleared from window");
+            //.log("FeedbackSnippet destroyed and cleared from window");
         }
 
         handleRouteChange(source) {
             const newPath = window.location.pathname;
             
             if (newPath !== this.currentPath) {
-                console.log(`Route changed from ${this.currentPath} to ${newPath} (via ${source})`);
+                //.log(`Route changed from ${this.currentPath} to ${newPath} (via ${source})`);
                 
                 this.currentPath = newPath;
                 this.pathname = newPath;
@@ -166,7 +166,7 @@
                 this.createWidget();
                 this.bindEvents();
             } catch (err) {
-                console.log(err);
+                //.log(err);
             }
         }
 
@@ -179,9 +179,9 @@
                     }
                 );
                 this.config = await res.json();
-                console.log(this.config)
+                //.log(this.config)
             } catch (err) {
-                console.log(err);
+                //.log(err);
                 // Fallback config
                 this.config = {
                     color: "#667eea",
@@ -876,7 +876,7 @@
             this.button.className = 'fw-button fw-container';
             this.button.title = 'Send Feedback';
             this.button.setAttribute('aria-label', 'Open feedback widget');
-            console.log()
+            //.log()
             if (this.config.widgetText) {
                 this.btnContent = this.config.widgetText;
             } else {
@@ -1081,7 +1081,7 @@
                 // Close dropdown
                 this.closeDropdown();
                 
-                console.log('Selected feedback type:', this.selectedFeedbackType);
+                //.log('Selected feedback type:', this.selectedFeedbackType);
             };
         }
 
@@ -1095,7 +1095,7 @@
             option.classList.add('selected');
             this.selectedRating = option.querySelector('input').value;
             
-            console.log('Selected rating:', this.selectedRating);
+            //.log('Selected rating:', this.selectedRating);
         }
 
         setupChat() {
@@ -1122,7 +1122,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ userMessage: message }),
+                    body: JSON.stringify({ userMessage: message, botContext: this.config.botContext || {}  }),
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -1131,11 +1131,11 @@
                     
                     // Add bot response
                      const formattedMessage = data.data.replace(/\\n/g, '<br>');
-                     console.log(formattedMessage)
+                     //.log(formattedMessage)
     this.addChatMessage(formattedMessage, 'bot');
                 })
                 .catch(error => {
-                    console.error('Error fetching LLM response:', error);
+                    //.error('Error fetching LLM response:', error);
                     loadingMsg.remove();
                     this.addChatMessage('Sorry, I encountered an error. Please try again.', 'bot');
                 });
@@ -1228,7 +1228,7 @@
             submitButton.disabled = true;
 
             // Submit feedback
-            console.log(this.selectedFeedbackType)
+            //.log(this.selectedFeedbackType)
             fetch(`${CONFIG.BASE_API}/api/feedback/addfeedback`, {
                 method: 'POST',
                 headers: {
@@ -1246,7 +1246,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Feedback submitted successfully:', data);
+                //.log('Feedback submitted successfully:', data);
                 
                 // Show success state
                 submitButton.innerHTML = `
@@ -1271,11 +1271,11 @@
                 try {
                     window.parent.postMessage({ type: 'FEEDBACK_SUBMITTED' }, '*');
                 } catch (e) {
-                    console.log('Could not post message to parent');
+                    //.log('Could not post message to parent');
                 }
             })
             .catch(error => {
-                console.error('Error submitting feedback:', error);
+                //.error('Error submitting feedback:', error);
                 
                 // Show error state
                 submitButton.innerHTML = `
