@@ -1,7 +1,5 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-// import { FaUsers,FaPagelines } from 'react-icons/fa';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagic, faFileAlt, faUsers } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -9,111 +7,160 @@ import {
   useSidebarContext,
 } from "../../context/sidebarContext";
 import Checkbox from "./hamburger";
+import { LucideHome, LucideLogIn, LucideView } from "lucide-react";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [show, setShow] = useState(true);
   const { showSidebar, setShowSidebar } = useSidebarContext();
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const color = [
-    "bg-blue-600",
-    "bg-green-600",
-    "bg-purple-600",
-    "bg-orange-600",
-  ];
-  const toggleNav = () => {
-    console.log("hello");
-    setIsMenuOpen((prev) => !prev);
-  };
-  useEffect(() => {
-    const handleSize = () => {
-      if (window.innerWidth > 1024) {
-        setIsMenuOpen(false);
-        setShowSidebar(false);
-        // setShow(false);
-      } else {
-      }
-    };
-    handleSize();
+  const [isScrolling, setIsScrolling] = useState(false);
 
-    window.addEventListener("resize", handleSize);
-    return () => window.removeEventListener("resize", handleSize);
-  }, [setShowSidebar]);
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolling(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
-    <header
-      className={`w-full transition-all z-[99999999999999999999999] duration-300 md:px-10 glass-card bg-white items-center p-4  ${
-        show ? "translate-y-0 " : "translate-y-[-100px]"
-      }  
-      ${showSidebar ? "h-[300px]" : ""} border-black-600 flex  ${
-        isMenuOpen ? "h-[100vh]" : ""
-      } `}
-    >
-      <div className=" mx-auto container w-full flex justify-between ">
-        <div className="left text-3xl font-semibold tracking-tight flex  ">
-          <div className="text-gray-900 text-3xl text-top">Feed</div>
-          <div className="font-mono text-primary bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent text-4xl text-bottom">
-            SNAP
-          </div>
-        </div>
-  
-          <div className="flex gap-5 font-sans lg:flex hidden">
-            <Link
-              className="transition-all duration-300 ease-in-out  py-2 text-black rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent"
-              to="/"
-            >
-              Home
-            </Link>
-            <Link
-              className="transition-all duration-300 ease-in-out  py-2 text-black rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent"
-              to="/overview"
-            >
-              Overview
-            </Link>
-            <Link
-              className="transition-all duration-300 ease-in-out   py-2 rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent"
-              to="/logIn"
-            >
-              Log In
-            </Link>
-          </div>
-
-         <div className="flex gap-5 font-sans lg:flex hidden">
-            <Link
-            className="text-bg_c transition-all duration-300  ease-in-out font-bold border  border-black  px-4 py-2 rounded-md  hover:bg-gradient-to-r hover:from-blue-500 hover:via-blue-500 hover:to-purple-600 hover:text-white hover:border-white"
-            to="/signIn"
-          >
-            Get Started
-          </Link>
-          </div>
-        </div>
-        <Checkbox show={show} color={color} />
-  
-      {showSidebar && (
+    <>
+      <header className="w-full z-[9999] sticky top-0 flex ">
         <div
-          onClick={() => setShowSidebar((prev) => !prev)}
-          className="flex flex-col w-full gap-2 mt-6 font-regular items-center justify-start"
+          className={`w-full flex ${
+            isScrolling ? "mt-4 mx-4 lg:mx-16 px-6 py-3" : "mt-0 px-4 py-4"
+          }`}
+          style={{
+            background: isScrolling
+              ? "rgba(235, 235, 235, 1)"
+              : "rgba(255, 255, 255, 1)",
+            backdropFilter: "blur(10px)",
+            boxShadow: isScrolling
+              ? "0 8px 32px 0 rgba(31, 38, 135, 0.15)"
+              : "0 4px 16px 0 rgba(31, 38, 135, 0.1)",
+            borderRadius: isScrolling ? "9999px" : "0",
+            transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
         >
-          <Link
-            className="transition-all w-full duration-300 ease-in-out text-xl py-2 text-black rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent"
-            to="/"
+          <div className="mx-auto container w-full flex justify-between items-center">
+            {/* Logo - Left aligned on all screens */}
+            <div className="flex justify-start">
+              <div className="text-3xl font-semibold tracking-tight flex items-center">
+                <div className="text-gray-900 text-3xl">Feed</div>
+                <div className=" bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent text-3xl">
+                  SNAP
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="flex gap-6 font-sans lg:flex hidden items-center">
+              <Link
+                className="transition-all duration-300 flex ease-in-out py-2 items-center gap-2 text-black text-lg rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent font-medium"
+                to="/"
+              >
+                <LucideHome className="text-black" size={19} />
+                Home
+              </Link>
+              <Link
+                className="transition-all duration-300 flex ease-in-out py-2 items-center gap-2 text-black rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent font-medium"
+                to="/overview"
+              >
+                <LucideView className="text-black" size={19} />
+                Overview
+              </Link>
+              <Link
+                className="transition-all duration-300 flex ease-in-out py-2 items-center gap-2 text-black rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent font-medium"
+                to="/logIn"
+              >
+                <LucideLogIn className="text-black" size={19} />
+                Log In
+              </Link>
+
+              {/* Get Started Button */}
+              <Link
+                className="font-bold px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white  hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
+                to="/signIn"
+                style={{
+                  borderRadius: isScrolling ? "9999px" : "0.375rem",
+                  transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                Get Started
+              </Link>
+            </div>
+
+            {/* Mobile Hamburger - Right aligned */}
+            <div className="lg:hidden flex">
+              <Checkbox show={show} />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Dropdown Menu - Separated from header */}
+      {showSidebar && (
+        <div className="lg:hidden fixed top-20 left-0 right-0 z-[9998] px-4 animate-slideDown">
+          <div
+            className="w-full rounded-2xl p-6 shadow-2xl"
+            style={{
+              background: "rgba(255, 255, 255, 1)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.5)",
+            }}
+            onClick={() => setShowSidebar((prev) => !prev)}
           >
-            Home
-          </Link>
-          <Link
-            className="transition-all w-full duration-300 ease-in-out  text-xl  py-2 text-black rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent"
-            to="/overview"
-          >
-            Overview
-          </Link>
-          <Link
-            className="transition-all w-full duration-300 ease-in-out   text-xl  py-2 text-black rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent"
-            to="/logIn"
-          >
-            Log In
-          </Link>
+            <div className="flex flex-col gap-4 font-medium">
+              <Link
+                className="transition-all duration-300 flex items-center  gap-3 ease-in-out text-lg py-3 px-4 text-black rounded-xl hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white hover:shadow-md"
+                to="/"
+              >
+                                <LucideHome className="text-black" size={19} />
+                Home
+              </Link>
+              <Link
+                className="transition-all duration-300 flex items-center gap-3 ease-in-out text-lg py-3 px-4 text-black rounded-xl hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white hover:shadow-md"
+                to="/overview"
+              >
+                   <LucideView className="text-black" size={19} />
+                Overview
+              </Link>
+              <Link
+                className="transition-all duration-300 flex items-center gap-3  ease-in-out text-lg py-3 px-4 text-black rounded-xl hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white hover:shadow-md"
+                to="/logIn"
+              >
+                <LucideLogIn className="text-black" size={19} />
+                Log In
+              </Link>
+              <Link
+                className="transition-all duration-300 ease-in-out text-lg py-3 px-4 mt-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-bold text-center hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
+                to="/signIn"
+              >
+                Get Started
+              </Link>
+            </div>
+          </div>
         </div>
       )}
-    </header>
+
+      <style jsx>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-slideDown {
+          animation: slideDown 0.3s ease-out forwards;
+        }
+      `}</style>
+    </>
   );
 }

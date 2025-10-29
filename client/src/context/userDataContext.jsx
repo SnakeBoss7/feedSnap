@@ -94,7 +94,7 @@ export const UserProvider = ({ children }) => {
   // Initial data fetch
   useEffect(() => {
     fetchUserData();
-  }, []);
+  }, [apiUrl]);
 
   // Listen for storage changes from other tabs
   useEffect(() => {

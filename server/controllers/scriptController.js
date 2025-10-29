@@ -5,8 +5,8 @@ const scriptCreate = async (req, res) => {
     console.log("no user");
     res.status(400).json({ mess: "user not found" });
   }
-  const { webUrl, position, color, text,bgColor } = req.body.settings;
-
+  const { webUrl, position, color, text,bgColor,ackMail,botContext } = req.body.settings;
+  console.log(req.body.settings)
   let webdata = await webData.findOne({ webUrl: webUrl });
   // console.log(process.env.SERVER);
   if (!webdata) {
@@ -17,9 +17,12 @@ const scriptCreate = async (req, res) => {
       position,
       text,
       bgColor,
+      ackMail,
+      botContext,
+
       owner: req.user.id,
     });
-    let scriptInjection = `<script src="${process.env.SERVER}/script.js?webUrl=${webUrl}"></script>`;
+    let scriptInjection = `<script src="${process.env.SERVER}/widget/script/?webUrl=${webUrl}"></script>`;
     res
       .status(200)
       .json({ mess: "web data created", injection: scriptInjection });
@@ -33,7 +36,8 @@ const scriptDemo = async (req, res) => {
   if (!req.user) {
     res.status(400).json({ mess: "user not found" });
   }
-  const { position, color, text,bgColor } = req.body.settings;
+
+  const { position, color, text,bgColor, } = req.body.settings;
   // console.log({bgColor})
   let webdata = await webData.findOne({ webUrl: process.env.FRONTEND });
   if (!webdata) {

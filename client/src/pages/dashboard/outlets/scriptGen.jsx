@@ -110,7 +110,7 @@ export const ScriptGen = () => {
       {
         setShowDemo(true);
          let script = document.createElement('script');
-      script.src = `${apiUrl}/integrated.js?webUrl=${frontendApiUrl}`;
+      script.src = `${apiUrl}/widget/script?webUrl=${frontendApiUrl}`;
       console.log("Script element created:", script);
       document.body.appendChild(script);
       }
@@ -121,45 +121,93 @@ const genDemo = async (e) => {
   if (showDemo) {
     setShowDemo(false);
 
-    // FIRST: Call the script's destroy method if it exists
+    // STEP 1: Call the destroy method to clean up event listeners
     if (window.FeedbackSnippet && typeof window.FeedbackSnippet.destroy === 'function') {
       window.FeedbackSnippet.destroy();
     }
 
-    // THEN: Remove any remaining DOM elements
-    [`script[src^='${apiUrl}integrated.js']`,
-     ".fw-overlay",
-     ".fw-popup", 
-     ".fw-button",".fw-container"
-    ].forEach(sel => {
-      const el = document.querySelector(sel);
-      if (el && el.parentNode) el.parentNode.removeChild(el);
+    // STEP 2: Remove the script tag (use the correct selector)
+    const scriptToRemove = document.querySelector(`script[src*="${apiUrl}/widget/script"]`);
+    if (scriptToRemove && scriptToRemove.parentNode) {
+      scriptToRemove.parentNode.removeChild(scriptToRemove);
+    }
+
+    // STEP 3: Remove all widget DOM elements
+    const selectorsToRemove = [
+      ".fw-overlay",
+      ".fw-popup", 
+      ".fw-button",
+      ".fw-container"
+    ];
+    
+    selectorsToRemove.forEach(selector => {
+      const elements = document.querySelectorAll(selector);
+      elements.forEach(el => {
+        if (el && el.parentNode) {
+          el.parentNode.removeChild(el);
+        }
+      });
     });
 
+    // STEP 4: Remove injected styles
+    document.querySelectorAll('style').forEach(style => {
+      if (style.textContent.includes('.fw-container') || 
+          style.textContent.includes('.fw-button') ||
+          style.textContent.includes('.fw-popup')) {
+        style.remove();
+      }
+    });
+
+    // STEP 5: Clear localStorage
     localStorage.removeItem("demoLive");
+    
+    console.log("Demo widget cleaned up successfully");
     return;
   }
 
-  // Rest of your code for adding the script...
-
+  // ========== LOADING THE WIDGET ==========
   try {
-   setShowDemo("loading");
-   console.log("Starting API call...");
-   let res = await axios.post(`${apiUrl}/api/script/demo`, { settings: UrlSettings }, { withCredentials: true });
-   
-   localStorage.setItem("demoLive", true);
-   
-   // Add cache-busting param
-   const script = document.createElement("script");
-   script.src = `${apiUrl}/integrated.js?webUrl=${frontendApiUrl}&t=${Date.now()}`;
-   script.async = true;
-   document.body.appendChild(script);
-   await new Promise(resolve => setTimeout(resolve, 600)); // Simulate loading delay
-   setShowDemo(true);
-
-    console.log("API response:", res);
+    setShowDemo("loading");
+    console.log("Starting demo widget...");
+    
+    // Optional: Call demo API if needed
+    let res = await axios.post(`${apiUrl}/api/script/demo`, 
+      { settings: UrlSettings }, 
+      { withCredentials: true }
+    );
+    
+    localStorage.setItem("demoLive", "true");
+    
+    // CRITICAL FIX: Create and append script correctly
+    const script = document.createElement("script");
+    
+    // Add cache-busting parameter
+    script.src = `${apiUrl}/widget/script?webUrl=${encodeURIComponent(frontendApiUrl)}&t=${Date.now()}`;
+    script.async = true;
+    
+    // Add error handling
+    script.onerror = () => {
+      console.error("Failed to load widget script");
+      setShowDemo(false);
+      localStorage.removeItem("demoLive");
+    };
+    
+    // IMPORTANT: Wait for script to load before setting state
+    script.onload = () => {
+      console.log("Widget script loaded successfully");
+      // Give the widget time to initialize
+      setTimeout(() => {
+        setShowDemo(true);
+      }, 300);
+    };
+    
+    // Append script to body
+    document.body.appendChild(script);
+    
   } catch (err) {
-    console.error("API error:", err);
+    console.error("Error loading demo widget:", err);
+    setShowDemo(false);
+    localStorage.removeItem("demoLive");
   }
 };
 

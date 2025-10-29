@@ -1,6 +1,7 @@
-(function() {
+const widgetGen =(config)=> {
+   return ` (function() {
     'use strict';
-    
+        const INJECTED_CONFIG = ${JSON.stringify(config)};
     // Prevent multiple instances
     if (window.FeedbackSnippet) return;
     
@@ -9,7 +10,7 @@
         hex = hex.replace(/^#/, "");
         if (hex.length === 3) hex = hex.split("").map(x => x + x).join("");
         const num = parseInt(hex, 16);
-        return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
+        return \`\${(num >> 16) & 255}, \${(num >> 8) & 255}, \${num & 255}\`;
     };
 
     function getContrastTextColor(hexColor) {
@@ -147,7 +148,7 @@
             const newPath = window.location.pathname;
             
             if (newPath !== this.currentPath) {
-                //.log(`Route changed from ${this.currentPath} to ${newPath} (via ${source})`);
+                //.log(\`Route changed from \${this.currentPath} to \${newPath} (via \${source})\`);
                 
                 this.currentPath = newPath;
                 this.pathname = newPath;
@@ -171,15 +172,10 @@
         }
 
         async loadConfig() {
-            try {
-                let res = await fetch(
-                    `${CONFIG.BASE_API}/api/widget/GetWidConfig?webUrl=${this.webUrl}`,
-                    {
-                        method: "GET",
-                    }
-                );
-                this.config = await res.json();
-                //.log(this.config)
+                       try {
+             
+                this.config = INJECTED_CONFIG;
+                console.log(this.config);
             } catch (err) {
                 //.log(err);
                 // Fallback config
@@ -227,26 +223,26 @@
             const textColor = getContrastTextColor(bgColor);
             const isDarkBg = textColor === '#FFFFFF';
 
-            const styles = `
+            const styles = \`
                 .fw-container {
-                    --primary-color: ${this.config.color || "#667eea"};
-                    --primary-rgb: ${rgb};
-                    --bg-color: ${bgColor};
-                    --text-color: ${textColor};
-                    --text-secondary: ${isDarkBg ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)'};
-                    --border-color: ${isDarkBg ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'};
-                    --surface: ${isDarkBg ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)'};
-                    --hover-surface: ${isDarkBg ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'};
-                    --dropdown-bg: ${isDarkBg ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
-                    --shadow: ${isDarkBg ? '0 20px 60px rgba(0, 0, 0, 0.5)' : '0 20px 60px rgba(0, 0, 0, 0.15)'};
+                    --primary-color: \${this.config.color || "#667eea"};
+                    --primary-rgb: \${rgb};
+                    --bg-color: \${bgColor};
+                    --text-color: \${textColor};
+                    --text-secondary: \${isDarkBg ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)'};
+                    --border-color: \${isDarkBg ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'};
+                    --surface: \${isDarkBg ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)'};
+                    --hover-surface: \${isDarkBg ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'};
+                    --dropdown-bg: \${isDarkBg ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
+                    --shadow: \${isDarkBg ? '0 20px 60px rgba(0, 0, 0, 0.5)' : '0 20px 60px rgba(0, 0, 0, 0.15)'};
 
-                    --surface-1: ${isDarkBg ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'};
-                    --surface-2: ${isDarkBg ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'};
+                    --surface-1: \${isDarkBg ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'};
+                    --surface-2: \${isDarkBg ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'};
                     --shadow-clean: 0 2px 8px rgba(0, 0, 0, 0.06);
                     --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.08);
                     --shadow-large: 0 8px 32px rgba(0, 0, 0, 0.12);
-                    --gradient-vibrant: linear-gradient(135deg, rgba(${rgb}, 0.2), rgba(${rgb}, 0.35), rgba(${rgb}, 0.15));
-                    --gradient-subtle: linear-gradient(135deg, rgba(${rgb}, 0.08), rgba(${rgb}, 0.12));
+                    --gradient-vibrant: linear-gradient(135deg, rgba(\${rgb}, 0.2), rgba(\${rgb}, 0.35), rgba(\${rgb}, 0.15));
+                    --gradient-subtle: linear-gradient(135deg, rgba(\${rgb}, 0.08), rgba(\${rgb}, 0.12));
                 }
 
                 .fw-container, .fw-container * {
@@ -260,12 +256,12 @@
                 
  .fw-button {
     position: fixed;
-    ${position[0]}: 20px;
-    ${position[1]}: 20px;
+    \${position[0]}: 20px;
+    \${position[1]}: 20px;
     padding: 20px;
     height: 56px;
-    background: linear-gradient(135deg, var(--primary-color), ${this.config.color}dd);
-    border: 2px solid ${textColor === '#FFFFFF' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.1)'};
+    background: linear-gradient(135deg, var(--primary-color), \${this.config.color}dd);
+    border: 2px solid \${textColor === '#FFFFFF' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.1)'};
     border-radius: 100px;
     cursor: pointer;
     z-index: 999999;
@@ -291,7 +287,7 @@
                 .fw-button svg {
                     width: 20px;
                     height: 20px;
-                    stroke: ${textColor === '#FFFFFF' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,1)'};
+                    stroke: \${textColor === '#FFFFFF' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,1)'};
                     transition: transform 0.3s ease;
                 }
                 
@@ -320,8 +316,8 @@
                 
                 .fw-popup {
                     position: fixed;
-                    ${position[0]}: 90px;
-                    ${position[1]}: 90px;
+                    \${position[0]}: 90px;
+                    \${position[1]}: 90px;
                     width: 400px;
                     height:570px;
                     max-width: calc(100vw - 40px);
@@ -345,8 +341,8 @@
                 
                 @media (max-width: 480px) {
                     .fw-popup {
-                        ${position[0]}: 20px;
-                        ${position[1]}: 20px;
+                        \${position[0]}: 20px;
+                        \${position[1]}: 20px;
                         width: calc(100vw - 40px);
                         height: auto;
                         max-height: calc(100vh - 40px);
@@ -864,7 +860,7 @@
     margin: 4px 0;
     content: "";
 }
-            `;
+            \`;
             
             const styleSheet = document.createElement('style');
             styleSheet.textContent = styles;
@@ -880,9 +876,9 @@
             if (this.config.widgetText) {
                 this.btnContent = this.config.widgetText;
             } else {
-                this.btnContent = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                this.btnContent = \`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>`;
+                </svg>\`;
             }
             
             this.button.innerHTML = this.btnContent;
@@ -895,7 +891,7 @@
             
             this.popup = document.createElement('div');
             this.popup.className = 'fw-popup fw-container';
-            this.popup.innerHTML = `
+            this.popup.innerHTML = \`
                 <div class="fw-header">
                     <button class="fw-tab active" data-tab="feedback">Feedback</button>
                     <button class="fw-tab" data-tab="chat">Chatbot</button>
@@ -920,23 +916,23 @@
                         <div class="fw-rating">
                             <label class="fw-rating-option">
                                 <input type="radio" name="rating" value="1">
-                                <img src="${CONFIG.BASE_API}/images/unhappy.png" alt="Unhappy">
+                                <img src="\${CONFIG.BASE_API}/images/unhappy.png" alt="Unhappy">
                             </label>
                             <label class="fw-rating-option">
                                 <input type="radio" name="rating" value="2">
-                                <img src="${CONFIG.BASE_API}/images/upset.png" alt="Upset">
+                                <img src="\${CONFIG.BASE_API}/images/upset.png" alt="Upset">
                             </label>
                             <label class="fw-rating-option">
                                 <input type="radio" name="rating" value="3">
-                                <img src="${CONFIG.BASE_API}/images/smile.png" alt="Neutral">
+                                <img src="\${CONFIG.BASE_API}/images/smile.png" alt="Neutral">
                             </label>
                             <label class="fw-rating-option">
                                 <input type="radio" name="rating" value="4">
-                                <img src="${CONFIG.BASE_API}/images/happy.png" alt="Happy">
+                                <img src="\${CONFIG.BASE_API}/images/happy.png" alt="Happy">
                             </label>
                             <label class="fw-rating-option">
                                 <input type="radio" name="rating" value="5">
-                                <img src="${CONFIG.BASE_API}/images/love.png" alt="Love">
+                                <img src="\${CONFIG.BASE_API}/images/love.png" alt="Love">
                             </label>
                         </div>
                         
@@ -975,7 +971,7 @@
                     </div>
                 </div>
                 
-            `;
+            \`;
             
             document.body.appendChild(this.overlay);
             document.body.appendChild(this.popup);
@@ -1117,7 +1113,7 @@
                 loadingMsg.classList.add('fw-loader');
 
                 // Send to API
-                fetch(`${CONFIG.BASE_API}/api/llm/llmquery`, {
+                fetch(\`\${CONFIG.BASE_API}/api/llm/llmquery\`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1219,17 +1215,17 @@
             const originalContent = submitButton.innerHTML;
             
             // Show loading state
-            submitButton.innerHTML = `
+            submitButton.innerHTML = \`
                 <span>Sending...</span>
                 <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 12a9 9 0 11-6.219-8.56"/>
                 </svg>
-            `;
+            \`;
             submitButton.disabled = true;
 
             // Submit feedback
             //.log(this.selectedFeedbackType)
-            fetch(`${CONFIG.BASE_API}/api/feedback/addfeedback`, {
+            fetch(\`\${CONFIG.BASE_API}/api/feedback/addfeedback\`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1249,9 +1245,9 @@
                 //.log('Feedback submitted successfully:', data);
                 
                 // Show success state
-                submitButton.innerHTML = `
+                submitButton.innerHTML = \`
                     <span>Success! ✓</span>
-                `;
+                \`;
                 submitButton.style.background = 'linear-gradient(135deg, #10b981, #059669)';
                 
                 // Reset form after delay
@@ -1278,14 +1274,14 @@
                 //.error('Error submitting feedback:', error);
                 
                 // Show error state
-                submitButton.innerHTML = `
+                submitButton.innerHTML = \`
                     <span>Error - Try Again</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"/>
                         <path d="m15 9-6 6"/>
                         <path d="m9 9 6 6"/>
                     </svg>
-                `;
+                \`;
                 submitButton.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
                 
                 setTimeout(() => {
@@ -1303,7 +1299,7 @@
         addChatMessage(message, type) {
     const messagesContainer = this.popup.querySelector('.fw-chat-messages');
     const messageEl = document.createElement('div');
-    messageEl.className = `fw-message ${type}`;
+    messageEl.className = \`fw-message \${type}\`;
     
     // Use innerHTML instead of textContent to render HTML tags
     if (type === 'bot') {
@@ -1339,12 +1335,12 @@
         showNotification(message, type = 'info') {
             // Simple notification system - you can enhance this
             const notification = document.createElement('div');
-            notification.style.cssText = `
+            notification.style.cssText = \`
                 position: fixed;
                 top: 20px;
                 right: 20px;
                 padding: 16px 24px;
-                background: ${type === 'error' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #10b981, #059669)'};
+                background: \${type === 'error' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #10b981, #059669)'};
                 color: white;
                 border-radius: 16px;
                 font-weight: 600;
@@ -1354,12 +1350,12 @@
                 backdrop-filter: blur(10px);
                 font-family: 'Inter', sans-serif;
                 font-size: 14px;
-            `;
+            \`;
             notification.textContent = message;
             
             // Add slide in animation
             const style = document.createElement('style');
-            style.textContent = `
+            style.textContent = \`
                 @keyframes slideInNotification {
                     from {
                         opacity: 0;
@@ -1370,7 +1366,7 @@
                         transform: translateX(0) translateY(0);
                     }
                 }
-            `;
+            \`;
             document.head.appendChild(style);
             
             document.body.appendChild(notification);
@@ -1400,4 +1396,6 @@
         window.FeedbackSnippet = new FeedbackSnippet();
     }
 
-})();
+})();`;
+};
+module.exports = {widgetGen};
