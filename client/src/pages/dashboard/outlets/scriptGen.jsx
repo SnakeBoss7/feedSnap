@@ -143,17 +143,19 @@ const genDemo = async (e) => {
   // Rest of your code for adding the script...
 
   try {
-    console.log("Starting API call...");
-    let res = await axios.post(`${apiUrl}/api/script/demo`, { settings: UrlSettings }, { withCredentials: true });
-    
-    setShowDemo(true);
-    localStorage.setItem("demoLive", true);
-
-    // Add cache-busting param
-    const script = document.createElement("script");
-    script.src = `${apiUrl}/integrated.js?webUrl=${frontendApiUrl}&t=${Date.now()}`;
-    script.async = true;
-    document.body.appendChild(script);
+   setShowDemo("loading");
+   console.log("Starting API call...");
+   let res = await axios.post(`${apiUrl}/api/script/demo`, { settings: UrlSettings }, { withCredentials: true });
+   
+   localStorage.setItem("demoLive", true);
+   
+   // Add cache-busting param
+   const script = document.createElement("script");
+   script.src = `${apiUrl}/integrated.js?webUrl=${frontendApiUrl}&t=${Date.now()}`;
+   script.async = true;
+   document.body.appendChild(script);
+   await new Promise(resolve => setTimeout(resolve, 600)); // Simulate loading delay
+   setShowDemo(true);
 
     console.log("API response:", res);
   } catch (err) {

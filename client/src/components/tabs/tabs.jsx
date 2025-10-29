@@ -2,7 +2,8 @@ import { useState, useCallback, useMemo, memo } from "react";
 import { Paintbrush, LucideInfo, Globe2Icon, LucideStars, LucideTvMinimalPlay, LucideArrowUpLeftFromSquare, LucideShield, Bot, Copy, Brain, TicketCheckIcon, MailCheck } from "lucide-react";
 import Select from "react-select";
 import Switch from "../button/switch";
-
+import DemLoader from "../loader/demoLoader";
+import Loader from "../loader/phubLoader";
 // Memoized tab button component
 const TabButton = memo(({ tab, index, isActive, onClick }) => (
   <button
@@ -201,7 +202,7 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
                     <Bot className="text-primary" size={25}/>
                     Bot Context
                   </h2>
-                 <textarea name="botContext" id=""  onChange={handleInputChange} className="h-[120px] w-full p-2 backdrop-blur-md bg-[#fff] border border-black/30 rounded-md mt-2 relative z-10" placeholder="Tell us about your website..."></textarea>
+                 <textarea name="botContext" id="" value={UrlSettings.botContext}  onChange={handleInputChange} className="h-[120px] w-full p-2 backdrop-blur-md bg-[#fff] border border-black/30 rounded-md mt-2 relative z-10" placeholder="Tell us about your website..."></textarea>
                </div>
 
                 {/* <div className="w-full rounded-lg border border-primary5        bg-primary/10 px-1 flex gap-2">
@@ -306,19 +307,29 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
           >
             <LucideStars/>Generate Script
           </button>
-          {!showDemo ?<>
-          <button 
+          {showDemo === "loading" ?<>
+          {/* <Loader/> */}
+           <button 
             onClick={(e) =>genDemo(e)}
-            className={`flex justify-center items-center md:gap-2 p-3 md:p-0 w-[30%] rounded-lg h-[60px] bg-primary1 text-white `}
-          >
-            <LucideTvMinimalPlay/>Live Demo
-          </button></>:<>
+            className={`flex justify-center items-center md:gap-2 p-3 md:p-0 w-[30%] rounded-lg h-[60px] bg-backgr text-white `}
+            >
+            
+            <DemLoader/>
+          </button>
+        </>:showDemo ? <>
           <button 
             onClick={(e) =>genDemo(e)}
             className={`flex justify-center items-center md:gap-2 p-3 md:p-0 w-[30%] rounded-lg h-[60px] bg-backgr text-white `}
           >
             <LucideTvMinimalPlay/>Stop Demo
-          </button></>}
+          </button></>:<>
+            <button 
+            onClick={(e) =>genDemo(e)}
+            className={`flex justify-center items-center md:gap-2 p-3 md:p-0 w-[30%] rounded-lg h-[60px] bg-primary1 text-white `}
+          >
+            <LucideTvMinimalPlay/>Live Demo
+          </button>
+          </>}
         </div>
       </form>
     </div>

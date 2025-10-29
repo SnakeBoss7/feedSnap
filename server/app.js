@@ -4,6 +4,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
 const path = require('path')
+const app = express();
 
 //routes
 const authRoute = require('./routes/authRoutes');
@@ -13,7 +14,6 @@ const feedRoute = require('./routes/feedback');
 const llmRoute = require('./routes/LLMRoutes'); 
 const mailRoute = require('./routes/mailRoutes');
 const  teamRoute = require('./routes/teamRoutes'); 
-const app = express();
 
 // Connect DB
 connectDB();
@@ -42,13 +42,15 @@ app.use('/api/team', teamRoute);
 
 app.use('/api/llm', llmRoute);
 //  Test if server is up
+
+
 app.get('/api/test', (req, res) => {
-  console.log(" Test route hit");
+  // console.log(" Test route hit");
   res.json({ message: "Server is live" });
 });
 
 
-
+// Listening to the server
 app.listen(process.env.PORT || 5000, () => {
   console.log(` Server running on port ${process.env.PORT || 5000}`);
 });

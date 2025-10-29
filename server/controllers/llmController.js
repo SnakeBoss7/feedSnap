@@ -416,6 +416,5 @@ function validateAIResponse(aiResponse) {
   return validated;
 }
 
-module.exports = { askAI };
 
 module.exports = { llmQuery,askAI };

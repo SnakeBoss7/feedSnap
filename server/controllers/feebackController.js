@@ -6,7 +6,7 @@ const cloudinary = require("../config/cloudinary");
 const { Parser } = require("json2csv");
 const PDFDocument = require("pdfkit");
 const { sendFeedbackEmail } = require("../utils/ackMails");
-
+const {computeSeverity} = require("../utils/severityCompute");
 // Helper function to get all websites accessible to a user
 const getUserAccessibleWebsites = async (userId) => {
   try {
@@ -100,10 +100,14 @@ const exportFeedback = async (req, res) => {
 
 //adding feedback to mongo
 const createFeed = async (req, res) => {
-  //.log(req.body);
+  
+  // console.log(req.body);
+  console.log("Hello tehre");
   const {webUrl,pathname,title,email,description,rating,config}= req.body
+  console.log({webUrl,pathname,title,email,description,rating,config});
+  let severity = computeSeverity({title,rating,description,email,status:false});
   res.status(200).json({ mess: "cooked" });
-  let data = await feedback.create(req.body);
+  let data = await feedback.create({...req.body,severity});
   if(req.body.config.ackMail)
     {
       const currentDate = new Date().toLocaleString("en-IN", {

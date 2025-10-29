@@ -945,7 +945,7 @@
                                 <input type="email" class="fw-input" name="email" placeholder="Your email address" required>
                             </div>
                             <div class="fw-form-group">
-                                <textarea class="fw-textarea" name="description" placeholder="Tell us about your experience..." required></textarea>
+                                <textarea class="fw-textarea" name="description" placeholder="Tell us about your experience...(Optional)" ></textarea>
                             </div>
                             <button type="submit" class="fw-submit">
                                 <span>Send Feedback</span>
@@ -1210,7 +1210,7 @@
             const description = this.popup.querySelector("textarea[name='description']").value;
             const rating = this.selectedRating;
 
-            if (!this.selectedFeedbackType || !email || !description || !rating) {
+            if (!this.selectedFeedbackType || !email  || !rating) {
                 this.showNotification('Please fill in all fields and select a feedback type.', 'error');
                 return;
             }
