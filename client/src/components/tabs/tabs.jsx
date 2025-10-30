@@ -117,17 +117,19 @@ const MAX_CONTEXT_LENGTH = 600;
     setActive(index);
   }, []);
 
-  const handleInputChange = useCallback((e) => {
-    const { name, value } = e.target;
-    if (name === 'botContext' && value.length > 200) {
-    return; // Prevent update if over limit
+const handleInputChange = useCallback((e) => {
+  const { name, value } = e.target;
+  
+  // For botContext, enforce max length
+  if (name === 'botContext') {
+    if (value.length > MAX_CONTEXT_LENGTH) {
+      return; // Block if over limit
+    }
+    setContextlen(value.length);
   }
-    console.log("urlsetting:", UrlSettings);
-    setUrlsettings(prev => ({ ...prev, [name]: value }));
-    let textLen = value.split('').length;
-    setContextlen(textLen);
-    console.log("Context length:", textLen);
-  }, [setUrlsettings, UrlSettings]);
+  
+  setUrlsettings(prev => ({ ...prev, [name]: value }));
+}, [setUrlsettings]);
 
   // Fixed handleSelectChange to update position
   const handleSelectChange = useCallback((selectedOption) => {
