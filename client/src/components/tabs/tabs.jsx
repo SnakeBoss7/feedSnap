@@ -108,7 +108,7 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
 
 
  const contextLength = UrlSettings.botContext?.length || 0;
-const MAX_CONTEXT_LENGTH = 200;
+const MAX_CONTEXT_LENGTH = 600;
 // const isOverLimit = contextLength > MAX_CONTEXT_LENGTH;
 
 
