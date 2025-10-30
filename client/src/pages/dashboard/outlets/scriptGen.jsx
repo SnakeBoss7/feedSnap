@@ -26,7 +26,7 @@ export const ScriptGen = () => {
     color: "#2563EB",
     bgColor: "#ffffff",
     text: "Feedback",
-    loading: false,
+    loading: true,
     botContext: "",
     ackMail:true,
   });
@@ -291,7 +291,7 @@ const genDemo = async (e) => {
             
             <div className="md:w-[60%] h-[40%] w-full">
               <div className="bg-white rounded-lg h-full shadow-lg overflow-hidden">
-                <div className="bg-gray-800 h-[20%] text-white px-4 py-2 flex items-center justify-between">
+                <div className="bg-gray-800 h-[40px] text-white px-4 py-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Code color="#5BAE83" size={25} />
                     <span className="text-lg text-center  tracking-tight  text-white">Script.js</span>
@@ -323,16 +323,16 @@ const genDemo = async (e) => {
                 
                 <div className=" h-[80%] ">
                   {UrlSettings.loading ? (
-                    <div className="px-4 w-full h-full bg-gray-900 flex flex-col items-center justify-center">
+                    <div className="px-4 w-full min-h-[200px] h-full bg-gray-900 flex flex-col items-center justify-center">
                       <Loader />
                       {/* <p className="text-white mt-4">Generating script...</p> */}
                     </div>
                   ) : scriptInj !== "" ? (
-                    <div className="bg-gray-900 text-gray-100 p-4 font-mono text-sm overflow-x-auto h-full">
+                    <div className="bg-gray-900 min-h-[200px] text-gray-100 p-4 font-mono text-sm overflow-x-auto h-full">
                       <pre className="whitespace-pre-wrap">{scriptInj}</pre>
                     </div>
                   ) : (
-                    <div className="px-4 w-full h-full bg-gray-900 flex flex-col items-center justify-center">
+                    <div className="px-4 w-full min-h-[200px]  h-full bg-gray-900 flex flex-col items-center justify-center">
                       <LucideCode color="#5BAE83" size={40} />
                       <p className="text-lg text-center mt-3 tracking-tight  text-white">
                         No Script Generated Yet
@@ -347,6 +347,7 @@ const genDemo = async (e) => {
             </div>
           </div>
         </div>
+         <div className="lg:h-5 h-10"></div>
       </div>
     </div>
   );

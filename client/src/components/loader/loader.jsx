@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const Loader = () => {
   return (
     <StyledWrapper>
-      <div className="card bg-transparent">
+      <div className="card bg-transparent ">
         <div className="loader">
           <p className="text-white">loading</p>
           <div className="words text-primary2">
@@ -24,7 +24,6 @@ const StyledWrapper = styled.div`
     background-color: var(--bg-color);
     padding: 1rem 2rem;
     border-radius: 1.25rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   }
   
   .loader {

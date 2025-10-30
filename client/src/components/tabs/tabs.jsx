@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, memo } from "react";
-import { Paintbrush, LucideInfo, Globe2Icon, LucideStars, LucideTvMinimalPlay, LucideArrowUpLeftFromSquare, LucideShield, Bot, Copy, Brain, TicketCheckIcon, MailCheck } from "lucide-react";
+import { Paintbrush, LucideInfo, Globe2Icon, LucideStars, LucideTvMinimalPlay, LucideArrowUpLeftFromSquare, LucideShield, Bot, Copy, Brain, TicketCheckIcon, MailCheck, LucideMessageCircleWarning, LucideAlertTriangle } from "lucide-react";
 import Select from "react-select";
 import Switch from "../button/switch";
 import DemLoader from "../loader/demoLoader";
@@ -98,13 +98,19 @@ const SELECT_STYLES = {
 // Main component
 export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlsettings,copied, genScript,scriptInj,copyToClipboard, genDemo, showDemo }) {
   const [active, setActive] = useState(0);
-  
+  const [contextlen, setContextlen] = useState(0);
   // Static tabs array
   const tabs = useMemo(() => [
     { label: "Configuration" },
     { label: "Customization" },
     { label: "Installation" },
   ], []);
+
+
+ const contextLength = UrlSettings.botContext?.length || 0;
+const MAX_CONTEXT_LENGTH = 200;
+// const isOverLimit = contextLength > MAX_CONTEXT_LENGTH;
+
 
   // Memoized callbacks
   const handleTabClick = useCallback((index) => {
@@ -113,8 +119,14 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
 
   const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
+    if (name === 'botContext' && value.length > 200) {
+    return; // Prevent update if over limit
+  }
     console.log("urlsetting:", UrlSettings);
     setUrlsettings(prev => ({ ...prev, [name]: value }));
+    let textLen = value.split('').length;
+    setContextlen(textLen);
+    console.log("Context length:", textLen);
   }, [setUrlsettings, UrlSettings]);
 
   // Fixed handleSelectChange to update position
@@ -172,7 +184,7 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
                   <Globe2Icon className="text-white rounded-md bg-blue-500 p-1 h-6 w-6" size={30} />
                   Widget Configuration
                 </h1>
-                <p className="tracking-tight text-gray-600 text-sm pt-1">
+                <p className="tracking-tight  mb-9 text-gray-600 text-sm pt-1">
                   Enter your website details to generate the script
                 </p>
               </div>
@@ -197,16 +209,38 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
                     </code>
                   </div>
                 </div> */}
-               <div>
-                <h2 className="flex items-center gap-2 tracking-tight text-lg ">
-                    <Bot className="text-primary" size={25}/>
-                    Bot Context
-                  </h2>
-                 <textarea name="botContext" id="" value={UrlSettings.botContext}  onChange={handleInputChange} className="h-[120px] w-full p-2 backdrop-blur-md bg-[#fff] border border-black/30 rounded-md mt-2 relative z-10" placeholder="Tell us about your website..."></textarea>
-               </div>
+    
+<div>
+  <h2 className="flex items-center gap-2 tracking-tight text-lg mb-2">
+    <Bot className="text-primary" size={25}/>
+    Bot Context
+  </h2>
+  <div className="relative">
+    <textarea 
+      name="botContext" 
+      value={UrlSettings.botContext || ''}  
+      onChange={handleInputChange} 
+      className="scrollbar-hide resize-none h-[120px] w-full p-2 pb-8 backdrop-blur-md bg-[#fff] border border-black/30 rounded-md relative z-[1]" 
+      placeholder="Tell us about your website..."
+      maxLength={MAX_CONTEXT_LENGTH}
+    />
+    <div className="absolute bottom-2 right-2 text-sm flex items-center gap-1 bg-white px-2 py-1 rounded shadow-sm z-[2] pointer-events-none">
+      <span className={contextLength > MAX_CONTEXT_LENGTH ? "text-red-500 font-semibold" : contextLength > 180 ? "text-orange-500" : "text-green-500"}>
+        {contextLength}
+      </span>
+      <span className="text-gray-500">/{MAX_CONTEXT_LENGTH}</span>
+    </div>
+  </div>
+  {contextLength > 180 && (
+    <p className={`text-xs mt-1 flex gap-1 item-center ${contextLength >= MAX_CONTEXT_LENGTH ? 'text-red-500' : 'text-orange-500'}`}>
+      {contextLength >= MAX_CONTEXT_LENGTH ? <> <LucideAlertTriangle size={14}/>Character limit reached</> : <> <LucideAlertTriangle size={14}/>{MAX_CONTEXT_LENGTH - contextLength} characters remaining</>}
+
+    </p>
+  )}
+</div>
 
                 {/* <div className="w-full rounded-lg border border-primary5        bg-primary/10 px-1 flex gap-2">
-                  <LucideStars size={30} className="text-primary"/>
+                  <LucideStars size={$30} className="text-primary"/>
                   <span className=" tracking-tight lg:text-sm text-[10px] text-primary">
                     For Live Demo: 
                     <span className="font-[100] lg:text-[12px] text-[10px] text-black"> Complete the customization in the next tab, then use the Preview tab to see your widget in action before going live.</span>
@@ -319,13 +353,13 @@ export default function WidgetTabs({ options, colorChange, UrlSettings, setUrlse
         </>:showDemo ? <>
           <button 
             onClick={(e) =>genDemo(e)}
-            className={`flex justify-center items-center md:gap-2 p-3 md:p-0 w-[30%] rounded-lg h-[60px] bg-backgr text-white `}
+            className={`flex justify-center items-center p-3  lg:gap-2  w-[30%] rounded-lg h-[60px] bg-backgr text-white `}
           >
             <LucideTvMinimalPlay/>Stop Demo
           </button></>:<>
             <button 
             onClick={(e) =>genDemo(e)}
-            className={`flex justify-center items-center md:gap-2 p-3 md:p-0 w-[30%] rounded-lg h-[60px] bg-primary1 text-white `}
+            className={`flex justify-center items-center p-3 lg:gap-2 w-[30%] rounded-lg h-[60px] bg-primary1 text-white `}
           >
             <LucideTvMinimalPlay/>Live Demo
           </button>
