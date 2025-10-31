@@ -26,7 +26,7 @@ export const ScriptGen = () => {
     color: "#2563EB",
     bgColor: "#ffffff",
     text: "Feedback",
-    loading: true,
+    loading: false,
     botContext: "",
     ackMail:true,
   });
@@ -321,7 +321,7 @@ const genDemo = async (e) => {
                   </div>
                 </div>
                 
-                <div className=" h-[80%] ">
+                <div className=" h-full ">
                   {UrlSettings.loading ? (
                     <div className="px-4 w-full min-h-[200px] h-full bg-gray-900 flex flex-col items-center justify-center">
                       <Loader />
@@ -332,7 +332,7 @@ const genDemo = async (e) => {
                       <pre className="whitespace-pre-wrap">{scriptInj}</pre>
                     </div>
                   ) : (
-                    <div className="px-4 w-full min-h-[200px]  h-full bg-gray-900 flex flex-col items-center justify-center">
+                    <div className=" w-full  h-full bg-gray-900 flex flex-col items-center justify-center">
                       <LucideCode color="#5BAE83" size={40} />
                       <p className="text-lg text-center mt-3 tracking-tight  text-white">
                         No Script Generated Yet

@@ -27,19 +27,14 @@ export default function Header() {
 
   return (
     <>
-      <header className="w-full z-[9999] sticky top-0 flex ">
+      <header className="w-full z-[9999] sticky top-0 flex  ">
         <div
-          className={`w-full flex ${
+          className={`w-full flex glass-card ${
             isScrolling ? "mt-4 mx-4 lg:mx-16 px-6 py-3" : "mt-0 px-4 py-4"
           }`}
           style={{
-            background: isScrolling
-              ? "rgba(235, 235, 235, 1)"
-              : "rgba(255, 255, 255, 1)",
-            backdropFilter: "blur(10px)",
-            boxShadow: isScrolling
-              ? "0 8px 32px 0 rgba(31, 38, 135, 0.15)"
-              : "0 4px 16px 0 rgba(31, 38, 135, 0.1)",
+
+            backdropFilter: "blur(2px)",
             borderRadius: isScrolling ? "9999px" : "0",
             transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
           }}

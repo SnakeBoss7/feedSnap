@@ -15,7 +15,7 @@ const scriptCreate = async (req, res) => {
       webUrl,
       color,
       position,
-      text,
+      widgetText:text,
       bgColor,
       ackMail,
       botContext,

@@ -36,45 +36,53 @@ function extractCleanJSON(aiResponse) {
   }
 }
 
-// query for chatbot integration
-const llmQuery = async (req,res) => {
-    const {userMessage,botContext} = req.body;
-    //.log({userMessage,botContext});
+// query for chatbot integration (non-streaming)
+const llmQuery = async (req, res) => {
+  const { userMessage, botContext } = req.body;
+  
   try {
-    const completion = await openaiChatBot.chat.completions.create({
-    model: "mistralai/mistral-small-3.2-24b-instruct:free",
-    messages: [
-        {
-               "role": "system",
-        "content": [
-          {
-            "type": "text",
-            "text": botContext,
-          },
-        ]
-        },
-      {
-        
-        "role": "user",
-        "content": [
-          {
-            "type": "text",
-            "text": userMessage
-          },
-        ]
-      }
-    ],
-    
-  });
-  //.log(completion.choices[0].message);
-  return res.status(200).json({ data: completion.choices[0].message.content })
-  } catch (error) {
-    
-    
-    return res.status(400).json({ data: completion.choices[0].message.content })
-  } 
+    // Validate input
+    if (!userMessage || !botContext) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: userMessage and botContext' 
+      });
+    }
 
-}
+    const completion = await openai_NVIDIA.chat.completions.create({
+      model: "nvidia/llama-3.3-nemotron-super-49b-v1.5", // Fast + high quality
+      messages: [
+        {
+          "role": "system",
+          "content": botContext+"/no_think"
+        },
+        {
+          "role": "user",
+          "content": userMessage
+        }
+      ],
+      temperature: 0.6,
+      top_p: 0.7,
+      max_tokens: 2048,
+      stream: false // No streaming
+    });
+
+    const response = completion.choices[0]?.message?.content;
+    
+    if (!response) {
+      throw new Error('Empty response from AI');
+    }
+
+    return res.status(200).json({ data: response });
+
+  } catch (error) {
+    console.error('LLM Query Error:', error);
+    
+    return res.status(500).json({ 
+      error: 'Failed to process request',
+      message: error.message 
+    });
+  }
+};
 
 
 // ai assistant for email generation and responses
@@ -105,7 +113,7 @@ const askAI = async (req, res) => {
     const data = JSON.stringify(feedbackData)
       .replace(/`/g, '\\`')
       .replace(/\$/g, '\\$');
-
+      console.log({data})
     const username = req.user?.name || "Unknown User";
     const userMail = req.user?.email || "Unknown Email";
 
