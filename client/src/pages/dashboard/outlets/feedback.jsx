@@ -422,14 +422,14 @@ const handleSendEmail = async (emailData, index, selectedTeam) => {
           onClick={(e) => setUserPrompt(e.target.innerText)} 
           className="border border-gray-400 text-gray-600 hover:scale-[1.01] cursor-pointer transition-all ease-in-out duration-300 p-1 w-fit rounded-lg"
         >
-          {promptSuggestion.sug1 ? promptSuggestion.sug1 : `Make a report for my ${state?.userTeams[0]?.label} team`}
+          {promptSuggestion.sug1 ? promptSuggestion.sug1 : `Make a report for my ${state?.userTeams[0]?.label ? state?.userTeams[0]?.label : ""}`}
         </button>
 
         <button 
           onClick={(e) => setUserPrompt(e.target.innerText)} 
           className="border border-gray-400 text-gray-600 hover:scale-[1.01] cursor-pointer transition-all ease-in-out duration-300 p-1 w-fit rounded-lg"
         >
-          {promptSuggestion.sug2 ? promptSuggestion.sug2 : `How's the user response?`}
+          {promptSuggestion.sug2 ? promptSuggestion.sug2 : `can you evaluate the data`}
         </button>
       </div>
     </div>

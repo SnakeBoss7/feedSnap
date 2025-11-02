@@ -481,7 +481,7 @@ export default function WidgetTabs({
           </button>
           <button
             onClick={(e) => genDemo(e)}
-            className={`flex justify-center items-center mt-3  md:gap-2 p-3 w-[30%] rounded-lg h-[60px] bg-backgr text-white `}
+            className={`flex justify-center items-center mt-3  md:gap-2 p-3 w-[30%] rounded-lg h-[60px]  text-white ${showDemo ? 'bg-backgr':'bg-primary1'} transition-opacity`}
           >
             {showDemo === "loading" ? (
               <>
