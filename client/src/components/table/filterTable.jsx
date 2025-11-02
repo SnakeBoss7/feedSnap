@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Search,
@@ -31,7 +31,7 @@ import { cn } from "../../lib/utils"
 import { RatingStar } from "../star/star"
 import { exportData } from "../../services/exportData"
 
-export function FilterTable({ data, onAction }) {
+export function FilterTable({ setSelectedData, data, onAction }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [formatType, setFormatType] = useState('csv')
   const [severityFilter, setSeverityFilter] = useState("all")
@@ -86,6 +86,13 @@ export function FilterTable({ data, onAction }) {
       return matchesSearch && matchesSeverity && matchesWebUrl && matchesDateRange
     })
   }, [data, searchTerm, severityFilter, webUrlFilter, dateRange])
+
+  // Update setSelectedData whenever filteredData changes
+  useEffect(() => {
+    if (setSelectedData) {
+      setSelectedData(filteredData)
+    }
+  }, [filteredData, setSelectedData])
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage

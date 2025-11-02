@@ -38,7 +38,6 @@ export const Selectors = ({ websites, selectedWebsite, onWebsiteChange, selected
 
           {isOpen && (
             <>
-              {/* Backdrop to close dropdown when clicking outside */}
               <div 
                 className="fixed inset-0 z-10" 
                 onClick={() => setIsOpen(false)}

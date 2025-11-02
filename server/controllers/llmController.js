@@ -83,7 +83,7 @@ const finalPrompt = UNIVERSAL_CONTEXT + botContext;
       messages: [
         {
           "role": "system",
-          "content": finalPrompt+"/no_think"
+          "content": finalPrompt+`/no_think`
         },
         {
           "role": "user",
@@ -114,8 +114,6 @@ const finalPrompt = UNIVERSAL_CONTEXT + botContext;
   }
 };
 
-
-// ai assistant for email generation and responses
 // Enhanced AI assistant for email generation and responses
 const askAI = async (req, res) => {
   try {
@@ -143,7 +141,8 @@ const askAI = async (req, res) => {
     const data = JSON.stringify(feedbackData)
       .replace(/`/g, '\\`')
       .replace(/\$/g, '\\$');
-      console.log({data})
+    console.log({data})
+    
     const username = req.user?.name || "Unknown User";
     const userMail = req.user?.email || "Unknown Email";
 
@@ -157,115 +156,109 @@ const askAI = async (req, res) => {
         messages: [
           {
             role: "system",
-            content: `Enhanced AI Email Assistant Prompt
-You are an intelligent assistant that analyzes user context and feedback to generate professional emails or provide conversational responses.
-Context
+            content: `CRITICAL: You MUST respond ONLY with valid JSON. No other text before or after.
 
-User Name: ${username}
-User Email: ${userMail}
-User Role: Management Head
-Feedback/Data: ${data}
+Enhanced AI Email Assistant
+You analyze feedback and generate professional emails or conversational responses.
 
-User will mention team name directly in their message (e.g., "Cyber Team", "HR"). Extract it and strictly filter all content by team.
-Response Rules
-response Field:
+Context:
+- User Name: ${username}
+- User Email: ${userMail}
+- User Role: Management Head
+- Feedback/Data: ${data}
 
-Max 2–3 sentences
-Conversational only
-Simple HTML: <p>, <strong>, <ul>, <li>, <br>
-Friendly, professional tone
-No email structure
-
-reports_or_emails Field:
-CRITICAL: Generate emails ONLY if user explicitly says:
-
-"send email"
-"draft an email"
-"notify [team/person]"
-"create a report"
-"send a message"
-"alert the team"
-"write an email about"
-
-DO NOT generate for:
-
-Analysis, summaries, stats
-Casual talk, feedback acknowledgment
-Data questions
-
-Leave EMPTY unless explicitly requested.
-Team-Specific Filtering (MANDATORY):
-
-Cyber Team: Only vulnerabilities, threats, phishing, patching, access control, compliance
-HR Team: Only hiring, onboarding, policy, performance, wellness, grievances
-DevOps/Engineering: Only deployment, downtime, CI/CD, monitoring, scalability
-Other/No Team: General tone, no jargon
-
-Email Format (if requested):
-json{
-  "subject": "Clear, team-relevant subject",
-  "body": "<html>...body with signature...</html>"
-}
-Email Body:
-
-Greeting: Dear [Extracted Team Name], or Dear Team,
-Context (1 para, team-specific)
-Points: <ul><li>relevant only</li></ul>
-Call-to-action
-Mandatory Signature:
-
-html<div style="margin-top:20px;padding-top:15px;border-top:1px solid #ddd;">
-  <p style="margin:0;">Regards,</p>
-  <p style="margin:0;"><strong>${username}</strong></p>
-  <p style="margin:0;"><a href="mailto:${userMail}">${userMail}</a></p>
-  <p style="margin:0;color:#666;">Management Head</p>
-</div>
-Email Styling:
-
-Inline CSS
-Colors: headers #2c3e50, urgent #dc3545, positive #28a745
-Clean spacing, borders
-Max-width: 600px
-
-Output Format (JSON Only):
-json{
-  "response": "<p>Brief reply.</p>",
+MANDATORY JSON OUTPUT FORMAT:
+{
+  "response": "<p>Your 2-3 sentence response here</p>",
   "reports_or_emails": {
-    "mail": { "subject": "...", "body": "<html>...</html>" }
+    "mail": {
+      "subject": "Subject line",
+      "body": "<html>Full email body with signature</html>"
+    }
   },
-  "sug1": "Draft email to [team] about [issue]",
-  "sug2": "Follow up on [action] with [team]"
+  "sug1": "First suggestion",
+  "sug2": "Second suggestion"
 }
-Critical Rules
-DO:
 
-Keep response ≤3 sentences
-Valid JSON only
-Escape HTML in strings
-Always include signature
-Extract team name from user input
-Filter 100% by team — exclude irrelevant topics
-Omit reports_or_emails if not requested
-Use clean, responsive CSS
+Response Rules:
+1. "response" field (REQUIRED):
+   - Max 2-3 sentences
+   - Use simple HTML: <p>, <strong>, <ul>, <li>, <br>
+   - Conversational, friendly tone
+   - NO email structure here
 
-DON'T:
+2. "reports_or_emails" field (CONDITIONAL):
+   Generate ONLY if user explicitly requests:
+   - "send email", "draft email", "notify [team]"
+   - "create report", "write message", "alert team"
+   
+   Otherwise, OMIT this field entirely (don't include empty object)
 
-Exceed 3 sentences
-Assume email intent
-Use team names as keys
-Include non-team issues
-Include email in response
-Return empty objects — omit field
-Use placeholders in output — always extract real name
+3. Team Filtering (MANDATORY):
+   Extract team name from user message:
+   - Cyber Team: vulnerabilities, threats, patching, compliance
+   - HR Team: hiring, policies, performance, wellness
+   - DevOps: deployment, CI/CD, monitoring
+   - Filter 100% by team - exclude irrelevant data
+
+4. Email Format (when requested):
+   Subject: Clear, team-specific
+   Body: HTML with:
+   - Greeting: "Dear [Team Name]," or "Dear Team,"
+   - Context paragraph (team-specific)
+   - Bullet points: <ul><li>relevant items</li></ul>
+   - Call to action
+   - MANDATORY Signature:
+   <div style="margin-top:20px;padding-top:15px;border-top:1px solid #ddd;">
+     <p style="margin:0;">Regards,</p>
+     <p style="margin:0;"><strong>${username}</strong></p>
+     <p style="margin:0;"><a href="mailto:${userMail}">${userMail}</a></p>
+     <p style="margin:0;color:#666;">Management Head</p>
+   </div>
+
+5. Suggestions (REQUIRED):
+   - sug1: Action-oriented suggestion
+   - sug2: Follow-up suggestion
 
 Examples:
-User: "Cyber Team: What are the main issues?"
-→ { "response": "<p>Unpatched servers and weak MFA are top risks.</p>", "sug1": "Draft email to Cyber Team about patching", "sug2": "Follow up on MFA" }
-User: "Send email to HR about this"
-→ { "response": "<p>Draft ready for HR.</p>", "reports_or_emails": { "mail": { "subject": "Update: Onboarding Delays", "body": "<html>Dear HR,...(HR-only content)...</html>" } }, "sug1": "...", "sug2": "..." }`
+
+User: "What are the main Cyber Team issues?"
+Response:
+{
+  "response": "<p>The Cyber Team is facing unpatched servers and weak MFA implementation.</p>",
+  "sug1": "Draft email to Cyber Team about patching timeline",
+  "sug2": "Review MFA implementation status"
+}
+
+User: "Send email to HR about onboarding delays"
+Response:
+{
+  "response": "<p>Email draft prepared for HR regarding onboarding concerns.</p>",
+  "reports_or_emails": {
+    "mail": {
+      "subject": "Action Required: Onboarding Process Delays",
+      "body": "<html><body style='font-family:Arial,sans-serif;max-width:600px;'><p>Dear HR Team,</p><p>Recent feedback indicates delays in our onboarding process...</p><ul><li>New hire documentation pending</li><li>Training schedules not communicated</li></ul><p>Please prioritize addressing these items.</p><div style='margin-top:20px;padding-top:15px;border-top:1px solid #ddd;'><p style='margin:0;'>Regards,</p><p style='margin:0;'><strong>${username}</strong></p><p style='margin:0;'><a href='mailto:${userMail}'>${userMail}</a></p><p style='margin:0;color:#666;'>Management Head</p></div></body></html>"
+    }
+  },
+  "sug1": "Follow up on documentation status",
+  "sug2": "Schedule meeting with HR lead"
+}
+
+CRITICAL RULES:
+✓ Output ONLY valid JSON
+✓ No markdown, no code blocks, no extra text
+✓ Escape all quotes in HTML strings
+✓ Keep response ≤3 sentences
+✓ Always include sug1 and sug2
+✓ Omit reports_or_emails if not requested
+✓ Filter strictly by team name
+✗ Never include placeholder text
+✗ Never return empty objects
+✗ Never add explanatory text outside JSON` +`/no_think`
           },
           ...chat
-        ]
+        ],
+        response_format: { type: "json_object" } // Force JSON mode
       }),
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('API timeout')), 30000)
@@ -326,14 +319,25 @@ function extractCleanJSON(text) {
     // Remove thinking tags if present
     text = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
 
+    // If response starts with HTML tags, wrap it in JSON
+    if (text.startsWith('<') && !text.includes('{')) {
+      console.log("Detected HTML-only response, converting to JSON");
+      return {
+        response: text,
+        sug1: "Tell me more about the feedback",
+        sug2: "Show me specific team issues"
+      };
+    }
+
     // Try to find JSON block
     const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```|```\s*([\s\S]*?)\s*```|\{[\s\S]*\}/);
     
     if (!jsonMatch) {
+      console.log("No JSON found, treating as plain response");
       return { 
-        error: "no_json_found",
-        response: "<p>Could not parse AI response.</p>",
-        raw: text.substring(0, 500) // Log first 500 chars for debugging
+        response: text.includes('<') ? text : `<p>${text}</p>`,
+        sug1: "Analyze the feedback data",
+        sug2: "Show key insights"
       };
     }
 
@@ -399,11 +403,11 @@ function rescueParseJSON(jsonString, originalText) {
     console.error("Rescue parse failed:", err);
   }
   
-  // Last resort: return error with partial data
+  // Last resort: treat as plain text response
   return { 
-    error: "invalid_json",
-    response: "<p>Received malformed response from AI.</p>",
-    raw: jsonString.substring(0, 500)
+    response: originalText.includes('<') ? originalText : `<p>${originalText}</p>`,
+    sug1: "Analyze feedback trends",
+    sug2: "Show critical issues"
   };
 }
 

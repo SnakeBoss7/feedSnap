@@ -905,11 +905,11 @@ const widgetGen =(config)=> {
                                 <span class="fw-dropdown-arrow">▼</span>
                             </div>
                             <div class="fw-dropdown-content">
-                                <div class="fw-dropdown-item" data-value="Bug Reports"> Bug Report</div>
-                                <div class="fw-dropdown-item" data-value="Feature Requests"> Feature Request</div>
+                                <div class="fw-dropdown-item" data-value="Bug Report"> Bug Report</div>
+                                <div class="fw-dropdown-item" data-value="Feature Request"> Feature Request</div>
                                 <div class="fw-dropdown-item" data-value="General Feedback"> General Feedback</div>
-                                <div class="fw-dropdown-item" data-value="Improvements"> Improvement</div>
-                                <div class="fw-dropdown-item" data-value="Complaints"> Complaint</div>
+                                <div class="fw-dropdown-item" data-value="Improvement"> Improvement</div>
+                                <div class="fw-dropdown-item" data-value="Complaint"> Complaint</div>
                             </div>
                         </div>
                         

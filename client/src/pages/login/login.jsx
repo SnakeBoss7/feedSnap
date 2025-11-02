@@ -8,6 +8,7 @@ import {
 import { MessageSquare, Eye, EyeOff, LucideInfo } from "lucide-react";
 // import { Label } from "../../components/ui/";
 // import { Input } from "@/components/ui/";
+import RoundLoader from "../../components/loader/roundLoader";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../services/firebase";
 import axios from "axios";
@@ -21,12 +22,14 @@ const apiUrl = process.env.REACT_APP_API_URL;
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [mess,setMess] = useState(null);
+  const [isloading,setIsloading] = useState(null);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
    const { refreshUserData } = useUserContext();
   const navigate = useNavigate();
   const handleGoogleLogin = async () => {
     try {
+      setIsloading(2);
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
       console.log("Frontend API URL:", apiUrl);
@@ -49,6 +52,7 @@ export const Login = () => {
   };
 const handleLogIn = async (e) => {
             e.preventDefault();
+            setIsloading(1);
             console.log('wake up')
             try {
               // setHappening('called + working');
@@ -171,18 +175,22 @@ const handleLogIn = async (e) => {
                 type="submit"
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               >
-                Sign In
+                {isloading === 1 ? <RoundLoader/> : 
+                "Sign In"
+              }
               </Button>
               </form>
               <Button
                 className="bg-white mt-2 hover:bg-white w-full  border  border-gray-300 shadow-sm"
                 onClick={handleGoogleLogin}
               >
+                   {isloading === 2 ? <RoundLoader/> : 
                 <img
                   src={googlesign}
                   className="h-[30px] w-[30px] bg-transparent"
                   alt=""
                 />
+              }
               </Button>
 
             <div className="mt-6 text-center">

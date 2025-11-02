@@ -79,7 +79,15 @@ export const Feedback = () => {
     {
       role: "assistant",
       content: "Hello! how can I help you today"
-    }
+    },
+    // {
+    //     role: "emailPrep",
+    //         subject: "fuck", 
+    //         body: `
+    //         `,
+    //         timestamp: new Date().toISOString()
+    // }
+    
   ]);
   
   const [state, dispatch] = useReducer(dashboardReducer, getCachedData());
@@ -94,9 +102,10 @@ export const Feedback = () => {
   const [copiedIndex, setCopiedIndex] = useState(null);
   const chatRefContainer = useRef(null);
   const messagesEndRef = useRef(null);
+const [selectedData,setSelectedData] = useState(null);
 
   // Scroll functions
-
+// Add this useEffect to monitor filtered data changes
   const scrollToBottomContainer = () => {
     if (chatRefContainer.current) {
       const container = chatRefContainer.current;
@@ -195,7 +204,7 @@ export const Feedback = () => {
 
     setTimeout(scrollToBottomContainer, 100);
 
-    const optimizedData = state?.data?.map(item => ({
+    const optimizedData = selectedData.map(item => ({
       title: item.title,
       desc: item.description?.substring(0, 100),
       url: item.webUrl?.replace('http://localhost:3000', 'localhost')
@@ -311,7 +320,7 @@ const handleSendEmail = async (emailData, index, selectedTeam) => {
 
       <div className="flex flex-row overflow-y-auto scrollbar-hide max-h-screen">
         <div className="flex flex-col w-full lg:w-[75%]">
-          <FilterTable data={state?.data}/>
+          <FilterTable setSelectedData={setSelectedData} data={state?.data}/>
         <div className={`absolute bottom-[70px] right-[30px] p-3 bg-[#2b5fceff] rounded-full shadow-lg cursor-pointer z-50 lg:hidden ${isSidebarOpen?'hidden':'block'} `} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
           <LucideBot size={26} className="text-white"/> </div>
         </div>
