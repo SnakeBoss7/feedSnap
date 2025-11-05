@@ -137,25 +137,13 @@ AI + Email Services
 
 ---
 
-## 🧰 APIs Overview
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/auth/login` | POST | Login user via Firebase or password |
-| `/api/auth/register` | POST | Register new user |
-| `/api/feedback/create` | POST | Create new feedback |
-| `/api/feedback/getAll` | GET | Get all feedback for user's sites |
-| `/api/webdata/add` | POST | Add a new website config |
-| `/api/analytics/summary` | GET | Get overall stats |
-| `/api/team/invite` | POST | Invite a new member (admin only) |
-
----
 
 ## 🧑‍💻 Role-Based Access (RBAC)
 
 | Role | Permissions |
 |------|-------------|
 | **Admin** | Add websites, manage members, view/export feedback, change configs |
+| **editor** | Add websites, view/export feedback,delete data |
 | **Member** | View assigned feedback, add notes, access analytics (read-only) |
 
 ---
