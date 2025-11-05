@@ -7,7 +7,6 @@ import { ScriptGen } from './pages/dashboard/outlets/scriptGen';
 import { Analytics } from './pages/dashboard/outlets/analytics';
 import { Feedback } from './pages/dashboard/outlets/feedback';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { FeedbackBox } from './components/feedbackUi/feedback';
 import Home from './pages/landing/index';
 import '@fontsource/inter';
 import Overview from './pages/landing/overview';
@@ -24,7 +23,6 @@ function App() {
         <Route path="/overview" element={<Overview />} />
         <Route path="/login" element={<Login />} />
         <Route path="/Signin" element={<SignIn />} />
-        <Route path="/widget" element={<FeedbackBox />} />
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<DashboardHome/>}/>
           <Route path="feedbacks" element={<Feedback/>} />

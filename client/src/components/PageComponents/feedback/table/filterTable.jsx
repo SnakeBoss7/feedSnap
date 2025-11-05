@@ -16,20 +16,20 @@ import {
   RefreshCcw,
   Download,
 } from "lucide-react"
-import { SeverityBadge } from "../button/severity"
-import { Button } from "../../components/ui/button"
-import { Input } from "../../components/ui/input"
-import { Badge } from "../../components/ui/badge"
-import { Checkbox } from "../../components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
-import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover"
-import { Calendar as CalendarComponent } from "../../components/ui/calender"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog"
+import { SeverityBadge } from "../../../button/severity"
+import { Button } from "../../../ui/button"
+import { Input } from "../../../ui/input"
+import { Badge } from "../../../ui/badge"
+import { Checkbox } from "../../../ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../ui/select"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../ui/dropdown-menu"
+import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover"
+import { Calendar as CalendarComponent } from "../../../ui/calender"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../ui/dialog"
 import { format } from "date-fns"
-import { cn } from "../../lib/utils"
-import { RatingStar } from "../star/star"
-import { exportData } from "../../services/exportData"
+import { cn } from "../../../../lib/utils"
+import { RatingStar } from "../../../star/star"
+import { exportData } from "../../../../services/exportData"
 
 export function FilterTable({ setSelectedData, data, onAction }) {
   const [searchTerm, setSearchTerm] = useState("")

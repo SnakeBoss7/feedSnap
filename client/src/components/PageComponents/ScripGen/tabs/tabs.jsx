@@ -16,9 +16,9 @@ import {
   LucideAlertTriangle,
 } from "lucide-react";
 import Select from "react-select";
-import Switch from "../button/switch";
-import DemLoader from "../loader/demoLoader";
-import Loader from "../loader/phubLoader";
+import Switch from "../../../button/switch";
+import DemLoader from "../../../loader/demoLoader";
+import Loader from "../../../loader/phubLoader";
 // Memoized tab button component
 const TabButton = memo(({ tab, index, isActive, onClick }) => (
   <button
@@ -485,9 +485,9 @@ export default function WidgetTabs({
           >
             {showDemo === "loading" ? (
               <>
-                {/* <Loader/> */}
+                <Loader/>
 
-                <DemLoader />
+                {/* <DemLoader /> */}
               </>
             ) : showDemo ? (
               <>

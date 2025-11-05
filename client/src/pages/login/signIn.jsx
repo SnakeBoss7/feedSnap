@@ -5,8 +5,8 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import {  Eye, EyeOff,  LucideInfo } from "lucide-react";
-
+import { Eye, EyeOff, LucideInfo } from "lucide-react";
+import { Background } from "../../components/background/background";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../services/firebase";
 import axios from "axios";
@@ -15,7 +15,7 @@ import { Button } from "../../components/ui/button";
 import { useState } from "react";
 import googlesign from "../../img/google.png";
 import RoundLoader from "../../components/loader/roundLoader";
-import { useUserContext } from "../../context/userDataContext";
+
 const apiUrl = process.env.REACT_APP_API_URL;
 
 export const SignIn = () => {
@@ -25,25 +25,22 @@ export const SignIn = () => {
     password: "",
     confirmPassword: "",
   });
-   const { refreshUserData } = useUserContext();
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(0);
   const [mess, setMess] = useState(null);
   const navigate = useNavigate();
-  
+
   const handleInputChange = (field, value) => {
     setMess(null);
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-
   const handleGoogleLogin = async () => {
     try {
-      setLoading(1); 
+      setLoading(1);
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
-      console.log("Frontend API URL:", apiUrl);
-      console.log(token);
 
       let res = await axios.post(
         `${apiUrl}/api/auth/firebase`,
@@ -52,15 +49,14 @@ export const SignIn = () => {
           withCredentials: true,
         }
       );
-      
-      localStorage.setItem('UserData',JSON.stringify(res.data.userData));
-      console.log("Login success", res);
+
+      localStorage.clear();
+      localStorage.setItem("UserData", JSON.stringify(res.data.userData));
       navigate("/dashboard");
-      setLoading(false);
-      refreshUserData();
     } catch (err) {
+      setMess(err.response?.data?.mess);
+    } finally {
       setLoading(false);
-      console.log("login failed", err);
     }
   };
 
@@ -71,28 +67,20 @@ export const SignIn = () => {
       let res = await axios.post(`${apiUrl}/api/auth/signIn`, formData, {
         withCredentials: true,
       });
-      console.log("Login success", res);
-      setLoading(false);
+      localStorage.clear();
+      localStorage.setItem("UserData", JSON.stringify(res.data.userData));
       navigate("/dashboard");
-      localStorage.setItem('UserData',JSON.stringify(res.data.userData));
-            refreshUserData();
     } catch (err) {
-      console.log("login failed", err);
+      setMess(err.response?.data?.mess);
+      console.log(err);
+    } finally {
       setLoading(false);
-      setMess(err.response?.data?.error);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 font-sans">
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_1050px_at_50%_200px,#c5b5ff,transparent)] pointer-events-none">
-        <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#e8e8e8_1px,transparent_2px),linear-gradient(to_bottom,#e8e8e8_0.5px,transparent_2px)] bg-[size:4.5rem_3.5rem]">
-          {/* <!-- Small screen gradient --> */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_700px_at_0%_250px,#c5b5ff,transparent)] lg:bg-none"></div>
-          {/* <!-- Large screen gradient --> */}
-          <div className="absolute inset-0 bg-none lg:bg-[radial-gradient(circle_3000px_at_0%_100px,#c5b5ff,transparent)]"></div>
-        </div>
-      </div>
+      <Background color={"#c5b5ff"} />
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -107,7 +95,7 @@ export const SignIn = () => {
             </div>
           </Link>
         </div>
-        
+
         <Card className="border-0 shadow-xl">
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-2xl">Create Account</CardTitle>
@@ -215,7 +203,7 @@ export const SignIn = () => {
                 disabled={loading === 2}
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               >
-               {loading === 2 ? <RoundLoader/> : 'Create Account'}
+                {loading === 2 ? <RoundLoader /> : "Create Account"}
               </Button>
             </form>
             <Button
@@ -223,13 +211,15 @@ export const SignIn = () => {
               disabled={loading === 1}
               onClick={handleGoogleLogin}
             >
-              {loading === 1 ? <RoundLoader/> : 
+              {loading === 1 ? (
+                <RoundLoader />
+              ) : (
                 <img
                   src={googlesign}
                   className="h-[30px] w-[30px] bg-transparent"
                   alt=""
                 />
-              }
+              )}
             </Button>
 
             <div className="mt-6 text-center">

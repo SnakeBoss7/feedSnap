@@ -3,8 +3,10 @@ const webData = require("../models/WebData");
 const feedback = require("../models/feedback");
 const Team = require("../models/teamSchema");
 const cloudinary = require("../config/cloudinary");
+const path = require('path')
 const { Parser } = require("json2csv");
 const PDFDocument = require("pdfkit");
+const fs = require('fs')
 const { sendFeedbackEmail } = require("../utils/ackMails");
 const {computeSeverity} = require("../utils/severityCompute");
 
@@ -97,7 +99,7 @@ const createFeed = async (req, res) => {
   console.log({webUrl,pathname,title,email,description,rating,config});
   let severity = computeSeverity({title,rating,description,email,status:false});
   res.status(200).json({ mess: "cooked" });
-  let data = await feedback.create({...req.body,severity,status:false});
+  // let data = await feedback.create({...req.body,severity,status:false});
   
   if(req.body.config?.ackMail) {
     const currentDate = new Date().toLocaleString("en-IN", {
@@ -109,8 +111,20 @@ const createFeed = async (req, res) => {
       hour: "2-digit",
       minute: "2-digit",
     });
-    // Your email code here...
-    sendFeedbackEmail(email,`Thanks for your feedback on ${webUrl}`,"mail content");
+    let filepath = path.join(process.cwd(),"utils","ackMail.html")
+    let  mailContent = fs.readFileSync(filepath,"utf-8")
+    // console.log({filepath,mailContent})
+        mailContent= mailContent
+      .replace(/{{email}}/g, email)
+      .replace(/{{title}}/g, title)
+      .replace(/{{webUrl}}/g, webUrl)
+      .replace(/{{rating}}/g, rating)
+      .replace(/{{description}}/g, description)
+      .replace(/{{pathname}}/g, pathname)
+      .replace(/{{currentDate}}/g, currentDate);
+    // const templatePath = path.join(process.cwd(), "templates", "ackMail.html");
+    // console.log({filepath});
+    sendFeedbackEmail(email,`Your feedback has been received — ${webUrl} Team`,mailContent);
   }
 };
 

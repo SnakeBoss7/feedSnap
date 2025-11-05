@@ -90,11 +90,11 @@ const registerUser = async(req,res)=>
                   const token = tokenGen(existingUser);
         // Set HTTP-only cookie
         res.cookie('token', token, cookieConfig);
-          return res.status(200).json({message:'working',userData:userData});
+          return res.status(200).json({mess:'working',userData:userData});
                 }
                 
             return res.status(409).json({ 
-                error: 'User with this email already exists' 
+                mess: 'User with this email already exists' 
             });
         }
         //.log({name,email,password,confirmPassword})
@@ -137,17 +137,20 @@ const logIn = async(req,res)=>
 
         if(isPasswordValid)
             {
+
+                //success with login
                 let token = tokenGen(existingUser);
                     res.cookie('token', token, cookieConfig);
                       return res.status(200).json({mess:'good to go',userData:existingUser});
             }
             else
                 {
-                    return res.status(401).json({mess:'Wrong Password'});
+                    // wrong credentitals
+                    return res.status(401).json({mess:'Wrong Credentitials'});
                 }
           } catch (error) {
              //.log(error);
-              return res.status(401).json({mess:'thers some error'});
+              return res.status(401).json({mess:'Error ,try again later!'});
     }
 }
 

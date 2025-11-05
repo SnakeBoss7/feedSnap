@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Feedback Received</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f9fafb;
+      color: #111827;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    h1 {
+      color: #2563eb;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.85rem;
+      color: #6b7280;
+      text-align: center;
+    }
+    .feedback-box {
+      background-color: #f3f4f6;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+    }
+    .feedback-box strong {
+      color: #111827;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Thank You for Your Feedback!</h1>
+    <p>Hi {{email}},</p>
+    <p>We truly appreciate you taking the time to share your thoughts about <strong>{{webUrl}}</strong>.</p>
+
+    <div class="feedback-box">
+      <p><strong>Title:</strong> {{title}}</p>
+      <p><strong>Rating:</strong> {{rating}} / 5</p>
+      <p><strong>Description:</strong> {{description}}</p>
+      <p><strong>Page:</strong> {{pathname}}</p>
+      <p><strong>Date:</strong> {{currentDate}}</p>
+    </div>
+
+    <p>Our team will review your feedback shortly. Your input helps us improve!</p>
+
+    <div class="footer">
+      <p>— The {{webUrl}} Team</p>
+    </div>
+  </div>
+</body>
+</html>

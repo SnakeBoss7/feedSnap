@@ -1,4 +1,4 @@
-import { Button } from  "../ui/button";
+import { Button } from  "../../ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 const CTA = () => {

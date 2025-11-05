@@ -1,8 +1,8 @@
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent } from "../../ui/card";
 import { MessageSquare, Bot, BarChart3 } from "lucide-react";
-import chatbotFeature from "../../img/Landing/chatbot-feature.jpg";
-import analyticsDashboard from "../../img/Landing/analytics-dashboard.jpeg";
-import heroMockup from "../../img/Landing/hero-mockup.png";
+import chatbotFeature from "../../../img/Landing/chatbot-feature.jpg";
+import analyticsDashboard from "../../../img/Landing/analytics-dashboard.jpeg";
+import heroMockup from "../../../img/Landing/hero-mockup.png";
 
 const FeaturesPreview = () => {
   const features = [

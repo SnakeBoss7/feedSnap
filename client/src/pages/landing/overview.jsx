@@ -2,21 +2,16 @@ import { useState } from "react";
 import { Button } from "../..//components/ui/button";
 import { Input } from "../..//components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
-// import { Textarea } from "../../components/ui/textarea";
 import { Badge } from "../../components/ui/badge";
-import { MessageSquare, Zap, Bot, Star, Send, ChevronDown, ArrowRight, Clock, Link as LinkIcon, Mail, Shield, FileText } from "lucide-react";
+import { MessageSquare, Zap, Bot,  Send, ArrowRight, Clock, } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "../../components/header";
 import { Footer } from "../../components/footer/footer";
-// import { useToast } from "../../utils/use-toast";
 
 const Overview = () => {
-  const [quickFeedback, setQuickFeedback] = useState("");
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
-  const [selectedFAQ, setSelectedFAQ] = useState(null);
-//   const { toast } = useToast();
+
 
   const predefinedMessages = [
     "How do I get started?",

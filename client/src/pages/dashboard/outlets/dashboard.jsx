@@ -9,6 +9,7 @@ import {
   PlusCircle,
   Star,
 } from "lucide-react";
+import { Background } from "../../../components/background/background";
 import { useEffect } from "react";
 import axios from "axios";
 import { useReducer } from "react";
@@ -114,14 +115,7 @@ export const DashboardHome = () => {
       <SimpleHeader color="#c5b5ff" />
 
       <div className="relative h-full  md:px-10 px-5 py-8">
-        <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_1050px_at_50%_200px,#c5b5ff,transparent)] pointer-events-none">
-          <div class="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#e8e8e8_1px,transparent_2px),linear-gradient(to_bottom,#e8e8e8_0.5px,transparent_2px)] bg-[size:4.5rem_3.5rem]">
-            {/* <!-- Small screen gradient --> */}
-            <div class="absolute inset-0 bg-[radial-gradient(circle_700px_at_0%_250px,#c5b5ff,transparent)] lg:bg-none"></div>
-            {/* <!-- Large screen gradient --> */}
-            <div class="absolute inset-0 bg-none lg:bg-[radial-gradient(circle_3000px_at_0%_100px,#c5b5ff,transparent)]"></div>
-          </div>
-        </div>
+        <Background color={"#c5b5ff"}/>
 
         {state.isLoading ? (
           <SkeletonTheme baseColor="#b88fddff" highlightColor="#ede1f7">

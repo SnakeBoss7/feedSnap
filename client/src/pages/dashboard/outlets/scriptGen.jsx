@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { HighlightedGridIcon } from "../../../utils/gridIcons";
 import Loader from "../../../components/loader/loader";
-import WidgetTabs from "../../../components/tabs/tabs";
+import WidgetTabs from "../../../components/PageComponents/ScripGen/tabs/tabs";
 
 let apiUrl = process.env.REACT_APP_API_URL;
 let frontendApiUrl = process.env.REACT_APP_API_FRONTEND_URL;
@@ -36,6 +36,7 @@ export const ScriptGen = () => {
       await navigator.clipboard.writeText(text);
       setCopied(opt);
       setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+      // setTimeout(() => setCopied(false), 10000); // Reset after 2 seconds
     } catch (err) {
       console.error('Failed to copy text: ', err);
 
@@ -196,6 +197,9 @@ const genDemo = async (e) => {
     script.onload = () => {
       console.log("Widget script loaded successfully");
       // Give the widget time to initialize
+      // setTimeout(() => {
+      //   setShowDemo(true);
+      // }, 3000);
       setTimeout(() => {
         setShowDemo(true);
       }, 300);

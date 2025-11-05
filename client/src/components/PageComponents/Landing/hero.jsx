@@ -1,6 +1,6 @@
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import { ArrowRight, Play } from "lucide-react";
-import heroMockup from "../../img/Landing/hero-mockup.png";
+import heroMockup from "../../../img/Landing/hero-mockup.png";
 
 const Hero = () => {
   return (

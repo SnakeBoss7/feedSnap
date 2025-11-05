@@ -22,41 +22,44 @@ connectDB();
 
 app.use(async (req, res, next) => {
   const origin = req.headers.origin;
+  
   try {
-    // Skip CORS for non-browser calls (e.g. Postman, CLI)
-    if (!origin) return next();
-    console.log("CORS Origin:", origin);
-    if (origin === process.env.FRONTEND) {
-      res.header("Access-Control-Allow-Origin", origin);
-      res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-      res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-      res.header("Access-Control-Allow-Credentials", "true");
-    
+    // Skip CORS for non-browser requests (Postman, curl, etc.)
+    if (!origin) {
       return next();
     }
+
+    console.log("CORS check for origin:", origin);
+
     // Check if the origin exists in your WebData DB
     const site = await webData.findOne({ webUrl: origin });
     
     if (site) {
-      // Allow only the verified origin
+      // ✅ Allow the verified origin
+      console.log("✅ Allowed:", origin);
       res.header("Access-Control-Allow-Origin", origin);
+      res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+      res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      res.header("Access-Control-Allow-Credentials", "true");
+
+      // Handle preflight
+      if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+      }
+      
+      return next();
     } else {
-      // Optionally log unauthorized origins
-      console.log(" Blocked CORS request from:", origin);
+      // ❌ Block unauthorized origins
+      console.log("❌ Blocked:", origin);
+      return res.status(403).json({ 
+        error: "Origin not allowed by CORS",
+        origin: origin 
+      });
     }
 
-    // Common headers
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.header("Access-Control-Allow-Credentials", "true");
-
-    // If it's a preflight OPTIONS request, end early
-    if (req.method === "OPTIONS") return res.sendStatus(200);
-
-    next();
   } catch (err) {
     console.error("Dynamic CORS error:", err);
-    next();
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 app.use(express.json());

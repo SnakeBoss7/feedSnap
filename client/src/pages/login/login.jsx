@@ -5,9 +5,8 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { MessageSquare, Eye, EyeOff, LucideInfo } from "lucide-react";
-// import { Label } from "../../components/ui/";
-// import { Input } from "@/components/ui/";
+import {  Eye, EyeOff, LucideInfo } from "lucide-react";
+import { Background } from "../../components/background/background";
 import RoundLoader from "../../components/loader/roundLoader";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../services/firebase";
@@ -16,7 +15,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { useState } from "react";
 import googlesign from "../../img/google.png";
-import { useUserContext } from "../../context/userDataContext";
 const apiUrl = process.env.REACT_APP_API_URL;
 
 export const Login = () => {
@@ -25,15 +23,12 @@ export const Login = () => {
   const [isloading,setIsloading] = useState(null);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-   const { refreshUserData } = useUserContext();
   const navigate = useNavigate();
   const handleGoogleLogin = async () => {
     try {
       setIsloading(2);
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
-      console.log("Frontend API URL:", apiUrl);
-      console.log(token);
       let res = await axios.post(
         `${apiUrl}/api/auth/firebase`,
         { idToken: token },
@@ -41,13 +36,15 @@ export const Login = () => {
           withCredentials: true,
         }
       );
-      console.log("Login success", res);
+      localStorage.clear();
+      localStorage.setItem("UserData", JSON.stringify(res.data.userData));
       navigate("/dashboard");
-      localStorage.setItem('UserData',JSON.stringify(res.data.userData));
-      refreshUserData();
     } catch (err) {
-        console.log(err);
       console.log("login failed", err);
+    }
+    finally
+    {
+      setIsloading(false);
     }
   };
 const handleLogIn = async (e) => {
@@ -55,47 +52,33 @@ const handleLogIn = async (e) => {
             setIsloading(1);
             console.log('wake up')
             try {
-              // setHappening('called + working');
               console.log('1st of the mont')
               let res = await axios.post(
         `${apiUrl}/api/auth/logIn`,
         {email,password},
         { withCredentials: true }
       );
-      console.log("Login success", res);
-                      // setHappening(res.data?.message || 'done yes yes');
+      localStorage.clear();
+      localStorage.setItem("UserData", JSON.stringify(res.data.userData));
       navigate("/dashboard");
-      localStorage.setItem('UserData',JSON.stringify(res.data.userData));
-      refreshUserData();
     } catch (err) {
-        console.log("login failed", err);//  setHappening(JSON.stringify(err, null, 2));
+        console.log("login failed", err);
         setMess(err.response?.data?.mess);
+    }finally
+    {
+      setIsloading(false);
     }
   };
 
   return (
-    // <>
-    //     <div>
-    //         <button className="bg-black" onClick={handleGoogleLogin}>Click here to loging using gooel</button>
-    //     </div>
-    // </>
     <div className="min-h-screen flex items-center justify-center p-4 font-sans">
-      <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_1050px_at_50%_200px,#c5b5ff,transparent)] pointer-events-none">
-        <div class="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#e8e8e8_1px,transparent_2px),linear-gradient(to_bottom,#e8e8e8_0.5px,transparent_2px)] bg-[size:4.5rem_3.5rem]">
-          {/* <!-- Small screen gradient --> */}
-          <div class="absolute inset-0 bg-[radial-gradient(circle_700px_at_0%_250px,#c5b5ff,transparent)] lg:bg-none"></div>
-          {/* <!-- Large screen gradient --> */}
-          <div class="absolute inset-0 bg-none lg:bg-[radial-gradient(circle_3000px_at_0%_100px,#c5b5ff,transparent)]"></div>
-        </div>
-      </div>
+      {/* BACKGROUND */}
+      <Background color={"#c5b5ff"}/>
       <div className="w-full max-w-md">
         {/* Logo */}
 
         <div className="text-center mb-8">
           <Link to="/" className=" items-center gap-2">
-            {/* <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-white" />
-            </div> */}
             <div className="flex items-center justify-center gap-2">
               <div className="justify-center text-4xl font-semibold tracking-tight flex  ">
                 <div className="text-black text-4xl text-top">Feed</div>

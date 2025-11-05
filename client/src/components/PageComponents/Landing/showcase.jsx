@@ -1,4 +1,4 @@
-import showcasePreview from "../../img/Landing/showcase-preview.jpg";
+import showcasePreview from "../../../img/Landing/showcase-preview.jpg";
 
 const Showcase = () => {
   return (

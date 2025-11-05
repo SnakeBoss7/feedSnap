@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { SimpleHeader } from "../../../components/header/header";
-import { FilterTable } from "../../../components/table/filterTable";
+import { FilterTable } from "../../../components/PageComponents/feedback/table/filterTable";
 import Select from "react-select";
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -204,17 +204,12 @@ const [selectedData,setSelectedData] = useState(null);
 
     setTimeout(scrollToBottomContainer, 100);
 
-    const optimizedData = selectedData.map(item => ({
-      title: item.title,
-      desc: item.description?.substring(0, 100),
-      url: item.webUrl?.replace('http://localhost:3000', 'localhost')
-    })) || [];
 
     try {
       let aiRes = await axios.post(`${apiUrl}/api/llm/askAI`, {
         aiResponse,
         userPrompt,
-        feedbackData: optimizedData
+        feedbackData: selectedData
       },{withCredentials:true});
       
       console.log(aiRes.data?.response);
@@ -578,13 +573,13 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
             <button
               onClick={() => onSend({ subject, body }, index, selectedTeam)}
               disabled={!selectedTeam}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium text-xs transition-all ${
+              className={`flex group items-center gap-1.5 px-3 py-1.5 rounded-md font-medium text-xs transition-all ${
                 selectedTeam
-                  ? 'bg-primary5 text-white hover:bg-purple-700 hover:shadow-md'
+                  ? 'bg-primary5 text-white hover:bg-blue-700  hover:shadow-md'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
-              <LucideSend size={14} />
+              <LucideSend className="group-hover:rotate-45 transition-all ease-in-out duration-300" size={14} />
               Send
             </button>
           </div>
