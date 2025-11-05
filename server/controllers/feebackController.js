@@ -96,10 +96,10 @@ const exportFeedback = async (req, res) => {
 const createFeed = async (req, res) => {
   console.log("Hello there");
   const {webUrl,pathname,title,email,description,rating,config}= req.body;
-  console.log({webUrl,pathname,title,email,description,rating,config});
+  console.log({webUrl,pathname,title,email,description,rating});
   let severity = computeSeverity({title,rating,description,email,status:false});
   res.status(200).json({ mess: "cooked" });
-  // let data = await feedback.create({...req.body,severity,status:false});
+  let data = await feedback.create({...req.body,severity,status:false});
   
   if(req.body.config?.ackMail) {
     const currentDate = new Date().toLocaleString("en-IN", {
