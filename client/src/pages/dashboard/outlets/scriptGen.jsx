@@ -44,7 +44,6 @@ export const ScriptGen = () => {
   };
 
   const fileDownload = () => {
-    console.log("download");
     const text = scriptInj;
     const blog = new Blob([text], { type: 'text/plain' });
     const url = URL.createObjectURL(blog);
@@ -58,14 +57,12 @@ export const ScriptGen = () => {
 
   const colorChange = (e) => {
     setUrlsettings((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    console.log(e.target.name);
-    console.log(e.target.value);
+
   };
 
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const genScript = async (e) => {
-    console.log("genScript called with UrlSettings:", UrlSettings);
     e.preventDefault();
 
     // Fixed validation logic - check if webUrl is empty (the main required field)
@@ -86,7 +83,7 @@ export const ScriptGen = () => {
     }
 
     try {
-      console.log("Starting API call...");
+
       setUrlsettings((prev) => ({ ...prev, loading: true }));
 
       let res = await axios.post(
@@ -97,7 +94,6 @@ export const ScriptGen = () => {
         }
       );
 
-      console.log("API response:", res);
       setScriptInj(res.data.injection);
       await wait(4000);
       setUrlsettings((prev) => ({ ...prev, loading: false }));
@@ -112,7 +108,6 @@ export const ScriptGen = () => {
         setShowDemo(true);
          let script = document.createElement('script');
       script.src = `${apiUrl}/widget/script?webUrl=${frontendApiUrl}`;
-      console.log("Script element created:", script);
       document.body.appendChild(script);
       }
   },[])
@@ -162,14 +157,12 @@ const genDemo = async (e) => {
     // STEP 5: Clear localStorage
     localStorage.removeItem("demoLive");
     
-    console.log("Demo widget cleaned up successfully");
     return;
   }
 
   // ========== LOADING THE WIDGET ==========
   try {
     setShowDemo("loading");
-    console.log("Starting demo widget...");
     
     // Optional: Call demo API if needed
     let res = await axios.post(`${apiUrl}/api/script/demo`, 
@@ -195,14 +188,10 @@ const genDemo = async (e) => {
     
     // IMPORTANT: Wait for script to load before setting state
     script.onload = () => {
-      console.log("Widget script loaded successfully");
-      // Give the widget time to initialize
-      // setTimeout(() => {
-      //   setShowDemo(true);
-      // }, 3000);
+
       setTimeout(() => {
         setShowDemo(true);
-      }, 300);
+      }, 100);
     };
     
     // Append script to body

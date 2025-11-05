@@ -485,9 +485,9 @@ export default function WidgetTabs({
           >
             {showDemo === "loading" ? (
               <>
-                <Loader/>
+                {/* <Loader/> */}
 
-                {/* <DemLoader /> */}
+                <DemLoader />
               </>
             ) : showDemo ? (
               <>

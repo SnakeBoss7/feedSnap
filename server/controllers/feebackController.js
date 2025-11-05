@@ -113,7 +113,7 @@ const createFeed = async (req, res) => {
     });
     let filepath = path.join(process.cwd(),"utils","ackMail.html")
     let  mailContent = fs.readFileSync(filepath,"utf-8")
-    // console.log({filepath,mailContent})
+    console.log({filepath,mailContent})
         mailContent= mailContent
       .replace(/{{email}}/g, email)
       .replace(/{{title}}/g, title)
