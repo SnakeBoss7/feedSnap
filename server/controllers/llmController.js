@@ -8,10 +8,7 @@ const openai_NVIDIA = new OpenAI({
   baseURL: "https://integrate.api.nvidia.com/v1",
 });
 
-const openaiChatBot = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+
 function extractCleanJSON(aiResponse) {
   try {
     let cleaned = aiResponse.replace(/<think>[\s\S]*?<\/think>/g, "");

@@ -7,6 +7,8 @@ const path = require('path')
 const app = express();
 const webData = require('./models/WebData.js');
 const {widgetGen} = require('./widgets/integrated.js');
+
+
 //routes
 const authRoute = require('./routes/authRoutes');
 const scriptRoute = require('./routes/scriptRoute');
