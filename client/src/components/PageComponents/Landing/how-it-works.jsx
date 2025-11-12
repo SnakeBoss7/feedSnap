@@ -1,4 +1,4 @@
-import { Code, LucideCode, MessageCircle, TrendingUp } from "lucide-react";
+import { Code, MessageCircle, TrendingUp } from "lucide-react";
 
 const HowItWorks = () => {
   const steps = [

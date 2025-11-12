@@ -19,7 +19,6 @@ import {
 import { SeverityBadge } from "../../../button/severity"
 import { Button } from "../../../ui/button"
 import { Input } from "../../../ui/input"
-import { Badge } from "../../../ui/badge"
 import { Checkbox } from "../../../ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../ui/dropdown-menu"
@@ -27,13 +26,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover"
 import { Calendar as CalendarComponent } from "../../../ui/calender"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../ui/dialog"
 import { format } from "date-fns"
-import { cn } from "../../../../lib/utils"
 import { RatingStar } from "../../../star/star"
 import { exportData } from "../../../../services/exportData"
 
 export function FilterTable({ setSelectedData, data, onAction }) {
   const [searchTerm, setSearchTerm] = useState("")
-  const [formatType, setFormatType] = useState('csv')
+  const [formatType] = useState('csv')
   const [severityFilter, setSeverityFilter] = useState("all")
   const [webUrlFilter, setWebUrlFilter] = useState("all")
   const [dateRange, setDateRange] = useState({})
@@ -102,7 +100,7 @@ export function FilterTable({ setSelectedData, data, onAction }) {
   // Reset to page 1 when filters change
   useMemo(() => {
     setCurrentPage(1)
-  }, [searchTerm, severityFilter, webUrlFilter, dateRange])
+  }, [])
 
   const handleSelectAll = (checked) => {
     if (checked) {

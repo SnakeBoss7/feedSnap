@@ -1,5 +1,4 @@
 import React from 'react';
-import { PlusCircle } from 'lucide-react';
 import AddButton from '../../button/addTeam';
 
 export const Header = ({ onCreateTeam }) => (

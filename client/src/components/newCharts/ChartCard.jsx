@@ -1,4 +1,3 @@
-import { bg } from "date-fns/locale"
 import {
   BarChart,
   Bar,
@@ -32,7 +31,6 @@ export const ChartCard = ({ title, children }) => {
 }
 
 export const ReportsByTypeChart = ({ data }) => {
-  const colors = ["#A855F7", "#5BAE83", "#E94057", "#2563EB", "#F59E0B"]
 
   return (
     <ResponsiveContainer width="100%" height={300}>

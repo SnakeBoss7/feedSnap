@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X, Users, Calendar, Mail, UserPlus, Trash2, MoreVertical } from 'lucide-react';
-import { RoleSelect } from './roleSelect';
 import { AddMemberForm } from './addMember';
 import axios from 'axios';
 

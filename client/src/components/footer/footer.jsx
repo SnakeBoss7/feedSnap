@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FileText, Link2Icon, LucideMailOpen, Mail, MailOpen, MessageSquare, Shield } from "lucide-react";
+import { FileText, Link2Icon,  Mail, MailOpen,  Shield } from "lucide-react";
 export const Footer = () => {
   return (
   <footer className="font-sans bg-gray-900 text-white py-12 px-4">
@@ -39,15 +39,15 @@ export const Footer = () => {
             <div className="space-y-4">
               <h3 className="font-semibold">Company</h3>
               <div className="space-y-2">
-                <a href="#" className="block text-gray-400 hover:text-white transition-colors text-sm">
+                <p  className="block text-gray-400 hover:text-white transition-colors text-sm">
                   About
-                </a>
-                <a href="#" className="block text-gray-400 hover:text-white transition-colors text-sm">
+                </p>
+                <p href="#" className="block text-gray-400 hover:text-white transition-colors text-sm">
                   Contact
-                </a>
-                <a href="#" className="block text-gray-400 hover:text-white transition-colors text-sm">
+                </p>
+                <p href="#" className="block text-gray-400 hover:text-white transition-colors text-sm">
                   Support
-                </a>
+                </p>
               </div>
             </div>
 
@@ -55,14 +55,14 @@ export const Footer = () => {
             <div className="space-y-4">
               <h3 className="font-semibold">Legal</h3>
               <div className="space-y-2">
-                <a href="#" className="block text-gray-400 hover:text-white transition-colors text-sm">
+                <p className="block text-gray-400 hover:text-white transition-colors text-sm">
                   <Shield className="inline w-3 h-3 mr-1" />
                   Privacy Policy
-                </a>
-                <a href="#" className="block text-gray-400 hover:text-white transition-colors text-sm">
+                </p>
+                <p  className="block text-gray-400 hover:text-white transition-colors text-sm">
                   <FileText className="inline w-3 h-3 mr-1" />
                   Terms of Service
-                </a>
+                </p>
               </div>
             </div>
           </div>
@@ -80,10 +80,10 @@ export const Footer = () => {
         </div>
       </div>
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <p  className="text-gray-400 hover:text-white transition-colors">
                 <Link2Icon className="w-4 h-4" />
    
-              </a>
+              </p>
             </div>
           </div>
         </div>

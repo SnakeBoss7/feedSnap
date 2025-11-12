@@ -7,7 +7,7 @@ import { useUserContext } from "../../context/userDataContext";
 
 export const SimpleHeader = ({ color }) => {
   const { showSidebar } = useSidebarContext();
-  const { userData, isLoading } = useUserContext();
+  const { userData } = useUserContext();
   const [imgError, setImgError] = useState(false);
 
   const displayName = userData?.name || userData?.username || "User";

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
-import { CircleQuestionMarkIcon, ShieldQuestion, X } from 'lucide-react';
+import { CircleQuestionMarkIcon, X } from 'lucide-react';
 import axios from 'axios';
 
 const apiUrl = process.env.REACT_APP_API_URL;
