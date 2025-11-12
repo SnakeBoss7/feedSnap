@@ -1,5 +1,5 @@
 // context/userContext.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const UserContext = createContext();
@@ -22,17 +22,16 @@ export const UserProvider = ({ children }) => {
   const apiUrl = process.env.REACT_APP_API_URL;
 
   // Function to fetch user data
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // First, try to load from localStorage for immediate UI feedback
       const cachedData = localStorage.getItem('UserData');
       if (cachedData) {
         try {
           const parsed = JSON.parse(cachedData);
-          if (parsed && parsed.name) { // Basic validation
+          if (parsed && parsed.name) {
             setUserData(parsed);
           }
         } catch (parseError) {
@@ -41,10 +40,9 @@ export const UserProvider = ({ children }) => {
         }
       }
 
-      // Then fetch fresh data from API
       const response = await axios.get(`${apiUrl}/api/auth/getData`, {
         withCredentials: true,
-        timeout: 10000, // 10 second timeout
+        timeout: 10000,
       });
 
       const newUserData = response.data?.userData;
@@ -59,39 +57,44 @@ export const UserProvider = ({ children }) => {
       console.error('Failed to fetch user data:', err);
       setError(err);
       
-      // If API fails but we have cached data, keep using cached data
-      if (!userData) {
-        const fallbackData = localStorage.getItem('UserData');
-        if (fallbackData) {
-          try {
-            setUserData(JSON.parse(fallbackData));
-          } catch (parseError) {
-            console.error('Cached data is also invalid');
+      // Don't use userData from closure - check localStorage directly
+      const fallbackData = localStorage.getItem('UserData');
+      if (fallbackData) {
+        try {
+          const parsed = JSON.parse(fallbackData);
+          if (parsed && parsed.name) {
+            setUserData(parsed);
           }
+        } catch (parseError) {
+          console.error('Cached data is also invalid');
         }
       }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [apiUrl]); // ✅ Only depends on apiUrl, not userData
 
   // Function to update user data
-  const updateUserData = (newData) => {
-    localStorage.setItem('UserData', JSON.stringify(newData));
-    setUserData(newData);
-  };
+  const updateUserData = useCallback((newData) => {
+    try {
+      localStorage.setItem('UserData', JSON.stringify(newData));
+      setUserData(newData);
+    } catch (err) {
+      console.error('Failed to save user data:', err);
+    }
+  }, []); // ✅ No dependencies needed
 
   // Function to clear user data (for logout)
-  const clearUserData = () => {
+  const clearUserData = useCallback(() => {
     setUserData(null);
     localStorage.removeItem('UserData');
     setError(null);
-  };
+  }, []); // ✅ No dependencies needed
 
   // Initial data fetch
   useEffect(() => {
     fetchUserData();
-  }, [apiUrl]);
+  }, [fetchUserData]); // ✅ Now includes fetchUserData
 
   // Listen for storage changes from other tabs
   useEffect(() => {

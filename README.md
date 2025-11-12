@@ -214,7 +214,7 @@ To integrate FeedSnap widget on your website, add this single line before the cl
 
 ```html
 <script src="https://feedsnap.onrender.com/widget/script?webUrl=YOUR_WEB_URL" ></script>
-``
+``` 
 
 ---
 

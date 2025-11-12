@@ -6,7 +6,6 @@ import {
   Globe,
   MessageSquare,
   Plus,
-  PlusCircle,
   Star,
 } from "lucide-react";
 import { Background } from "../../../components/background/background";

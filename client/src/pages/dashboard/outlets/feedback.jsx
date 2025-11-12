@@ -150,7 +150,7 @@ const [selectedData,setSelectedData] = useState(null);
     }, 150);
 
     return () => clearInterval(interval);
-  }, [aiResponse]);
+  }, [aiResponse,displayedMessages]);
 
   useEffect(() => {
     setTimeout(scrollToBottomContainer, 100);
@@ -519,7 +519,6 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
        border: '1px solid #2563EB',
       zIndex: 9999,
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-      border: '1px solid #e5e7eb'
     }),
     menuPortal: (base) => ({
       ...base,

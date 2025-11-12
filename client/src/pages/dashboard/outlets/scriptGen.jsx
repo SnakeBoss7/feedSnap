@@ -164,12 +164,6 @@ const genDemo = async (e) => {
   try {
     setShowDemo("loading");
     
-    // Optional: Call demo API if needed
-    let res = await axios.post(`${apiUrl}/api/script/demo`, 
-      { settings: UrlSettings }, 
-      { withCredentials: true }
-    );
-    
     localStorage.setItem("demoLive", "true");
     
     // CRITICAL FIX: Create and append script correctly
