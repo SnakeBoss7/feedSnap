@@ -15,12 +15,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { useState } from "react";
 import googlesign from "../../img/google.png";
+import { useUserContext } from "../../context/userDataContext";
 const apiUrl = process.env.REACT_APP_API_URL;
 
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [mess,setMess] = useState(null);
   const [isloading,setIsloading] = useState(null);
+  const {updateUserData} = useUserContext();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -37,7 +39,7 @@ export const Login = () => {
         }
       );
       localStorage.clear();
-      localStorage.setItem("UserData", JSON.stringify(res.data.userData));
+      updateUserData(res.data.userData);
       navigate("/dashboard");
     } catch (err) {
       console.log("login failed", err);
@@ -59,7 +61,7 @@ const handleLogIn = async (e) => {
         { withCredentials: true }
       );
       localStorage.clear();
-      localStorage.setItem("UserData", JSON.stringify(res.data.userData));
+      updateUserData(res.data.userData);
       navigate("/dashboard");
     } catch (err) {
         console.log("login failed", err);

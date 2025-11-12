@@ -10,12 +10,13 @@ export const MetricCard = ({ label, value, color }) => {
   const bgColor = colorMap[color] || color
 
   return (
+    <div className="bg-white rounded-lg">
     <div
       className="rounded-lg p-3 hover:shadow-sm transition-shadow border border-gray-200 bg-white"
       style={{
         backgroundColor: `${bgColor}20`,
       }}
-    >
+      >
       <p className="text-sm font-bold" style={{ color: bgColor }}>
         {label}
       </p>
@@ -23,5 +24,6 @@ export const MetricCard = ({ label, value, color }) => {
         {value}
       </p>
     </div>
+      </div>
   )
 }

@@ -24,7 +24,6 @@ export const Sidebar = () => {
   const { showSidebar, setShowSidebar, sidebarSize, setSidebarSize } = useSidebarContext();
   const { userData, isLoading } = useUserContext();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-  const [imgError, setImgError] = useState(false);
   const sidebarRef = useRef();
 
   // Handle responsive
@@ -81,15 +80,8 @@ export const Sidebar = () => {
   };
 
   const displayName = userData?.name || userData?.username || "User";
-  const profileImage = (!imgError && userData?.profile) ? userData.profile : logo;
+  const profileImage =  userData?.profile ? userData.profile : logo;
 
-  const handleImageError = () => {
-    setImgError(true);
-  };
-
-  const handleImageLoad = () => {
-    setImgError(false);
-  };
 
   const sidebarClasses = `
     font-sans z-50 flex flex-col bg-backgr h-full transition-all duration-300 ease-in-out
@@ -186,8 +178,6 @@ export const Sidebar = () => {
                 src={profileImage}
                 className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
                 alt={`${displayName}'s profile`}
-                onError={handleImageError}
-                onLoad={handleImageLoad}
               />
             )}
             

@@ -17,6 +17,7 @@ import { initializeDashboardData } from "../../../components/newCharts/dataAdapt
 import AddButton from "../../../components/button/addButton"
 import { Link } from "react-router-dom"
 import { SimpleHeader } from "../../../components/header/header"
+import { Background } from "../../../components/background/background"
 
 export const Analytics = () => {
   const [selectedWebsite, setSelectedWebsite] = useState("all")
@@ -93,12 +94,15 @@ export const Analytics = () => {
 
   if (isLoading) {
     return (
+      <>
+        <SimpleHeader color={'#c5b5ff'}/>
       <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading dashboard data...</p>
         </div>
       </div>
+      </>
     )
   }
 
@@ -172,7 +176,8 @@ export const Analytics = () => {
 
   return (
     <div className="min-h-screen  overflow-y-scroll scrollbar-hide font-sans">
-           {/* <Background color={'/#e0e0e0ff'}/> */}
+             <Background color={"#a78dffff"}/>
+
             <SimpleHeader color={'#c5b5ff'}/>
       <div className="relative h-full  md:px-10 px-5 py-8">
         {/* Header */}
@@ -187,7 +192,7 @@ export const Analytics = () => {
                 </p>
               </div>
               <Link
-                to="scriptGen"
+                to="/dashboard/scriptGen"
                 className="flex items-center justify-center hidden md:flex"
               >
                 {" "}
@@ -213,7 +218,7 @@ export const Analytics = () => {
         />
 
         {/* Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 p-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <MetricCard label="Total Reports" value={displayMetrics.totalReports || 0} color="total" />
           <MetricCard label="Active" value={displayMetrics.activeReports || 0} color="active" />
           <MetricCard label="Resolved" value={displayMetrics.resolvedReports || 0} color="resolved" />

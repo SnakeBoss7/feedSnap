@@ -77,11 +77,8 @@ export const UserProvider = ({ children }) => {
 
   // Function to update user data
   const updateUserData = (newData) => {
-    setUserData(prevData => {
-      const updatedData = { ...prevData, ...newData };
-      localStorage.setItem('UserData', JSON.stringify(updatedData));
-      return updatedData;
-    });
+    localStorage.setItem('UserData', JSON.stringify(newData));
+    setUserData(newData);
   };
 
   // Function to clear user data (for logout)

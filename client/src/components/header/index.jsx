@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagic, faFileAlt, faUsers } from "@fortawesome/free-solid-svg-icons";
 import {
-  SidebarContextprovider,
   useSidebarContext,
 } from "../../context/sidebarContext";
 import Checkbox from "./hamburger";
 import { LucideHome, LucideLogIn, LucideView } from "lucide-react";
+import { useUserContext } from "../../context/userDataContext";
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [show, setShow] = useState(true);
+    const { userData} = useUserContext();
   const { showSidebar, setShowSidebar } = useSidebarContext();
   const [isScrolling, setIsScrolling] = useState(false);
 
@@ -75,7 +72,16 @@ export default function Header() {
               </Link>
 
               {/* Get Started Button */}
-              <Link
+              {userData?<Link
+                className="font-bold px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white  text-xl hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
+                to="/dashboard"
+                style={{
+                  borderRadius: isScrolling ? "9999px" : "0.375rem",
+                  transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                Dashboard
+              </Link>:<Link
                 className="font-bold px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white  hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
                 to="/signIn"
                 style={{
@@ -84,12 +90,12 @@ export default function Header() {
                 }}
               >
                 Get Started
-              </Link>
+              </Link>}
             </div>
 
             {/* Mobile Hamburger - Right aligned */}
             <div className="lg:hidden flex">
-              <Checkbox show={show} />
+              <Checkbox show={"false"} />
             </div>
           </div>
         </div>
@@ -129,12 +135,25 @@ export default function Header() {
                 <LucideLogIn className="text-black" size={19} />
                 Log In
               </Link>
-              <Link
-                className="transition-all duration-300 ease-in-out text-lg py-3 px-4 mt-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-bold text-center hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
+              {userData?<Link
+                className="font-bold px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white  text-xl hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
+                to="/dashboard"
+                style={{
+                  borderRadius: isScrolling ? "9999px" : "0.375rem",
+                  transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                Dashboard
+              </Link>:<Link
+                className="font-bold px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white  hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
                 to="/signIn"
+                style={{
+                  borderRadius: isScrolling ? "9999px" : "0.375rem",
+                  transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
               >
                 Get Started
-              </Link>
+              </Link>}
             </div>
           </div>
         </div>

@@ -1,157 +1,176 @@
-const admin = require('../config/firebaseAdmin');
-const User = require('../models/user');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const {tokenGen} = require('../utils/jwtTokenGen')
-const isProduction = process.env.NODE_ENV === 'prod';
-const {getUserAccessibleWebsites} = require('../controllers/feebackController');
+const admin = require("../config/firebaseAdmin");
+const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const { tokenGen } = require("../utils/jwtTokenGen");
+const isProduction = process.env.NODE_ENV === "prod";
+const {
+  getUserAccessibleWebsites,
+} = require("../controllers/feebackController");
 
 const cookieConfig = {
   httpOnly: true,
-  secure: isProduction,              
-  sameSite: isProduction ? 'none' : 'lax', 
-  maxAge: 7 * 24 * 60 * 60 * 1000,   // 7 days
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
 
-const getUserData = async(req,res)=>
-    {
-try {
-            let user = req.user;
-                if (!req.user || !req.user.id) {
-      return res.status(401).json({ 
-        mess: 'User not authenticated',
-        error: 'Missing user information from token'
+const getUserData = async (req, res) => {
+  try {
+    let user = req.user;
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        mess: "User not authenticated",
+        error: "Missing user information from token",
       });
     }
-        //.log({user});
-        const userData = await User.findOne({_id:user.id})
-        const webURL = await getUserAccessibleWebsites(user.id);
-        userData.webURL = webURL.sites;
-        console.log({webURL});
-        console.log({userData});
-        return res.status(200).json({userData});
-    } catch (error) {
-        console.log(error)
-    return res.status(400).json({mess:error});
-    
-}
-    }
-const firebaseLogin = async (req, res) => {
-    const { idToken } = req.body;
-        //.log({idToken})
-    if (!idToken) {
-        //.log('token not found');
-        return res.status(400).send('Invalid token'); // Add return
-    }
-    
-    try {
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const { email, name, uid, displayName } = decodedToken;
-        const finalName = displayName || name;
-         const userRecord = await admin.auth().getUser(uid);
-        const photoURL = userRecord.photoURL || null;
-        //.log(email)
-        let user = await User.findOne({ email: email });
+    const userData = await User.findOne({ _id: user.id });
+    const webURL = await getUserAccessibleWebsites(userData.id);
+    const { _id, name, role, profile } = userData;
 
-        if (!user) {
-            user = await User.create({ email, name: finalName, firebaseId: uid,profile:photoURL });
-        }
-        user.firebaseId=uid;
-        user.name = finalName;
-        user.profile= photoURL
-        await user.save();
-        const token = tokenGen(user);
-        
-        // Fixed cookie configuration
-        res.cookie('token', token, cookieConfig);
-        //.log('User logged in via Firebase:', user);
-        return res.status(200).json({ userData:user, token });
-        
-    } catch (err) {
-        //.log('Firebase login error:', err);
-        res.status(401).json({ error: err.message });
+    const filteredUser = { _id, name, role, profile, webURL: webURL.sites };
+
+    return res.status(200).json({ userData: filteredUser });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ mess: error });
+  }
+};
+const firebaseLogin = async (req, res) => {
+  const { idToken } = req.body;
+  //.log({idToken})
+  if (!idToken) {
+    //.log('token not found');
+    return res.status(400).send("Invalid token"); // Add return
+  }
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const { email, uid, displayName } = decodedToken;
+    const finalName = displayName;
+    const userRecord = await admin.auth().getUser(uid);
+    const photoURL = userRecord.photoURL || null;
+    //.log(email)
+    let user = await User.findOne({ email: email });
+
+    if (!user) {
+      user = await User.create({
+        email,
+        name: finalName,
+        firebaseId: uid,
+        profile: photoURL,
+      });
     }
+    user.firebaseId = uid;
+    user.name = finalName;
+    user.profile = photoURL;
+    await user.save();
+    const token = tokenGen(user);
+
+    // Fixed cookie configuration
+    res.cookie("token", token, cookieConfig);
+        const webURL = await getUserAccessibleWebsites(user.id);
+    const { _id, name, role, profile } = user;
+
+    const filteredUser = { _id, name, role, profile, webURL: webURL.sites };
+
+    return res.status(200).json({ userData: filteredUser, token });
+  } catch (err) {
+    //.log('Firebase login error:', err);
+    res.status(401).json({ error: err.message });
+  }
 };
 
-const registerUser = async(req,res)=>
-{
-
-     const { name, email, password, confirmPassword } = req.body;
-    try {
-        const existingUser = await User.findOne({ email });
-        //.log(existingUser)
-        if (existingUser) {
-            if( existingUser.password === "")
-                {
-                const saltRounds = 12;
-                const hashedPassword = await bcrypt.hash(password, saltRounds);
-                existingUser.password = hashedPassword;
-                await existingUser.save();
-                  const token = tokenGen(existingUser);
-        // Set HTTP-only cookie
-        res.cookie('token', token, cookieConfig);
-          return res.status(200).json({mess:'working',userData:userData});
-                }
-                
-            return res.status(409).json({ 
-                mess: 'User with this email already exists' 
-            });
-        }
-        //.log({name,email,password,confirmPassword})
+const registerUser = async (req, res) => {
+  const { name, email, password, confirmPassword } = req.body;
+  try {
+    const existingUser = await User.findOne({ email });
+    //.log(existingUser)
+    if (existingUser) {
+      if (existingUser.password === "") {
         const saltRounds = 12;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
+        existingUser.password = hashedPassword;
+        await existingUser.save();
+        const token = tokenGen(existingUser);
 
-        // Create new user
-        const newUser = new User({
-            name: name.trim(),
-            email: email.toLowerCase().trim(),
-            password: hashedPassword
-        });
+        res.cookie("token", token, cookieConfig);
+    const webURL = await getUserAccessibleWebsites(existingUser.id);
+        const { _id, name, role, profile } = existingUser;
 
-        // Save user to database
-        const savedUser = await newUser.save();
-        //.log(savedUser);
-        // Generate JWT token
-        const token = tokenGen(savedUser)
+        const filteredUser = { _id, name, role, profile, webURL: webURL.sites };
+        return res
+          .status(200)
+          .json({ mess: "working", userData: filteredUser });
+      }
 
-        // Set HTTP-only cookie
-        res.cookie('token', token, cookieConfig);
-        return res.status(200).json({message:'working',userData:savedUser});
-    } catch (err) {
-        //.log(err);
-        return res.status(401).json({ error: 'err' });
+      return res.status(409).json({
+        mess: "User with this email already exists",
+      });
     }
-}
-const logIn = async(req,res)=>
-    {
-          const {email ,password} = req.body;
-          //.log({email,password})
-          try {
-            const existingUser = await User.findOne({ email });
-        //.log(existingUser)
-        if (!existingUser) {
-            return res.status(401).json({mess:'User does not exist'});
-          }
+    //.log({name,email,password,confirmPassword})
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+    // Create new user
+    const newUser = new User({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password: hashedPassword,
+    });
 
-        if(isPasswordValid)
-            {
+    // Save user to database
+    const savedUser = await newUser.save();
+    //.log(savedUser);
+    // Generate JWT token
+    const token = tokenGen(savedUser);
 
-                //success with login
-                let token = tokenGen(existingUser);
-                    res.cookie('token', token, cookieConfig);
-                      return res.status(200).json({mess:'good to go',userData:existingUser});
-            }
-            else
-                {
-                    // wrong credentitals
-                    return res.status(401).json({mess:'Wrong Credentitials'});
-                }
-          } catch (error) {
-             //.log(error);
-              return res.status(401).json({mess:'Error ,try again later!'});
+    // Set HTTP-only cookie
+    res.cookie("token", token, cookieConfig);
+        const webURL = await getUserAccessibleWebsites(savedUser.id);
+    const { _id, name, role, profile } = savedUser;
+
+    const filteredUser = { _id, name, role, profile, webURL: webURL.sites };
+    return res.status(200).json({ message: "working", userData: filteredUser });
+  } catch (err) {
+    //.log(err);
+    return res.status(401).json({ error: "err" });
+  }
+};
+const logIn = async (req, res) => {
+  const { email, password } = req.body;
+  //.log({email,password})
+  try {
+    const existingUser = await User.findOne({ email });
+    //.log(existingUser)
+    if (!existingUser) {
+      return res.status(401).json({ mess: "User does not exist" });
     }
-}
 
-module.exports = { firebaseLogin,registerUser,logIn,getUserData };
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
+
+    if (isPasswordValid) {
+      //success with login
+      let token = tokenGen(existingUser);
+      res.cookie("token", token, cookieConfig);
+          const webURL = await getUserAccessibleWebsites(existingUser.id);
+      const { _id, name, role, profile } = existingUser;
+
+      const filteredUser = { _id, name, role, profile, webURL: webURL.sites };
+      return res
+        .status(200)
+        .json({ mess: "good to go", userData: filteredUser });
+    } else {
+      // wrong credentitals
+      return res.status(401).json({ mess: "Wrong Credentitials" });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(401).json({ mess: "Error ,try again later!" });
+  }
+};
+
+module.exports = { firebaseLogin, registerUser, logIn, getUserData };
