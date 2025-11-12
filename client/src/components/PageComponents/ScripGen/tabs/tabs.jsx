@@ -130,7 +130,7 @@ export default function WidgetTabs({
   showDemo,
 }) {
   const [active, setActive] = useState(0);
-  const [contextlen, setContextlen] = useState(0);
+  // const [contextlen, setContextlen] = useState(0);
   // Static tabs array
   const tabs = useMemo(
     () => [
@@ -159,7 +159,7 @@ export default function WidgetTabs({
         if (value.length > MAX_CONTEXT_LENGTH) {
           return; // Block if over limit
         }
-        setContextlen(value.length);
+        // setContextlen(value.length);
       }
 
       setUrlsettings((prev) => ({ ...prev, [name]: value }));
