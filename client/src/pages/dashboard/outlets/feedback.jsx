@@ -80,13 +80,6 @@ export const Feedback = () => {
       role: "assistant",
       content: "Hello! how can I help you today"
     },
-    // {
-    //     role: "emailPrep",
-    //         subject: "fuck", 
-    //         body: `
-    //         `,
-    //         timestamp: new Date().toISOString()
-    // }
     
   ]);
   
@@ -114,43 +107,43 @@ const [selectedData,setSelectedData] = useState(null);
   };
 
   // Typewriter effect for AI messages
-  useEffect(() => {
-    if (!aiResponse.length) return;
+useEffect(() => {
+  if (!aiResponse.length) return;
 
-    const lastMessage = aiResponse[aiResponse.length - 1];
-    if (lastMessage.role !== "assistant") {
-      setDisplayedMessages(aiResponse);
-      setTimeout(scrollToBottomContainer, 100);
-      return;
+  const lastMessage = aiResponse[aiResponse.length - 1];
+  if (lastMessage.role !== "assistant") {
+    setDisplayedMessages(aiResponse);
+    setTimeout(scrollToBottomContainer, 100);
+    return;
+  }
+
+  let words = lastMessage?.content?.split(" ");
+  let i = 0;
+  const tempMessages = [...aiResponse.slice(0, -1)]; // Start with all messages except the last one
+
+  const interval = setInterval(() => {
+    if (
+      !tempMessages.length ||
+      tempMessages[tempMessages.length - 1].role !== "assistant"
+    ) {
+      tempMessages.push({ role: "assistant", content: "" });
     }
 
-    let words = lastMessage?.content?.split(" ");
-    let i = 0;
-    const tempMessages = [...displayedMessages];
+    tempMessages[tempMessages.length - 1].content +=
+      (i === 0 ? "" : " ") + words[i];
+    setDisplayedMessages([...tempMessages]);
+    
+    setTimeout(scrollToBottomContainer, 50);
 
-    const interval = setInterval(() => {
-      if (
-        !tempMessages.length ||
-        tempMessages[tempMessages.length - 1].role !== "assistant"
-      ) {
-        tempMessages.push({ role: "assistant", content: "" });
-      }
+    i++;
+    if (i >= words.length) {
+      clearInterval(interval);
+      setTimeout(scrollToBottomContainer, 100);
+    }
+  }, 150);
 
-      tempMessages[tempMessages.length - 1].content +=
-        (i === 0 ? "" : " ") + words[i];
-      setDisplayedMessages([...tempMessages]);
-      
-      setTimeout(scrollToBottomContainer, 50);
-
-      i++;
-      if (i >= words.length) {
-        clearInterval(interval);
-        setTimeout(scrollToBottomContainer, 100);
-      }
-    }, 150);
-
-    return () => clearInterval(interval);
-  }, [aiResponse,displayedMessages]);
+  return () => clearInterval(interval);
+}, [aiResponse]); 
 
   useEffect(() => {
     setTimeout(scrollToBottomContainer, 100);
@@ -472,8 +465,6 @@ const handleSendEmail = async (emailData, index, selectedTeam) => {
 };
 
 // Email Card Component
-// Email Card Component
-// Replace the EmailCard component with this:
 const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [subject, setSubject] = useState(chat.subject);

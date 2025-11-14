@@ -288,7 +288,7 @@ const Overview = () => {
             Create your account today and start collecting valuable feedback from your website visitors in minutes.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/register">
+            <Link to="/Signup">
               <Button size="lg" className="bg-gradient-to-r text-white from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
                 Start Free Trial
                 <ArrowRight className="ml-2 w-4 h-4" />

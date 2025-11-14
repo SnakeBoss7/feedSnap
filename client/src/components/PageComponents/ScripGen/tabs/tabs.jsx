@@ -130,7 +130,7 @@ export default function WidgetTabs({
   showDemo,
 }) {
   const [active, setActive] = useState(0);
-  // const [contextlen, setContextlen] = useState(0);
+  const [contextlen, setContextlen] = useState(0);
   // Static tabs array
   const tabs = useMemo(
     () => [

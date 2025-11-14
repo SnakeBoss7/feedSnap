@@ -83,7 +83,7 @@ export default function Header() {
                 Dashboard
               </Link>:<Link
                 className="font-bold px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white  hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
-                to="/signIn"
+                to="/Signup"
                 style={{
                   borderRadius: isScrolling ? "9999px" : "0.375rem",
                   transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -146,7 +146,7 @@ export default function Header() {
                 Dashboard
               </Link>:<Link
                 className="font-bold px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white  hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
-                to="/signIn"
+                to="/Signup"
                 style={{
                   borderRadius: isScrolling ? "9999px" : "0.375rem",
                   transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",

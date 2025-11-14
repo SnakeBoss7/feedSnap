@@ -176,7 +176,7 @@ export const Analytics = () => {
 
   return (
     <div className="min-h-screen  overflow-y-scroll scrollbar-hide font-sans">
-             <Background color={"#a78dffff"}/>
+             <Background color={"#b3a2ebff"}/>
 
             <SimpleHeader color={'#c5b5ff'}/>
       <div className="relative h-full  md:px-10 px-5 py-8">

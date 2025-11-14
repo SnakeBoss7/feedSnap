@@ -1,6 +1,7 @@
 import { Button } from "../../ui/button";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, LucideArrowRightFromLine, LucideArrowRightLeft, LucideMessageCircleReply, LucideMoveRight, LucidePanelRight, LucidePlane, Play } from "lucide-react";
 import heroMockup from "../../../img/Landing/hero-mockup.png";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
@@ -29,14 +30,15 @@ const Hero = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button size="lg" className="group shadow-soft">
+              <Link to={"/Signup"} size="lg" className="group bg-primary rounded-md py-2 px-5  text-white flex gap-2 items-center">
                 Get Started
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button variant="outline" size="lg" className="group border-muted-foreground  hover:bg-white/10">
-                <Play className="mr-2 h-4 w-4" />
+                <LucideMoveRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                
+              </Link>
+              <Link variant="outline" size="lg" className="group bg-white rounded-md py-2 px-5   flex gap-2 items-center border border-primary">
+                <Play className="  duration-300 mr-2 h-4 w-4" />
                 See Demo
-              </Button>
+              </Link>
             </div>
             
             <div className="mt-12 flex items-center justify-center lg:justify-start space-x-8 text-sm text-muted-foreground">
