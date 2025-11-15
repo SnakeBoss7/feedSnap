@@ -1,5 +1,4 @@
-import { Button } from "../../ui/button";
-import { ArrowRight, LucideArrowRightFromLine, LucideArrowRightLeft, LucideMessageCircleReply, LucideMoveRight, LucidePanelRight, LucidePlane, Play } from "lucide-react";
+import { LucideMoveRight,  Play } from "lucide-react";
 import heroMockup from "../../../img/Landing/hero-mockup.png";
 import { Link } from "react-router-dom";
 

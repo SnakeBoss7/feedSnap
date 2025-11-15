@@ -24,7 +24,7 @@ connectDB();
 
 app.use(async (req, res, next) => {
   const origin = req.headers.origin;
-  
+  console.log(origin);
   try {
     // Skip CORS for non-browser requests (Postman, curl, etc.)
     if (!origin) {

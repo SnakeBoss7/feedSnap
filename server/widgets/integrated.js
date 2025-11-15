@@ -54,7 +54,7 @@ const widgetGen =(config)=> {
     }
 
     const CONFIG = {
-        BASE_API: "https://feedsnap.onrender.com",
+        BASE_API: "https://feedsnap-zr7g.onrender.com",
     };
     
     class FeedbackSnippet {
