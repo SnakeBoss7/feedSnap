@@ -67,6 +67,7 @@ export const DashboardHome = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
+                     <SimpleHeader color={'#c5b5ff'}/>
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Oops!</h2>
           <p className="text-gray-600">{error}</p>
@@ -101,9 +102,9 @@ export const DashboardHome = () => {
       {/* Header */}
              <SimpleHeader color={'#c5b5ff'}/>
 <div className="p-6 md:p-10">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
+        <div className="flex flex-col md:flex-row mt-5 md:mt-0 justify-between items-start md:items-center mb-5 md:mb-12">
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 mb-1">
+          <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 mb-1">
             Dashboard
           </h1>
           <p className="text-gray-500 font-medium">
@@ -130,7 +131,7 @@ export const DashboardHome = () => {
         <StatCard
           title="Total Feedback"
           value={stats.totalFeedbacks}
-          icon={<ArrowUpRight size={24} className="text-black " />}
+          icon={ <div className="p-2 bg-white rounded-full top-4 right-7 group-hover:right-5 absolute backdrop-blur-sm group-hover:scale-[1.04] ease-in-out transition-all duration-300"> <ArrowUpRight size={24} className="group-hover:rotate-45  ease-in-out transition-all duration-300 text-black " /></div>}
           trend="+12% from last month"
           text_col="text-white/80"
           // group-hover:scale-[1.06] ease-in-out transition-all duration-300
@@ -139,7 +140,7 @@ export const DashboardHome = () => {
         <StatCard
           title="Average Rating"
           value={stats.avgRating}
-          icon={<Star size={24} className="text-yellow-500" />}
+          icon={ <div className="p-3 bg-white rounded-full backdrop-blur-sm"> <Star size={24} className="text-yellow-500" /></div>}
           trend="Stable"
           color="bg-white"
 
@@ -148,7 +149,7 @@ export const DashboardHome = () => {
         <StatCard
           title="Active Widgets"
           value={stats.totalWidgets}
-          icon={<Globe size={24} className="text-black" />}
+          icon={ <div className="p-3 bg-white rounded-full backdrop-blur-sm"><Globe size={24} className="text-blue-500" /></div>}
           trend="Across all sites"
           color="bg-white"
 
@@ -156,7 +157,7 @@ export const DashboardHome = () => {
         <StatCard
           title="New Today"
           value={stats.newFeedbackToday}
-          icon={<Zap size={24} className="text-black" />}
+          icon={ <div className="p-3 bg-white rounded-full backdrop-blur-sm"> <Zap size={24} className="text-green-500" /></div>}
           trend="Daily activity"
           color="bg-white"
         />
@@ -166,7 +167,7 @@ export const DashboardHome = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Analytics Chart (DayBreakdown) */}
         {/* Analytics Chart (DayBreakdown) */}
-        <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
+        <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-xl font-bold text-gray-900">Project Analytics</h2>
             <div className="px-3 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-600">
@@ -180,7 +181,7 @@ export const DashboardHome = () => {
 
         {/* Project Progress */}
         {/* Project Progress */}
-        <div className="bg-white rounded-3xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 flex flex-col hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
+        <div className="bg-white rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 flex flex-col hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-gray-900">Project Progress</h2>
           </div>
@@ -194,7 +195,7 @@ export const DashboardHome = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
         {/* Team Members */}
         {/* Team Members */}
-        <div className="bg-white rounded-3xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
+        <div className="bg-white rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-gray-900">Team Members</h2>
             <button className="text-sm font-semibold text-purple-600 hover:text-purple-700">
@@ -225,7 +226,7 @@ export const DashboardHome = () => {
 
         {/* Active Widgets List */}
         {/* Active Widgets List */}
-        <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
+        <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-gray-900">Active Projects</h2>
             <Link to="scriptGen" className="text-sm font-semibold text-purple-600 hover:text-purple-700">
@@ -302,7 +303,7 @@ const StatCard = ({ title, value,text_col, icon, trend, color, isRating }) => {
     
       </div>
     <div className="flex justify-between items-start">
-          <div className="p-3 bg-white rounded-full backdrop-blur-sm">{icon}</div>
+          {icon}
          
         </div>
     </div>

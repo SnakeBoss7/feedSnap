@@ -44,7 +44,7 @@ const DayBreakdown = ({ data }) => {
                   minHeight: '20px'
                 }}
               ></div>
-              <span className="text-xs text-gray-400 font-medium">{item.day}</span>
+              <span className="text-xs text-black font-bold">{item.day}</span>
             </div>
           );
         })}
