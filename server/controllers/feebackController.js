@@ -54,7 +54,7 @@ const exportFeedback = async (req, res) => {
     const { format } = req.query;
 
     if (format === "csv") {
-      const fields = ["title", "description", "rating", "webUrl", "pathname", "createdOn"];
+      const fields = ["title", "description", "rating", "webUrl", "pathname", "createdOn","severity","status"];
       const parser = new Parser({ fields });
       const csv = parser.parse(feedbacks);
 
@@ -495,11 +495,136 @@ const categorizeFeedback = (title) => {
   return 'other';
 };
 
+const getDashboardData = async (req, res) => {
+  try {
+    const user = req.user;
+    const { sites, webDataObjects, teams } = await getUserAccessibleWebsites(user.id);
+
+    if (!sites || sites.length === 0) {
+      return res.status(200).json({
+        stats: {
+          totalFeedbacks: 0,
+          avgRating: 0,
+          totalWidgets: 0,
+          newFeedbackToday: 0
+        },
+        analytics: [],
+        recentCriticalFeedback: [],
+        teamMembers: [],
+        widgets: []
+      });
+    }
+
+    // 1. Fetch all feedback for accessible sites
+    const allFeedback = await feedback.find({ webUrl: { $in: sites } }).sort({ createdOn: -1 });
+
+    // 2. Calculate Stats
+    const totalFeedbacks = allFeedback.length;
+    
+    const ratedFeedbacks = allFeedback.filter(f => f.rating && !isNaN(f.rating));
+    const avgRating = ratedFeedbacks.length > 0 
+      ? (ratedFeedbacks.reduce((acc, curr) => acc + curr.rating, 0) / ratedFeedbacks.length).toFixed(1) 
+      : 0;
+
+    const totalWidgets = sites.length;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const newFeedbackToday = allFeedback.filter(f => new Date(f.createdOn) >= today).length;
+    
+    // Calculate resolved count (status === true)
+    const resolvedCount = allFeedback.filter(f => f.status === true).length;
+
+    // 3. Analytics (Last 7 days for chart)
+    const analytics = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const dayFeedbacks = allFeedback.filter(f => f.createdOn.toISOString().split('T')[0] === dateStr);
+      
+      analytics.push({
+        date: d.toLocaleDateString('en-US', { weekday: 'short' }), // Mon, Tue
+        count: dayFeedbacks.length,
+        avgRating: dayFeedbacks.filter(f => f.rating).length > 0
+          ? (dayFeedbacks.reduce((acc, f) => acc + (f.rating || 0), 0) / dayFeedbacks.filter(f => f.rating).length).toFixed(1)
+          : 0
+      });
+    }
+
+    // 4. Recent Critical Feedback (Low rating or High severity)
+    const recentCriticalFeedback = allFeedback
+      .filter(f => (f.rating && f.rating <= 2) || (f.severity && f.severity >= 4)) // Adjust thresholds as needed
+      .slice(0, 5);
+
+    // 5. Team Members (Mocking or fetching real if available)
+    let teamMembers = [];
+
+    
+    // Better approach for Team Members: Fetch distinct users from teams
+    // For now, let's return empty or implement a separate call if it's heavy. 
+    // Actually, let's try to get some basic info.
+    // We can fetch the team details with populated members.
+    const populatedTeams = await Team.find({ _id: { $in: teams.map(t => t._id) } }).populate('members.user', 'name email profile');
+    
+    const membersMap = new Map();
+    populatedTeams.forEach(team => {
+        team.members.forEach(m => {
+            if (m.user && !membersMap.has(m.user._id.toString())) {
+                membersMap.set(m.user._id.toString(), {
+                    name: m.user.name,
+                    email: m.user.email,
+                    profile: m.user.profile,
+                    role: m.role,
+                    teamName: team.name
+                });
+            }
+        });
+    });
+    teamMembers = Array.from(membersMap.values()).slice(0, 5); // Top 5 members
+
+    // 6. Widgets List with specific stats
+    const widgets = webDataObjects.map(site => {
+        const siteFeedbacks = allFeedback.filter(f => f.webUrl === site.webUrl);
+        const siteRated = siteFeedbacks.filter(f => f.rating);
+        const siteAvg = siteRated.length > 0 
+            ? (siteRated.reduce((acc, f) => acc + f.rating, 0) / siteRated.length).toFixed(1) 
+            : 0;
+        
+        return {
+            webUrl: site.webUrl,
+            totalFeedback: siteFeedbacks.length,
+            avgRating: siteAvg,
+            lastActive: siteFeedbacks.length > 0 ? siteFeedbacks[0].createdOn : site.createdAt
+        };
+    });
+
+    res.status(200).json({
+      stats: {
+        totalFeedbacks,
+        avgRating,
+        totalWidgets,
+        newFeedbackToday,
+        resolvedCount
+      },
+      analytics,
+      recentCriticalFeedback,
+      teamMembers,
+      widgets
+    });
+
+  } catch (error) {
+    console.error("Error in getDashboardData:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = { 
   createFeed, 
   getFeed, 
   display, 
-  allFeedback,  // THIS WAS MISSING
+  allFeedback,
   exportFeedback,
-  getUserAccessibleWebsites 
+  getUserAccessibleWebsites,
+  getDashboardData
 };

@@ -163,10 +163,10 @@ const genDemo = async (e) => {
   // ========== LOADING THE WIDGET ==========
   console.log({UrlSettings})
   try {
+    setShowDemo("loading");
     let res = await axios.post(`${apiUrl}/api/script/demo`, UrlSettings,{
       withCredentials:true,
     })
-    setShowDemo("loading");
     
     localStorage.setItem("demoLive", "true");
     

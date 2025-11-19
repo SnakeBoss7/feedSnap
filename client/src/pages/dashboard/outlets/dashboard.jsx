@@ -1,346 +1,311 @@
-import { SimpleHeader } from "../../../components/header/header";
-import {
-  BarChartBigIcon,
-  Calendar1Icon,
-  ExternalLink,
-  Globe,
-  MessageSquare,
-  Plus,
-  Star,
-} from "lucide-react";
-import { Background } from "../../../components/background/background";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useReducer } from "react";
+import { Link } from "react-router-dom";
+import {
+  LayoutDashboard,
+  MessageSquare,
+  Star,
+  Globe,
+  Plus,
+  ArrowUpRight,
+  Zap,
+} from "lucide-react";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { RatingStar } from "../../../components/star/star";
-import { Link } from "react-router-dom";
-import { EmptyDash } from "../../../components/empty/emptyDash";
-import AddButton from "../../../components/button/addButton";
-//backedn_api
+import DayBreakdown from "../../../components/Visual/DayBreakdown";
+import ProjectProgress from "../../../components/Visual/ProjectProgress";
+import { SimpleHeader } from "../../../components/header/header";
+
 const apiUrl = process.env.REACT_APP_API_URL;
-const getCachedData = () => {
-  const type = localStorage.getItem("type");
-  const cachedData = localStorage.getItem("dashboardData");
 
-  // Check if cache exists and is recent (e.g., less than 5 minutes old)
-  if (type === "FETCH_SUCCESS" && cachedData) {
-    try {
-      const parsed = JSON.parse(cachedData);
-      const isRecent = Date.now() - parsed.timestamp < 5 * 60 * 1000; // 5 minutes
-
-      if (isRecent && parsed.data) {
-        return {
-          ...parsed.data,
-          isLoading: false,
-        };
-      }
-    } catch (e) {
-      console.log("Cache parse error:", e);
-    }
-  }
-  return {
-    sites: [],
-    userfeedback: [],
-    avgRatingPerSite: {},
-    feedbackPerSite: {},
-    avgRating: 0,
-    isLoading: true,
-    mess: "",
-  };
-};
-const dashboardReducer = (state, action) => {
-  switch (action.type) {
-    case "FETCH_SUCCESS":
-      return {
-        ...state,
-        ...action.payload,
-        isLoading: false,
-      };
-    case "FETCH_FAIL":
-      return {
-        ...state,
-        isLoading: false,
-      };
-    default:
-      return state; // ✅ Always return state in default
-  }
-};
-const wait = (ms) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
 export const DashboardHome = () => {
-  const [state, dispatch] = useReducer(dashboardReducer, getCachedData());
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   useEffect(() => {
-    async function fetchData() {
+    const fetchData = async () => {
       try {
-        const res = await axios.get(`${apiUrl}/api/feedback/getfeedback`, {
+        const res = await axios.get(`${apiUrl}/api/feedback/dashboard-data`, {
           withCredentials: true,
         });
-        await wait(2000);
-        console.log(res);
-        dispatch({
-          type: "FETCH_SUCCESS",
-          payload: res.data,
-        });
-
-        // Store with timestamp
-        const cacheData = {
-          data: res.data,
-          timestamp: Date.now(),
-        };
-        console.log(cacheData);
-        localStorage.setItem("dashboardData", JSON.stringify(cacheData));
-        localStorage.setItem("type", "FETCH_SUCCESS");
+        setData(res.data);
       } catch (err) {
-        dispatch({
-          type: "FETCH_FAIL",
-          payload: err.response?.data,
-        });
-        console.log(err);
-        localStorage.setItem("type", "FETCH_FAIL");
+        console.error("Error fetching dashboard data:", err);
+        setError("Failed to load dashboard data.");
+      } finally {
+        setLoading(false);
       }
-    }
+    };
 
-    // Fetch fresh data if cache is missing, old, or invalid
-    if (state.isLoading) {
-      fetchData();
-    }
-  }, [state.isLoading]);
-  return (
-    state.sites.length<= 0 && !state.isLoading ?<EmptyDash/> :<>
-      <div className="h-full w-full overflow-y-scroll scrollbar-hide  font-sans">
-      <SimpleHeader color="#c5b5ff" />
+    fetchData();
+  }, []);
 
-      <div className="relative h-full  md:px-10 px-5 py-8">
-        <Background color={"#c5b5ff"}/>
-
-        {state.isLoading ? (
-          <SkeletonTheme baseColor="#b88fddff" highlightColor="#ede1f7">
-            <div className="p-6 space-y-6">
-              {/* Header skeleton */}
-              <Skeleton height={40} width={300} />
-              <Skeleton height={20} width={250} />
-
-              {/* Button skeleton */}
-              <Skeleton height={40} width={180} />
-
-              {/* Grid skeletons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Skeleton height={100} />
-                <Skeleton height={100} />
-                <Skeleton height={100} />
-                <Skeleton height={100} />
-              </div>
+  if (loading) {
+    return (
+      <div className="p-8 bg-gray-50 min-h-screen">
+        <SkeletonTheme baseColor="#e0e0e0" highlightColor="#f5f5f5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Skeleton height={140} borderRadius={16} />
+            <Skeleton height={140} borderRadius={16} />
+            <Skeleton height={140} borderRadius={16} />
+            <Skeleton height={140} borderRadius={16} />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Skeleton height={400} borderRadius={16} />
             </div>
-          </SkeletonTheme>
-        ) : (
-          <>
-            <div className="relative header flex flex-col gap-5 sm:flex-row justify-between items-start md:items-center">
-              <div className="heading flex flex-col gap-1">
-                <h1 className="text-5xl  font-extrabold bg-gradient-to-r tracking-tight from-blue-500 via-purple-400  to-purple-800 bg-clip-text text-transparent ">
-                  Dashboard
-                </h1>
-                <p className="text-md text-gray-700 tracking-tight">
-                  Welcome back! Here's your feedback overview.
-                </p>
-              </div>
-              <Link
-                to="scriptGen"
-                className="flex items-center justify-center"
-              >
-                {" "}
-               <AddButton/>
-              </Link>
+            <div>
+              <Skeleton height={400} borderRadius={16} />
             </div>
-            {/* <button onClick={()=>console.log(state)}>helo</button> */}
-            <div className="mt-14 w-full gap-3 overallStats grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1">
-              <div className="h-[110px] backdrop-blur-md bg-white/80 border border-white/10 flex rounded-lg items-center justify-between p-3">
-                <div className="left ">
-                  <h1 className="text-sm font-bold text-gray-900">
-                    Total Feedback
-                  </h1>
-                  <p className="text-xl font-regular mb-2">
-                    {state.totalFeedbacks}
-                  </p>
-                </div>
-                <MessageSquare
-                  size={25}
-                  className="h-full "
-                  color="#8714d4ff"
-                />
-              </div>
-              <div className="h-[110px] backdrop-blur-md bg-white/80 border border-white/10 flex rounded-lg items-center justify-between p-3">
-                <div className="left ">
-                  <h1 className="text-sm font-bold text-gray-900">
-                    Average Rating
-                  </h1>
-                  <p className="mb-3 text-xl font-regular mb-2">
-                    {state.avgRating}
-                  </p>
-                  <RatingStar value={state.avgRating} />
-                </div>
-                <Star size={25} color="#EAB307" />
-              </div>
-              <div className="h-[110px] group backdrop-blur-md bg-white/80 border border-white/10  flex rounded-lg items-center justify-between p-3">
-                <div className="left ">
-                  <h1 className="text-sm font-bold text-gray-900">
-                    Average Widgets
-                  </h1>
-                  <p className="text-xl font-regular mb-2">
-                    {state.sites.length}
-                  </p>
-                  <p className="text-[12px] text-gray-500">
-                    Across All websites
-                  </p>
-                </div>
-                <Globe size={25} className="group-hover:rotate-180 transition-all ease-in-out duration-300"  color="#1976e0ff" />
-              </div>
-              <div className="h-[110px] backdrop-blur-md bg-white/80 border border-white/10  flex rounded-lg items-center justify-between p-3">
-                <div className="left ">
-                  <h1 className="text-sm font-bold text-gray-900">
-                    This months
-                  </h1>
-                  <p className="text-xl font-regular mb-2">
-                    {state.sites.length}
-                  </p>
-                </div>
-                <Calendar1Icon size={25} color="#4fc00dff" />
-              </div>
-            </div>
-            <div className="mt-3 reviws_sites flex w-full flex-col gap-3 lg:flex-row justify-between  ">
-              <div className="reviews lg:w-[50%] w-full backdrop-blur-md bg-white/80 border border-white/10 rounded-lg p-3 ">
-                <div className="flex justify-between w-full">
-                  <div>
-                    <h1 className="text-xl lg:text-2xl font-semibold">
-                      Recent Feedback
-                    </h1>
-                    <p className="text-gray-600 text-sm">
-                      Latest customer responses
-                    </p>
-                  </div>
-                  <Link
-                    to="feedbacks"
-                    className="gap-1 px-3 h-10 flex items-center border border-gray-300 hover:text-primary1 hover:border-primary1 transition-all ease-in-out duration-500"
-                  >
-                    View All
-                  </Link>
-                </div>
-                <div className="mt-10 flex flex-col gap-5">
-                  {state?.userfeedback
-                    ?.filter((data) => data.rating && data.rating !== "")
-                    .slice(0, 3)
-                    .map((data, idx) => {
-                      return (
-                        <div
-                          key={idx}
-                          className="flex flex-col gap-2 p-3 rounded-lg "
-                          style={{ border: "2px solid #e3f0fdff" }}
-                        >
-                          <div className="metaData ">
-                            <p
-                              className="text-xs font-bold w-fit px-1"
-                              style={{ border: "2px solid #e3f0fdff" }}
-                            >
-                              {data.webUrl
-                                .replace(/(^\w+:|^)\/\//, "")
-                                .replace(/["']/g, "")}
-                            </p>
-                          </div>
-                          <div className="description text-sm font-normal text-gray-600 flex flex-col gap-1">
-  <p className="overflow-hidden break-words overflow-wrap-anywhere">
-    {data.description}
-  </p>
-  <p className="text-xs text-gray-500">Page: {data.pathname}</p>
-</div>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-              <div className="sites lg:w-[50%] w-full  backdrop-blur-md bg-white/80 border border-white/10   rounded-lg   p-3">
-                <div className="flex justify-between w-full">
-                  <div>
-                    <h1 className="text-xl lg:text-2xl font-bold">
-                      Your websites
-                    </h1>
-                    <p className="text-gray-600 text-sm">
-                      Widget status overview
-                    </p>
-                  </div>
-                  <Link
-                    to="scriptGen"
-                    className="gap-1 px-2 h-10 group   flex items-center border border-gray-300  hover:text-primary1 hover:border-primary1 transition-all ease-in-out duration-500"
-                  >
-                    <Plus size={20} className="group-hover:scale-[1.2] group-hover:rotate-90 transition-all ease-in-out duration-300"/> Add Site
-                  </Link>
-                </div>
-                <div className="mt-10 flex flex-col gap-5 border">
-                  {state.sites.map((val, idx) => {
-                    return (
-                      <>
-                        <div className="flex justify-between  p-2 rounded-sm"  style={{ border: "1px solid #c9d6e2ff" }}>
-                          <div className="flex items-center gap-3" key={idx}>
-                            <Globe color="#1976e0ff" /> {val}
-                          </div>
-
-                          <div
-                            key={val}
-                            className="flex gap-1 text-sm flex-col items-center"
-                          >
-                            <p className="font-bold">
-                              {Object.values(state.avgRatingPerSite)[idx]}
-                            </p>
-                            <p className="text-xs text-gray-600">
-                              {Object.values(state.feedbackPerSite)[idx]}{" "}
-                              feedback
-                            </p>
-                            <RatingStar
-                              value={Object.values(state.avgRatingPerSite)[idx]}
-                            />
-                          </div>
-                        </div>
-                      </>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-            <div className="my-10 mb-30 py-5 px-5 rounded-lg backdrop-blur-md bg-white/80 border border-white/10">
-              <div className="flex flex-col gap-2">
-                <h1 className="text-xl lg:text-2xl  font-bold">
-                  Quick Actions
-                </h1>
-                <p className="text-gray-700 text-sm">
-                  Common tasks to manage your feedback widgets
-                </p>
-              </div>
-              <div className="navigarots mt-10 w-full gap-3 overallStats grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1">
-                <Link to="scriptGen" className="h-[110px] text-sm hover:scale-[1.01] hover:text-primary1 hover:bg-primary1/30 duration-100 transition-all ease-in bg-white  shadow-lg flex flex-col rounded-lg items-center justify-center gap-2 border border-black/20 hover:border-primary1/20">
-                  <Plus />
-                  <p className="font-regular">Add Widget</p>
-                </Link>
-                <Link to="feedbacks" className="h-[110px] text-sm hover:scale-[1.01] hover:text-primary1 hover:bg-primary1/30 duration-100 transition-all ease-in bg-white shadow-lg flex  flex-col rounded-lg items-center justify-center gap-2 p-3 border border-black/20 hover:border-primary1/20">
-                  <MessageSquare />
-                  <p>View Feedback</p>
-                </Link>
-                <Link to="analytics" className="h-[110px] text-sm hover:scale-[1.01] hover:text-primary1 hover:bg-primary1/30 duration-100 transition-all ease-in bg-white shadow-lg flex flex-col rounded-lg items-center justify-center gap-2 p-3 border border-black/20 hover:border-primary1/20">
-                  <BarChartBigIcon />
-                  <p className=" font-regular">Analytics</p>
-                </Link>
-                <Link to="scriptGen" className="h-[110px] text-sm hover:scale-[1.01] hover:text-primary1 hover:bg-primary1/30 duration-100 transition-all ease-in bg-white shadow-lg flex flex-col rounded-lg items-center justify-center gap-2 p-3 border border-black/20 hover:border-primary1/20">
-                  <ExternalLink />
-                  <p className=" font-regular">Widget Demo</p>
-                </Link>
-              </div>
-            </div>
-            <div className="h-[10px]"></div>
-          </>
-        )}
-        <div className="lg:h-5 h-10"></div>
+          </div>
+        </SkeletonTheme>
       </div>
-    </div></> 
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Oops!</h2>
+          <p className="text-gray-600">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const { stats, analytics, recentCriticalFeedback, teamMembers, widgets } = data;
+
+  // Transform analytics for DayBreakdown
+  // Assuming analytics is [{ date: 'Mon', count: 5 }, ...]
+  const dayBreakdownData = analytics.map(a => ({
+    day: a.date.charAt(0), // 'M' from 'Mon'
+    value: a.count,
+    label: a.date
+  }));
+
+
   
+  const resolvedCount = stats.resolvedCount || 0;
+  const totalCount = stats.totalFeedbacks || 0;
+
+  return (
+    <div className="min-h-screen overflow-scroll scrollbar-hide bg-[#F3F4F6] font-sans text-gray-900">
+      {/* Header */}
+             <SimpleHeader color={'#c5b5ff'}/>
+<div className="p-6 md:p-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
+        <div>
+          <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 mb-1">
+            Dashboard
+          </h1>
+          <p className="text-gray-500 font-medium">
+            Overview of your feedback performance
+          </p>
+        </div>
+        <div className="flex gap-4 mt-10 md:mt-0">
+          <Link
+            to="scriptGen"
+            className="flex group border-primary1 text-primary1 transition-all ease-in-out duration-300  items-center gap-2 px-5 py-2.5 bg-white border border-[]  rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+          >
+            <Plus size={18} className="group-hover:rotate-90 transition-all ease-in-out duration-300" />
+            Add Widget
+          </Link>
+          <button className="px-5 py-2.5  text-white rounded-full text-sm font-semibold transition-all bg-gradient-to-br from-primary1 to-purple-600 flex items-center gap-2">
+            <ArrowUpRight size={18} />
+            Export Data
+          </button>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatCard
+          title="Total Feedback"
+          value={stats.totalFeedbacks}
+          icon={<ArrowUpRight size={24} className="text-black " />}
+          trend="+12% from last month"
+          text_col="text-white/80"
+          // group-hover:scale-[1.06] ease-in-out transition-all duration-300
+          color="bg-gradient-to-br from-primary1 to-purple-500"
+        />
+        <StatCard
+          title="Average Rating"
+          value={stats.avgRating}
+          icon={<Star size={24} className="text-yellow-500" />}
+          trend="Stable"
+          color="bg-white"
+
+          isRating
+        />
+        <StatCard
+          title="Active Widgets"
+          value={stats.totalWidgets}
+          icon={<Globe size={24} className="text-black" />}
+          trend="Across all sites"
+          color="bg-white"
+
+        />
+        <StatCard
+          title="New Today"
+          value={stats.newFeedbackToday}
+          icon={<Zap size={24} className="text-black" />}
+          trend="Daily activity"
+          color="bg-white"
+        />
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Analytics Chart (DayBreakdown) */}
+        {/* Analytics Chart (DayBreakdown) */}
+        <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900">Project Analytics</h2>
+            <div className="px-3 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-600">
+               Weekly
+            </div>
+          </div>
+          <div className="h-[300px] w-full">
+             <DayBreakdown data={dayBreakdownData} />
+          </div>
+        </div>
+
+        {/* Project Progress */}
+        {/* Project Progress */}
+        <div className="bg-white rounded-3xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 flex flex-col hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Project Progress</h2>
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <ProjectProgress resolved={resolvedCount} total={totalCount} />
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Section: Team & Widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+        {/* Team Members */}
+        {/* Team Members */}
+        <div className="bg-white rounded-3xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Team Members</h2>
+            <button className="text-sm font-semibold text-purple-600 hover:text-purple-700">
+              Manage
+            </button>
+          </div>
+          <div className="space-y-5">
+            {teamMembers.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-4">No team members found.</p>
+            ) : (
+              teamMembers.map((member, idx) => (
+                <div key={idx} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-100 to-purple-100 flex items-center justify-center text-sm font-bold text-gray-700 border border-white shadow-sm">
+                      {member.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">{member.name}</p>
+                      <p className="text-xs text-gray-500">{member.role || "Member"}</p>
+                    </div>
+                  </div>
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Active Widgets List */}
+        {/* Active Widgets List */}
+        <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Active Projects</h2>
+            <Link to="scriptGen" className="text-sm font-semibold text-purple-600 hover:text-purple-700">
+              View All
+            </Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-left border-b border-gray-100">
+                  <th className="pb-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Project Name</th>
+                  <th className="pb-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
+                  <th className="pb-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Rating</th>
+                  <th className="pb-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Feedback</th>
+                  <th className="pb-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Last Active</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {widgets.map((widget, idx) => (
+                  <tr key={idx} className="group hover:bg-gray-50/50 transition-colors">
+                    <td className="py-4 pr-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
+                          <LayoutDashboard size={16} />
+                        </div>
+                        <span className="text-sm font-semibold text-gray-900">
+                          {widget.webUrl.replace(/(^\w+:|^)\/\//, "")}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-4 pr-4">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                        Active
+                      </span>
+                    </td>
+                    <td className="py-4 pr-4">
+                      <div className="flex items-center gap-1">
+                        <Star size={14} className="text-yellow-400 fill-yellow-400" />
+                        <span className="text-sm font-bold text-gray-900">{widget.avgRating}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 pr-4">
+                      <span className="text-sm text-gray-600">{widget.totalFeedback}</span>
+                    </td>
+                    <td className="py-4">
+                      <span className="text-sm text-gray-500">
+                        {new Date(widget.lastActive).toLocaleDateString()}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+</div>
+    </div>
   );
 };
+
+const StatCard = ({ title, value,text_col, icon, trend, color, isRating }) => {
+  return (
+    <div className={` h-[150px] group relative overflow-hidden rounded-2xl p-6 ${text_col} flex justify-between items-start shadow-lg ${color}`}>
+      <div className="relative z-10 flex flex-col h-full justify-between">
+        <div className="mt-4">
+          <h3 className={`text-sm font-medium ${text_col} mb-1`}>{title}</h3>
+          <div className="flex items-end gap-2">
+            <h2 className="text-4xl font-bold tracking-tight">{value}</h2>
+          </div>
+          <p className="text-xs text-white/60 mt-2 font-medium">{trend}</p>
+        </div>
+    
+      </div>
+    <div className="flex justify-between items-start">
+          <div className="p-3 bg-white rounded-full backdrop-blur-sm">{icon}</div>
+         
+        </div>
+    </div>
+  );
+};
+

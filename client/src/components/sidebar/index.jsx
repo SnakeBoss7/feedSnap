@@ -174,6 +174,7 @@ export const Sidebar = () => {
               <div className="w-10 h-10 rounded-full bg-gray-300 animate-pulse"></div>
             ) : (
               <img
+                referrerPolicy="no-referrer"
                 key={userData?.profile || 'default'}
                 src={profileImage}
                 className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
