@@ -15,6 +15,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import DayBreakdown from "../../../components/Visual/DayBreakdown";
 import ProjectProgress from "../../../components/Visual/ProjectProgress";
 import { SimpleHeader } from "../../../components/header/header";
+import { Background } from "../../../components/background/background";
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -43,23 +44,53 @@ export const DashboardHome = () => {
 
   if (loading) {
     return (
-      <div className="p-8 bg-gray-50 min-h-screen">
-        <SkeletonTheme baseColor="#e0e0e0" highlightColor="#f5f5f5">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Skeleton height={140} borderRadius={16} />
-            <Skeleton height={140} borderRadius={16} />
-            <Skeleton height={140} borderRadius={16} />
-            <Skeleton height={140} borderRadius={16} />
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Skeleton height={400} borderRadius={16} />
+          <div className="min-h-screen overflow-scroll scrollbar-hide bg-gradient-to-br from-purple-400  from-purple-400 to-gray-100 font-sans text-gray-900">
+                         <SimpleHeader color={'#c5b5ff'}/>
+     <div className="">
+         <SkeletonTheme baseColor="#e0e0e0" highlightColor="#f5f5f5">
+          <div className="p-6 md:p-10">
+            {/* Header Skeleton */}
+            <div className="flex flex-col md:flex-row mt-5 md:mt-0 justify-between items-start md:items-center mb-5 md:mb-12">
+              <div>
+                <Skeleton height={48} width={250} className="mb-1" />
+                <Skeleton height={24} width={300} />
+              </div>
+              <div className="flex gap-4 mt-10 md:mt-0">
+                <Skeleton height={44} width={140} borderRadius={9999} />
+                <Skeleton height={44} width={140} borderRadius={9999} />
+              </div>
             </div>
-            <div>
-              <Skeleton height={400} borderRadius={16} />
+
+            {/* Stats Grid Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <Skeleton height={150} borderRadius={16} />
+              <Skeleton height={150} borderRadius={16} />
+              <Skeleton height={150} borderRadius={16} />
+              <Skeleton height={150} borderRadius={16} />
+            </div>
+
+            {/* Main Content Grid Skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <Skeleton height={400} borderRadius={16} />
+              </div>
+              <div>
+                <Skeleton height={400} borderRadius={16} />
+              </div>
+            </div>
+
+            {/* Bottom Section Skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+              <div>
+                <Skeleton height={300} borderRadius={16} />
+              </div>
+              <div className="lg:col-span-2">
+                <Skeleton height={300} borderRadius={16} />
+              </div>
             </div>
           </div>
         </SkeletonTheme>
+     </div>
       </div>
     );
   }
@@ -98,23 +129,24 @@ export const DashboardHome = () => {
   const totalCount = stats.totalFeedbacks || 0;
 
   return (
-    <div className="min-h-screen overflow-scroll scrollbar-hide bg-[#F3F4F6] font-sans text-gray-900">
+    <div className="min-h-screen overflow-scroll scrollbar-hide bg-gradient-to-br from-purple-400 from-purple-400 to-gray-100 font-sans text-gray-900">
       {/* Header */}
+         {/* <Background color={"#c5b5ff"} /> */}
              <SimpleHeader color={'#c5b5ff'}/>
 <div className="p-6 md:p-10">
         <div className="flex flex-col md:flex-row mt-5 md:mt-0 justify-between items-start md:items-center mb-5 md:mb-12">
         <div>
-          <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 mb-1">
+          <h1 className="text-5xl font-extrabold tracking-tight text-white mb-1">
             Dashboard
           </h1>
-          <p className="text-gray-500 font-medium">
+          <p className="text-purple-900 font-medium">
             Overview of your feedback performance
           </p>
         </div>
         <div className="flex gap-4 mt-10 md:mt-0">
           <Link
             to="scriptGen"
-            className="flex group border-primary1 text-primary1 transition-all ease-in-out duration-300  items-center gap-2 px-5 py-2.5 bg-white border border-[]  rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+            className="flex group  text-primary1 transition-all ease-in-out duration-300  items-center gap-2 px-5 py-2.5 bg-white  rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
           >
             <Plus size={18} className="group-hover:rotate-90 transition-all ease-in-out duration-300" />
             Add Widget
@@ -167,9 +199,9 @@ export const DashboardHome = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Analytics Chart (DayBreakdown) */}
         {/* Analytics Chart (DayBreakdown) */}
-        <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
+        <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 ">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-xl font-bold text-gray-900">Project Analytics</h2>
+            <h2 className="text-xl font-bold text-gray-900">Feedback Analytics</h2>
             <div className="px-3 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-600">
                Weekly
             </div>
@@ -181,9 +213,9 @@ export const DashboardHome = () => {
 
         {/* Project Progress */}
         {/* Project Progress */}
-        <div className="bg-white rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 flex flex-col hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
+        <div className="bg-white rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 flex flex-col hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 ">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Project Progress</h2>
+            <h2 className="text-xl font-bold text-gray-900">Feebacks Progress</h2>
           </div>
           <div className="flex-1 flex items-center justify-center">
             <ProjectProgress resolved={resolvedCount} total={totalCount} />
@@ -195,7 +227,7 @@ export const DashboardHome = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
         {/* Team Members */}
         {/* Team Members */}
-        <div className="bg-white rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
+        <div className="bg-white rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 ">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-gray-900">Team Members</h2>
             <button className="text-sm font-semibold text-purple-600 hover:text-purple-700">
@@ -226,7 +258,7 @@ export const DashboardHome = () => {
 
         {/* Active Widgets List */}
         {/* Active Widgets List */}
-        <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1">
+        <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300 ">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-gray-900">Active Projects</h2>
             <Link to="scriptGen" className="text-sm font-semibold text-purple-600 hover:text-purple-700">
@@ -285,6 +317,7 @@ export const DashboardHome = () => {
         </div>
       </div>
 </div>
+      <div className="h-4"></div>
     </div>
   );
 };
@@ -306,6 +339,7 @@ const StatCard = ({ title, value,text_col, icon, trend, color, isRating }) => {
           {icon}
          
         </div>
+  
     </div>
   );
 };

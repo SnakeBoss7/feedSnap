@@ -44,14 +44,14 @@ const ProjectProgress = ({ resolved, total }) => {
       
       <div className="absolute top-[60%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
         <h2 className="text-4xl font-bold text-gray-900">{percentage}%</h2>
-        <p className="text-xs text-gray-500 font-medium">Project Ended</p>
+        <p className="text-xs text-gray-500 font-medium">Feedbacks Resolved</p>
       </div>
 
       {/* Legend */}
       <div className="absolute bottom-0 w-full flex justify-between px-4 text-xs text-gray-500">
          <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-[#7E2AC9]"></div>
-            <span>Completed</span>
+            <span>Resolved</span>
          </div>
          <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-[url(#stripedPattern)] bg-[length:12px_12px]" style={{ backgroundImage: 'repeating-linear-gradient(45deg, white, white 4px, #e5e7eb 4px, #e5e7eb 5px)' }}></div> 

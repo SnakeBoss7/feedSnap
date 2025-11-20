@@ -1,16 +1,19 @@
 import { SimpleHeader } from "../../../components/header/header";
 import {
-  LucideCode,
   Code,
   LucideCopy,
   LucideDownload,
   Check,
+  Terminal,
+  Sparkles,
+  Zap,
+  LayoutDashboard
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { HighlightedGridIcon } from "../../../utils/gridIcons";
 import Loader from "../../../components/loader/loader";
 import WidgetTabs from "../../../components/PageComponents/ScripGen/tabs/tabs";
+import { Background } from "../../../components/background/background";
 
 let apiUrl = process.env.REACT_APP_API_URL;
 let frontendApiUrl = process.env.REACT_APP_API_FRONTEND_URL;
@@ -28,18 +31,16 @@ export const ScriptGen = () => {
     text: "Feedback",
     loading: false,
     botContext: "",
-    ackMail:true,
+    ackMail: true,
   });
 
-  const copyToClipboard = async (opt,text) => {
+  const copyToClipboard = async (opt, text) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(opt);
-      setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
-      // setTimeout(() => setCopied(false), 10000); // Reset after 2 seconds
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy text: ', err);
-
     }
   };
 
@@ -57,7 +58,6 @@ export const ScriptGen = () => {
 
   const colorChange = (e) => {
     setUrlsettings((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-
   };
 
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -65,25 +65,12 @@ export const ScriptGen = () => {
   const genScript = async (e) => {
     e.preventDefault();
 
-    // Fixed validation logic - check if webUrl is empty (the main required field)
     if (!UrlSettings.webUrl || UrlSettings.webUrl.trim() === "") {
       console.warn("Website URL is required");
       return;
     }
 
-    // Optional: More detailed validation
-    const requiredFields = ["webUrl", "position", "color"];
-    const emptyFields = requiredFields.filter(
-      (field) => !UrlSettings[field] || UrlSettings[field].trim() === ""
-    );
-    console.log(UrlSettings);
-    if (emptyFields.length > 0) {
-      console.warn("Empty required fields:", emptyFields);
-      return;
-    }
-
     try {
-
       setUrlsettings((prev) => ({ ...prev, loading: true }));
 
       let res = await axios.post(
@@ -95,250 +82,248 @@ export const ScriptGen = () => {
       );
 
       setScriptInj(res.data.injection);
-      await wait(4000);
+      await wait(1500); // Reduced wait time for snappier feel
       setUrlsettings((prev) => ({ ...prev, loading: false }));
     } catch (err) {
       console.error("API error:", err);
       setUrlsettings((prev) => ({ ...prev, loading: false }));
     }
   };
-  useEffect(()=>{
-    if(localStorage.getItem("demoLive"))
-      {
-        setShowDemo(true);
-         let script = document.createElement('script');
+
+  useEffect(() => {
+    if (localStorage.getItem("demoLive")) {
+      setShowDemo(true);
+      let script = document.createElement('script');
       script.src = `${apiUrl}/widget/script?webUrl=${frontendApiUrl}`;
       document.body.appendChild(script);
+    }
+  }, []);
+
+  const genDemo = async (e) => {
+    e.preventDefault();
+
+    if (showDemo) {
+      setShowDemo(false);
+
+      if (window.FeedbackSnippet && typeof window.FeedbackSnippet.destroy === 'function') {
+        window.FeedbackSnippet.destroy();
       }
-  },[])
-const genDemo = async (e) => {
-  e.preventDefault();
 
-  if (showDemo) {
-    setShowDemo(false);
+      const scriptToRemove = document.querySelector(`script[src*="${apiUrl}/widget/script"]`);
+      if (scriptToRemove && scriptToRemove.parentNode) {
+        scriptToRemove.parentNode.removeChild(scriptToRemove);
+      }
 
-    // STEP 1: Call the destroy method to clean up event listeners
-    if (window.FeedbackSnippet && typeof window.FeedbackSnippet.destroy === 'function') {
-      window.FeedbackSnippet.destroy();
-    }
+      const selectorsToRemove = [
+        ".fw-overlay",
+        ".fw-popup",
+        ".fw-button",
+        ".fw-container"
+      ];
 
-    // STEP 2: Remove the script tag (use the correct selector)
-    const scriptToRemove = document.querySelector(`script[src*="${apiUrl}/widget/script"]`);
-    if (scriptToRemove && scriptToRemove.parentNode) {
-      scriptToRemove.parentNode.removeChild(scriptToRemove);
-    }
-
-    // STEP 3: Remove all widget DOM elements
-    const selectorsToRemove = [
-      ".fw-overlay",
-      ".fw-popup", 
-      ".fw-button",
-      ".fw-container"
-    ];
-    
-    selectorsToRemove.forEach(selector => {
-      const elements = document.querySelectorAll(selector);
-      elements.forEach(el => {
-        if (el && el.parentNode) {
-          el.parentNode.removeChild(el);
-        }
+      selectorsToRemove.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+          if (el && el.parentNode) {
+            el.parentNode.removeChild(el);
+          }
+        });
       });
-    });
 
-    // STEP 4: Remove injected styles
-    document.querySelectorAll('style').forEach(style => {
-      if (style.textContent.includes('.fw-container') || 
+      document.querySelectorAll('style').forEach(style => {
+        if (style.textContent.includes('.fw-container') ||
           style.textContent.includes('.fw-button') ||
           style.textContent.includes('.fw-popup')) {
-        style.remove();
-      }
-    });
+          style.remove();
+        }
+      });
 
-    // STEP 5: Clear localStorage
-    localStorage.removeItem("demoLive");
-    
-    return;
-  }
+      localStorage.removeItem("demoLive");
+      return;
+    }
 
-  // ========== LOADING THE WIDGET ==========
-  console.log({UrlSettings})
-  try {
-    setShowDemo("loading");
-    let res = await axios.post(`${apiUrl}/api/script/demo`, UrlSettings,{
-      withCredentials:true,
-    })
-    
-    localStorage.setItem("demoLive", "true");
-    
-    // CRITICAL FIX: Create and append script correctly
-    const script = document.createElement("script");
-    
-    // Add cache-busting parameter
-    script.src = `${apiUrl}/widget/script?webUrl=${encodeURIComponent(frontendApiUrl)}&t=${Date.now()}`;
-    script.async = true;
-    
-    // Add error handling
-    script.onerror = () => {
-      console.error("Failed to load widget script");
+    try {
+      setShowDemo("loading");
+      await axios.post(`${apiUrl}/api/script/demo`, UrlSettings, {
+        withCredentials: true,
+      });
+
+      localStorage.setItem("demoLive", "true");
+
+      const script = document.createElement("script");
+      script.src = `${apiUrl}/widget/script?webUrl=${encodeURIComponent(frontendApiUrl)}&t=${Date.now()}`;
+      script.async = true;
+
+      script.onerror = () => {
+        console.error("Failed to load widget script");
+        setShowDemo(false);
+        localStorage.removeItem("demoLive");
+      };
+
+      script.onload = () => {
+        setTimeout(() => {
+          setShowDemo(true);
+        }, 100);
+      };
+
+      document.body.appendChild(script);
+
+    } catch (err) {
+      console.error("Error loading demo widget:", err);
       setShowDemo(false);
       localStorage.removeItem("demoLive");
-    };
-    
-    // IMPORTANT: Wait for script to load before setting state
-    script.onload = () => {
-
-      setTimeout(() => {
-        setShowDemo(true);
-      }, 100);
-    };
-    
-    // Append script to body
-    document.body.appendChild(script);
-    
-  } catch (err) {
-    console.error("Error loading demo widget:", err);
-    setShowDemo(false);
-    localStorage.removeItem("demoLive");
-  }
-};
+    }
+  };
 
   const options = [
-    {
-      value: "bottom right",
-      label: (
-        <div className="flex items-center  gap-3">
-          <HighlightedGridIcon color={UrlSettings.color} highlight="bottom-right" />
-          Bottom right
-        </div>
-      ),
-    },
-    {
-      value: "bottom left",
-      label: (
-        <div className="flex items-center  gap-3">
-          <HighlightedGridIcon color={UrlSettings.color} highlight="bottom-left" /> Bottom left
-        </div>
-      ),
-    },
-    {
-      value: "top right",
-      label: (
-        <div className="flex items-center  gap-3">
-          <HighlightedGridIcon color={UrlSettings.color} highlight="top-right" />
-          Top right
-        </div>
-      ),
-    },
-    {
-      value: "top left",
-      label: (
-        <div className="flex items-center  gap-3">
-          <HighlightedGridIcon color={UrlSettings.color} highlight="top-left" />
-          Top left
-        </div>
-      ),
-    },
+    { value: "bottom right", label: "Bottom Right" },
+    { value: "bottom left", label: "Bottom Left" },
+    { value: "top right", label: "Top Right" },
+    { value: "top left", label: "Top Left" },
   ];
 
   return (
-    <div className="h-full w-full font-sans overflow-y-scroll scrollbar-hide">
-      <SimpleHeader color="#517cd8ff" />
+    <div className="min-h-screen overflow-y-auto font-sans text-gray-900 relative">
+      {/* Background Gradient */}
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-500 via-blu-400 to-blue-200 pointer-events-none z-0" />
+      
+      <div className="relative z-10">
+        <SimpleHeader color={'#2563EB'}/>
 
-      <div className="relative h-full md:px-10 px-5 py-8">
-        <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_1050px_at_50%_200px,#c5b5ff,transparent)] pointer-events-none">
-          <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#e8e8e8_1px,transparent_2px),linear-gradient(to_bottom,#e8e8e8_0.5px,transparent_2px)] bg-[size:4.5rem_3.5rem]">
-            {/* Small screen gradient */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_700px_at_100%_100px,#173f96,transparent)] lg:bg-none"></div>
-            {/* Large screen gradient */}
-            <div className="absolute inset-0 bg-none lg:bg-[radial-gradient(circle_1800px_at_100%_100px,#173f96,transparent)]"></div>
-          </div>
-        </div>
-        
-        <div className="relative mb-12">
-          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-primary5 via-black/80 to-black bg-clip-text text-transparent">
-            Script Generator
-          </h1>
-          <p className="text-md text-black tracking-tight">
-            Generate and customize your feedback widget script
-          </p>
-        </div>
-        
-        <div className="flex w-full">
-          <div className="flex flex-col md:flex-row w-full justify-between gap-10">
-            <div className="md:w-[40%] w-full">
-              <WidgetTabs
-                options={options}
-                colorChange={colorChange}
-                UrlSettings={UrlSettings}
-                setUrlsettings={setUrlsettings}
-                genScript={genScript}
-                scriptInj={scriptInj}
-                genDemo={genDemo}
-                copied={copied}
-                showDemo={showDemo}
-                copyToClipboard={copyToClipboard}
-              />
+        <div className="max-w-7xl mx-auto p-6 md:p-10">
+          {/* Header Section */}
+          <div className="flex flex-col md:flex-row mt-5 md:mt-0 justify-between items-start md:items-center mb-8 md:mb-12">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-2">
+                Script Generator
+              </h1>
+              <p className="text-black font-medium text-lg">
+                Generate and customize your feedback widget script
+              </p>
             </div>
-            
-            <div className="md:w-[60%] h-[40%] w-full">
-              <div className="bg-white rounded-lg h-full shadow-lg overflow-hidden">
-                <div className="bg-gray-800 h-[40px] text-white px-4 py-2 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Code color="#5BAE83" size={25} />
-                    <span className="text-lg text-center  tracking-tight  text-white">Script.js</span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+            {/* Left Column: Configuration */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-2xl p-1 shadow-xl shadow-gray-200/50 border border-gray-100 transition-all duration-300 h-full">
+                <div className="bg-white rounded-xl p-2 md:px-5 h-full">
+                  <WidgetTabs
+                    options={options}
+                    colorChange={colorChange}
+                    UrlSettings={UrlSettings}
+                    setUrlsettings={setUrlsettings}
+                    genScript={genScript}
+                    scriptInj={scriptInj}
+                    genDemo={genDemo}
+                    copied={copied}
+                    showDemo={showDemo}
+                    copyToClipboard={copyToClipboard}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Console/Preview */}
+            <div className="lg:col-span-2 flex flex-col gap-6 sticky top-6">
+              {/* Compact Console */}
+              <div className="bg-[#1e1e1e] rounded-2xl shadow-2xl shadow-gray-900/20 overflow-hidden border border-gray-800 relative group">
+                {/* Console Header */}
+                <div className="h-12 bg-[#252526] flex items-center justify-between px-4 border-b border-[#333]">
+                  <div className="flex items-center gap-3">
+                    <div className="flex gap-2">
+                      <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]" />
+                      <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]" />
+                      <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]" />
+                    </div>
+                    <div className="ml-4 flex items-center gap-2 text-gray-400 text-xs font-mono bg-[#1e1e1e] px-3 py-1.5 rounded-md border border-[#333]">
+                      <Terminal size={12} />
+                      script.js
+                    </div>
                   </div>
-                  <div className="flex gap-2">
+
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <button
-                      onClick={() => copyToClipboard(2,scriptInj)}
-                      className={`text-gray-300 hover:rotate-12  rounded-md hover:text-primary2 transition-all ease-in-out duration-300  hover:bg-white hover:text-primary2 p-1 cursor-pointer ${!scriptInj ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      onClick={() => copyToClipboard(2, scriptInj)}
                       disabled={!scriptInj}
+                      className="p-2 text-gray-400 hover:text-white hover:bg-[#333] rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                       title="Copy to clipboard"
-                    
                     >
-                      {copied===2 ? <Check size={20} /> : <LucideCopy size={20} />}
+                      {copied === 2 ? <Check size={16} className="text-green-500" /> : <LucideCopy size={16} />}
                     </button>
                     <button
-                      onClick={() => {
-                        fileDownload();
-                        console.log('ok');
-                      }}
-                      className={`text-gray-300 hover:rotate-12  rounded-md hover:text-primary2 transition-all ease-in-out duration-300  hover:bg-white z hover:text-primary2 p-1 cursor-pointer ${!scriptInj ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      onClick={fileDownload}
                       disabled={!scriptInj}
-                      
-                      title="Download script"
+                      className="p-2 text-gray-400 hover:text-white hover:bg-[#333] rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Download file"
                     >
-                      <LucideDownload size={20} />
+                      <LucideDownload size={16} />
                     </button>
                   </div>
                 </div>
-                
-                <div className=" h-full ">
+
+                {/* Console Body - Compact */}
+                <div className="relative min-h-[200px] max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
                   {UrlSettings.loading ? (
-                    <div className="px-4 w-full min-h-[200px] h-full bg-gray-900 flex flex-col items-center justify-center">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-3 py-8">
                       <Loader />
-                      {/* <p className="text-white mt-4">Generating script...</p> */}
+                      <p className="text-sm font-mono animate-pulse text-blue-400">Generating optimized script...</p>
                     </div>
-                  ) : scriptInj !== "" ? (
-                    <div className="bg-gray-900 min-h-[200px] text-gray-100 p-4 font-mono text-sm overflow-x-auto h-full">
-                      <pre className="whitespace-pre-wrap">{scriptInj}</pre>
+                  ) : scriptInj ? (
+                    <div className="p-6 font-mono text-sm leading-relaxed">
+                      <div className="flex items-start">
+                        <div className="flex-none w-8 text-right pr-4 text-gray-600 select-none pt-0.5 border-r border-gray-800 mr-4">
+                          1
+                        </div>
+                        <div className="flex-1 text-gray-300 whitespace-pre-wrap break-all font-mono">
+                          <span className="text-[#569cd6]">&lt;script</span> <span className="text-[#9cdcfe]">src</span>=<span className="text-[#ce9178]">"{scriptInj.match(/src="([^"]+)"/)?.[1] || '...'}"</span><span className="text-[#569cd6]">&gt;&lt;/script&gt;</span>
+                        </div>
+                      </div>
                     </div>
                   ) : (
-                    <div className=" w-full  h-full bg-gray-900 flex flex-col items-center justify-center">
-                      <LucideCode color="#5BAE83" size={40} />
-                      <p className="text-lg text-center mt-3 tracking-tight  text-white">
-                        No Script Generated Yet
-                      </p>
-                      <p className="text-sm text-center tracking-tight text-gray-300">
-                        Configure your widget and click generate
-                      </p>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 gap-4 select-none py-8">
+                      <div className="w-16 h-16 rounded-2xl bg-[#252526] flex items-center justify-center border border-[#333]">
+                        <Code size={32} className="text-gray-600" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-base font-medium text-gray-400">Ready to Generate</p>
+                        <p className="text-sm text-gray-600 mt-1">Configure your widget to get started</p>
+                      </div>
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Info Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white rounded-2xl p-6 shadow-lg shadow-gray-200/50 border border-gray-100 hover:shadow-xl hover:shadow-gray-200/60 transition-all duration-300 flex items-start gap-4 group">
+                  <div className="p-3 bg-blue-50 rounded-xl text-blue-500 group-hover:bg-blue-100 group-hover:scale-110 transition-all duration-300">
+                     <Sparkles size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 mb-1">Quick Setup</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">
+                      Copy the generated script and paste it before the closing <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-800 font-mono text-xs border border-gray-200">&lt;/body&gt;</code> tag.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl p-6 shadow-lg shadow-gray-200/50 border border-gray-100 hover:shadow-xl hover:shadow-gray-200/60 transition-all duration-300 flex items-start gap-4 group">
+                  <div className="p-3 bg-purple-50 rounded-xl text-purple-500 group-hover:bg-purple-100 group-hover:scale-110 transition-all duration-300">
+                     <Zap size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 mb-1">Live Preview</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">
+                      Use the "Live Demo" button to test your widget configuration instantly on this page.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-         <div className="lg:h-5 h-10"></div>
+        <div className="h-12"></div>
       </div>
     </div>
   );
