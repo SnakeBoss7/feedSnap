@@ -22,7 +22,7 @@ export const SimpleHeader = ({ color }) => {
   };
 
   return (
-    <div className="min-h-[70px] lg:hidden shadow-lg bg-backgr w-full flex items-center justify-between px-4">
+    <div className="min-h-[70px] lg:hidden shadow-sm bg-white dark:bg-dark-bg-primary border-b border-gray-200 dark:border-dark-border-subtle w-full flex items-center justify-between px-4 transition-colors duration-300">
       {/* Profile Section */}
       <div className="flex items-center gap-3">
         {/* Profile Image */}
@@ -34,13 +34,13 @@ export const SimpleHeader = ({ color }) => {
               <img
                 key={userData?.profile || 'default'} // Force re-render on profile change
                 src={profileImage}
-                className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                className="w-10 h-10 rounded-full object-cover border-2 border-gray-100 dark:border-dark-border-emphasis"
                 alt={`${displayName}'s profile`}
                 onError={handleImageError}
                 onLoad={handleImageLoad}
               />
               {userData && !imgError && (
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-dark-bg-primary rounded-full"></div>
               )}
             {/* </>
           )} */}
@@ -52,11 +52,11 @@ export const SimpleHeader = ({ color }) => {
             <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
           ) : (
             <> */}
-              <span className="text-sm font-medium text-white">
+              <span className="text-sm font-bold text-gray-900 dark:text-dark-text-primary">
                 {displayName}
               </span>
               {userData?.role && (
-                <span className="text-xs text-gray-300 capitalize">
+                <span className="text-xs text-gray-500 dark:text-dark-text-muted capitalize">
                   {userData.role}
                 </span>
               )}

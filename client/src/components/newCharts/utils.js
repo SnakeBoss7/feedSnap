@@ -253,3 +253,24 @@ export const getMetrics = (data, website) => {
 
   return metrics
 }
+
+export const getDayBreakdownData = (data) => {
+  if (!data || !Array.isArray(data)) return []
+
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  const dayCounts = new Array(7).fill(0)
+
+  data.forEach((item) => {
+    if (!item.date) return
+    const date = new Date(item.date)
+    const dayIndex = date.getDay()
+    dayCounts[dayIndex]++
+  })
+
+  return days.map((day, index) => ({
+    day: day.charAt(0), // 'S', 'M', 'T', etc.
+    fullDay: day,
+    value: dayCounts[index],
+    label: day
+  }))
+}

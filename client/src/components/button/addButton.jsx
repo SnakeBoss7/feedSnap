@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const AddButton = () => {
   return (
     <StyledWrapper>
-      <button className="button">
+      <button className="button text-black dark:text-white">
         Add Widget
         <div className="hoverEffect">
           <div />
@@ -27,7 +27,6 @@ const StyledWrapper = styled.div`
     transition: all 0.02s;
     font-weight: bold;
     cursor: pointer;
-    color: black;
     z-index: 0;
     box-shadow: 0 0px 7px -5px rgba(0, 0, 0, 0.5);
   }

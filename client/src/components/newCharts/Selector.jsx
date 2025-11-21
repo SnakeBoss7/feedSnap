@@ -1,9 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
+import { ChevronDown } from "lucide-react"
 
 export const Selectors = ({ websites, selectedWebsite, onWebsiteChange, selectedTimeframe, onTimeframeChange }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   const timeframes = [
     { label: "7 Days", value: 7 },
@@ -12,81 +24,74 @@ export const Selectors = ({ websites, selectedWebsite, onWebsiteChange, selected
   ]
 
   return (
-    <div className="flex flex-col sm:flex-row sm:justify-between bg-white p-5 border border-blue-100 rounded-lg gap-6 mb-4 mt-4 md:mt-14 items-start sm:items-end">
+    <div className="flex justify-between lg:flex-row flex-col items-start  gap-6 w-full">
       {/* Website Selector */}
-      <div className="w-full sm:w-64">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
-        <div className="relative">
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-gray-900 font-medium truncate">
-                {selectedWebsite === "all" ? "All Websites" : selectedWebsite}
-              </span>
-              <svg
-                className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </button>
+      <div className="w-full lg:w-64 relative" ref={dropdownRef}>
+        <label className="block text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wider mb-2">
+          Website
+        </label>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full px-4 py-2.5 text-left bg-white dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border-subtle rounded-xl shadow-sm hover:border-purple-400 dark:hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-200 flex items-center justify-between group"
+        >
+          <span className="text-gray-900 dark:text-dark-text-primary font-medium truncate">
+            {selectedWebsite === "all" ? "All Websites" : selectedWebsite}
+          </span>
+          <ChevronDown 
+            size={16} 
+            className={`text-gray-400 dark:text-gray-500 transition-transform duration-200 group-hover:text-purple-500 ${isOpen ? "rotate-180" : ""}`} 
+          />
+        </button>
 
-          {isOpen && (
-            <>
-              <div 
-                className="fixed inset-0 z-10" 
-                onClick={() => setIsOpen(false)}
-              />
-              
-              <div className="absolute z-20 w-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
-                <button
-                  onClick={() => {
-                    onWebsiteChange("all")
-                    setIsOpen(false)
-                  }}
-                  className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors first:rounded-t-lg ${
-                    selectedWebsite === "all" ? "bg-purple-50 text-purple-700 font-medium" : "text-gray-900"
-                  }`}
-                >
-                  All Websites
-                </button>
-                {websites.map((website) => (
-                  <button
-                    key={website}
-                    onClick={() => {
-                      onWebsiteChange(website)
-                      setIsOpen(false)
-                    }}
-                    className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors border-t border-gray-200 last:rounded-b-lg ${
-                      selectedWebsite === website ? "bg-purple-50 text-purple-700 font-medium" : "text-gray-900"
-                    }`}
-                  >
-                    {website}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        {isOpen && (
+          <div className="absolute z-50 w-full mt-2 bg-white dark:bg-dark-bg-tertiary border border-gray-100 dark:border-dark-border-subtle rounded-xl shadow-xl max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
+            <button
+              onClick={() => {
+                onWebsiteChange("all")
+                setIsOpen(false)
+              }}
+              className={`w-full px-4 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-dark-bg-hover transition-colors ${
+                selectedWebsite === "all" 
+                  ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 font-medium" 
+                  : "text-gray-700 dark:text-dark-text-secondary"
+              }`}
+            >
+              All Websites
+            </button>
+            {websites.map((website) => (
+              <button
+                key={website}
+                onClick={() => {
+                  onWebsiteChange(website)
+                  setIsOpen(false)
+                }}
+                className={`w-full px-4 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-dark-bg-hover transition-colors border-t border-gray-50 dark:border-dark-border-subtle ${
+                  selectedWebsite === website 
+                    ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 font-medium" 
+                    : "text-gray-700 dark:text-dark-text-secondary"
+                }`}
+              >
+                {website}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Timeframe Selector */}
-      <div className="w-full sm:w-auto">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Timeframe</label>
-        <div className="flex flex-wrap gap-2">
+      <div className="w-full lg:w-auto">
+        <label className="block text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wider mb-2">
+          Timeframe
+        </label>
+        <div className="flex justify-between gap-2 bg-gray-100 dark:bg-dark-bg-tertiary p-1 rounded-xl border border-gray-200 dark:border-dark-border-subtle">
           {timeframes.map((tf) => (
             <button
               key={tf.value}
               onClick={() => onTimeframeChange(tf.value)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                 selectedTimeframe === tf.value
-                  ? "bg-purple-600 text-white shadow-md"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  ? "bg-white dark:bg-dark-bg-secondary text-purple-700 dark:text-purple-300 shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+                  : "text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-dark-text-primary hover:bg-gray-200/50 dark:hover:bg-dark-bg-hover"
               }`}
             >
               {tf.label}

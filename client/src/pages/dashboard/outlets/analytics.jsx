@@ -12,12 +12,15 @@ import {
   AvgRatingBySeverityChart,
 } from "../../../components/newCharts/ChartCard"
 import { Selectors } from "../../../components/newCharts/Selector"
-import { filterDataByTimeframe, getChartData, getMetrics } from "../../../components/newCharts/utils"
+import { filterDataByTimeframe, getChartData, getMetrics, getDayBreakdownData } from "../../../components/newCharts/utils"
 import { initializeDashboardData } from "../../../components/newCharts/dataAdapter"
 import AddButton from "../../../components/button/addButton"
 import { Link } from "react-router-dom"
 import { SimpleHeader } from "../../../components/header/header"
 import { Background } from "../../../components/background/background"
+import { useThemeContext } from "../../../context/themeContext"
+import { BarChart2, Calendar, Filter } from "lucide-react"
+import DayBreakdown from "../../../components/Visual/DayBreakdown"
 
 export const Analytics = () => {
   const [selectedWebsite, setSelectedWebsite] = useState("all")
@@ -25,6 +28,7 @@ export const Analytics = () => {
   const [allData, setAllData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { darkMode } = useThemeContext()
 
   useEffect(() => {
     const loadData = async () => {
@@ -92,52 +96,46 @@ export const Analytics = () => {
     return data
   }, [filteredData, selectedWebsite])
 
+  const dayBreakdownData = useMemo(() => {
+    const data = getDayBreakdownData(filteredData)
+    return data
+  }, [filteredData])
+
   if (isLoading) {
     return (
-      <>
+      <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary transition-colors duration-300">
         <SimpleHeader color={'#c5b5ff'}/>
-      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard data...</p>
-        </div>
-      </div>
-      </>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <svg className="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Analytics</h3>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              Retry
-            </button>
+        <div className="flex items-center justify-center h-[80vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-dark-text-muted">Loading dashboard data...</p>
           </div>
         </div>
       </div>
     )
   }
 
-  if (!Array.isArray(allData) || allData.length === 0) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <svg className="w-12 h-12 text-blue-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Data Available</h3>
-            <p className="text-gray-600">No feedback data found. Start collecting feedback to see analytics.</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary transition-colors duration-300">
+        <SimpleHeader color={'#c5b5ff'}/>
+        <div className="flex items-center justify-center h-[80vh] p-6">
+          <div className="text-center max-w-md w-full">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 shadow-sm">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">Error Loading Analytics</h3>
+              <p className="text-gray-600 dark:text-dark-text-muted mb-6">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-purple-500/30"
+              >
+                Try Again
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -154,7 +152,7 @@ export const Analytics = () => {
     reportsByTitle: [],
     activeVsResolved: [
       { name: "Active", value: 0, fill: "#F59E0B" },
-      { name: "Resolved", value: 0, fill: "#5BAE83" },
+      { name: "Resolved", value: 0, fill: "#10B981" },
     ],
     avgSeverity: 0,
     avgRating: 0,
@@ -175,50 +173,66 @@ export const Analytics = () => {
   }
 
   return (
-    <div className="min-h-screen  overflow-y-scroll scrollbar-hide font-sans">
-             <Background color={"#b3a2ebff"}/>
-
-            <SimpleHeader color={'#c5b5ff'}/>
-      <div className="relative h-full  md:px-10 px-5 py-8">
-        {/* Header */}
-        <div className="mb-0">
-         <div className="relative header flex flex-col gap-5 sm:flex-row justify-between items-start md:items-center">
-              <div className="heading flex flex-col gap-1">
-                <h1 className="text-5xl md:text-5xl md font-bold bg-gradient-to-r tracking-tight from-blue-500 via-purple-400  to-purple-800 bg-clip-text text-transparent ">
-                  Analytics Dashboard
+    <div className="min-h-screen overflow-y-scroll scrollbar-hide font-sans bg-gray-100 dark:bg-dark-bg-primary transition-colors duration-300">
+      <Background color={"#b3a2ebff"}/>
+      <SimpleHeader color={'#c5b5ff'}/>
+      
+      <div className="relative h-full max-w-[1600px] mx-auto md:px-10 px-5 py-8">
+        {/* Header Section */}
+        <div className="mb-10">
+          <div className="relative header flex flex-col gap-6 sm:flex-row justify-between items-start md:items-center mb-8">
+            <div className="heading flex flex-col gap-2">
+              <div className="flex items-center gap-3">
+                
+                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r tracking-tight from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
+                  Analytics
                 </h1>
-                <p className="text-md text-gray-700 tracking-tight">
-                  Welcome back! Here's your Analytics Overview.
-                </p>
               </div>
+              <p className="text-gray-600 dark:text-dark-text-muted text-lg ml-1">
+                Comprehensive overview of your feedback performance
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4">
               <Link
                 to="/dashboard/scriptGen"
-                className="flex items-center justify-center hidden md:flex"
+                className="hidden md:flex"
               >
-                {" "}
-               <AddButton/>
+                <AddButton/>
               </Link>
             </div>
+          </div>
+
+          {/* Filters Section */}
+          <div className="bg-white dark:bg-dark-bg-secondary p-6 rounded-2xl shadow-md border border-gray-300 dark:border-dark-border mb-8 flex justify-between w-full items-center gap-4">
+          
+            <div className="flex justify-between w-full">
+              <Selectors
+                websites={websites}
+                selectedWebsite={selectedWebsite}
+                onWebsiteChange={setSelectedWebsite}
+                selectedTimeframe={selectedTimeframe}
+                onTimeframeChange={setSelectedTimeframe}
+              />
+            </div>
+          </div>
+
           {!hasFilteredData && (
-            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-sm text-yellow-800">
+            <div className="mb-8 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 flex items-start gap-3">
+              <div className="mt-0.5 text-yellow-600 dark:text-yellow-500">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
                 No data available for the selected timeframe. Showing empty charts. Try selecting "All Time" to see all data.
               </p>
             </div>
           )}
         </div>
 
-        {/* Selectors */}
-        <Selectors
-          websites={websites}
-          selectedWebsite={selectedWebsite}
-          onWebsiteChange={setSelectedWebsite}
-          selectedTimeframe={selectedTimeframe}
-          onTimeframeChange={setSelectedTimeframe}
-        />
-
-        {/* Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <MetricCard label="Total Reports" value={displayMetrics.totalReports || 0} color="total" />
           <MetricCard label="Active" value={displayMetrics.activeReports || 0} color="active" />
           <MetricCard label="Resolved" value={displayMetrics.resolvedReports || 0} color="resolved" />
@@ -234,30 +248,50 @@ export const Analytics = () => {
           />
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Main Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+          {/* Reports Over Time - Spans 8 columns */}
+          <div className="lg:col-span-8">
+            <ChartCard title="Feedback Trends">
+              <ReportsOverTimeChart data={displayChartData.reportsOverTime} />
+            </ChartCard>
+          </div>
+          
+          {/* Active vs Resolved - Spans 4 columns */}
+          <div className="lg:col-span-4">
+            <ChartCard title="Resolution Status">
+              <ActiveVsResolvedChart data={displayChartData.activeVsResolved} />
+            </ChartCard>
+          </div>
+        </div>
+
+        {/* Secondary Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <ChartCard title="Reports by Type">
             <ReportsByTypeChart data={displayChartData.reportsByType} />
           </ChartCard>
 
-          <ChartCard title="Reports Over Time">
-            <ReportsOverTimeChart data={displayChartData.reportsOverTime} />
-          </ChartCard>
-
-          <ChartCard title="Average Rating by Severity">
-            <AvgRatingBySeverityChart data={displayChartData.avgRatingBySeverity} />
-          </ChartCard>
-
-          <ChartCard title="Active vs Resolved">
-            <ActiveVsResolvedChart data={displayChartData.activeVsResolved} />
-          </ChartCard>
-
-          <ChartCard title="Average Severity & Rating">
-            <SeverityRatingChart avgSeverity={displayChartData.avgSeverity} avgRating={displayChartData.avgRating} />
-          </ChartCard>
-
           <ChartCard title="Severity vs Rating">
             <SeverityVsRatingChart data={displayChartData.severityVsRating} />
+          </ChartCard>
+
+          <ChartCard title="Impact Analysis">
+            <SeverityRatingChart avgSeverity={displayChartData.avgSeverity} avgRating={displayChartData.avgRating} />
+          </ChartCard>
+        </div>
+        
+        {/* Bottom Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ChartCard title="Rating Distribution by Severity">
+            <div className="h-[400px]">
+               <AvgRatingBySeverityChart data={displayChartData.avgRatingBySeverity} />
+            </div>
+          </ChartCard>
+          
+          <ChartCard title="Weekly Breakdown">
+            <div className="h-[400px] p-4">
+              <DayBreakdown data={dayBreakdownData} />
+            </div>
           </ChartCard>
         </div>
       </div>

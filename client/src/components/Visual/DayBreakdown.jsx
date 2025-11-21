@@ -33,7 +33,7 @@ const DayBreakdown = ({ data }) => {
           return (
             <div key={index} className="flex flex-col items-center gap-2 flex-1 group relative h-full justify-end">
                {/* Tooltip */}
-               <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity bg-white border border-gray-200 px-2 py-1 rounded shadow-sm text-xs font-bold z-10 whitespace-nowrap">
+               <div className="absolute -top-8 opacity-0 group-hover:opacity-100  transition-opacity bg-white dark:bg-dark-bg-primary  px-2 py-1 rounded shadow-sm text-xs font-bold z-10 whitespace-nowrap dark:text-dark-text-primary">
                 {item.value} Feedback
               </div>
 
@@ -44,7 +44,7 @@ const DayBreakdown = ({ data }) => {
                   minHeight: '20px'
                 }}
               ></div>
-              <span className="text-xs text-black font-bold">{item.day}</span>
+              <span className="text-xs text-black font-bold dark:text-dark-text-primary">{item.day}</span>
             </div>
           );
         })}

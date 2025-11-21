@@ -183,9 +183,9 @@ export const ScriptGen = () => {
   ];
 
   return (
-    <div className="min-h-screen overflow-y-auto font-sans text-gray-900 relative">
+    <div className="min-h-screen overflow-y-scroll scrollbar-hide font-sans text-gray-900 dark:text-dark-text-primary relative bg-gray-50 dark:bg-dark-bg-primary transition-colors duration-300">
       {/* Background Gradient */}
-      <div className="fixed inset-0 bg-gradient-to-br from-blue-500 via-blu-400 to-blue-200 pointer-events-none z-0" />
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-700 to-white   dark:from-dark-bg-primary pointer-events-none z-0" />
       
       <div className="relative z-10">
         <SimpleHeader color={'#2563EB'}/>
@@ -194,10 +194,10 @@ export const ScriptGen = () => {
           {/* Header Section */}
           <div className="flex flex-col md:flex-row mt-5 md:mt-0 justify-between items-start md:items-center mb-8 md:mb-12">
             <div>
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-2">
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white dark:text-dark-text-primary mb-2 drop-shadow-sm">
                 Script Generator
               </h1>
-              <p className="text-black font-medium text-lg">
+              <p className="text-blue-50 dark:text-dark-text-muted font-medium text-lg">
                 Generate and customize your feedback widget script
               </p>
             </div>
@@ -206,8 +206,8 @@ export const ScriptGen = () => {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
             {/* Left Column: Configuration */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-2xl p-1 shadow-xl shadow-gray-200/50 border border-gray-100 transition-all duration-300 h-full">
-                <div className="bg-white rounded-xl p-2 md:px-5 h-full">
+              <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-1 shadow-md dark:shadow-none border border-gray-100 dark:border-dark-border transition-all duration-300 h-full">
+                <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-3  h-full">
                   <WidgetTabs
                     options={options}
                     colorChange={colorChange}
@@ -227,7 +227,7 @@ export const ScriptGen = () => {
             {/* Right Column: Console/Preview */}
             <div className="lg:col-span-2 flex flex-col gap-6 sticky top-6">
               {/* Compact Console */}
-              <div className="bg-[#1e1e1e] rounded-2xl shadow-2xl shadow-gray-900/20 overflow-hidden border border-gray-800 relative group">
+              <div className="bg-[#1e1e1e] rounded-2xl shadow-lg dark:shadow-none overflow-hidden border border-gray-800 dark:border-dark-border relative group">
                 {/* Console Header */}
                 <div className="h-12 bg-[#252526] flex items-center justify-between px-4 border-b border-[#333]">
                   <div className="flex items-center gap-3">
@@ -236,13 +236,13 @@ export const ScriptGen = () => {
                       <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]" />
                       <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]" />
                     </div>
-                    <div className="ml-4 flex items-center gap-2 text-gray-400 text-xs font-mono bg-[#1e1e1e] px-3 py-1.5 rounded-md border border-[#333]">
-                      <Terminal size={12} />
-                      script.js
+                    <div className="ml-4 flex items-center gap-2 text-blue-400 text-xs font-mono bg-blue-500/10 px-3 py-1.5 rounded-md border border-blue-500/20 shadow-sm">
+                      <Terminal size={14} />
+                      <span className="font-semibold">script.js</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="flex items-center gap-2 opacity-100 transition-opacity duration-200">
                     <button
                       onClick={() => copyToClipboard(2, scriptInj)}
                       disabled={!scriptInj}
@@ -296,25 +296,25 @@ export const ScriptGen = () => {
 
               {/* Info Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-2xl p-6 shadow-lg shadow-gray-200/50 border border-gray-100 hover:shadow-xl hover:shadow-gray-200/60 transition-all duration-300 flex items-start gap-4 group">
-                  <div className="p-3 bg-blue-50 rounded-xl text-blue-500 group-hover:bg-blue-100 group-hover:scale-110 transition-all duration-300">
+                <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-6 shadow-md dark:shadow-none border border-gray-100 dark:border-dark-border hover:shadow-lg transition-all duration-300 flex items-start gap-4 group">
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-500 dark:text-blue-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:scale-110 transition-all duration-300">
                      <Sparkles size={24} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Quick Setup</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">
-                      Copy the generated script and paste it before the closing <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-800 font-mono text-xs border border-gray-200">&lt;/body&gt;</code> tag.
+                    <h3 className="font-bold text-gray-900 dark:text-dark-text-primary mb-1">Quick Setup</h3>
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted leading-relaxed">
+                      Copy the generated script and paste it before the closing <code className="bg-gray-100 dark:bg-dark-bg-tertiary px-1.5 py-0.5 rounded text-gray-800 dark:text-gray-300 font-mono text-xs border border-gray-200 dark:border-dark-border-subtle">&lt;/body&gt;</code> tag.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl p-6 shadow-lg shadow-gray-200/50 border border-gray-100 hover:shadow-xl hover:shadow-gray-200/60 transition-all duration-300 flex items-start gap-4 group">
-                  <div className="p-3 bg-purple-50 rounded-xl text-purple-500 group-hover:bg-purple-100 group-hover:scale-110 transition-all duration-300">
+                <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-6 shadow-md dark:shadow-none border border-gray-100 dark:border-dark-border hover:shadow-lg transition-all duration-300 flex items-start gap-4 group">
+                  <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-purple-500 dark:text-purple-400 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/30 group-hover:scale-110 transition-all duration-300">
                      <Zap size={24} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Live Preview</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">
+                    <h3 className="font-bold text-gray-900 dark:text-dark-text-primary mb-1">Live Preview</h3>
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted leading-relaxed">
                       Use the "Live Demo" button to test your widget configuration instantly on this page.
                     </p>
                   </div>
