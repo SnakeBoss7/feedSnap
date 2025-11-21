@@ -63,9 +63,9 @@ const navItems = [
     to: 'feedbacks', 
     icon: MessageSquare, 
     label: 'Feedbacks', 
-    activeColor: 'text-white ', 
-    activeBg: 'bg-primary2 border-0',
-    hoverColor: 'group-hover:text-primary2 ',
+    activeColor: 'dark:text-black text-white ', 
+    activeBg: 'dark:bg-white bg-black border-0',
+    hoverColor: 'group-hover:text-white group-hover:text-black  ',
     gradient: 'from-purple-500 to-indigo-500',
     end: true 
   },

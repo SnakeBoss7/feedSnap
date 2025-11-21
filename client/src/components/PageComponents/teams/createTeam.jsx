@@ -1,314 +1,178 @@
-import React, { useState, useEffect } from 'react';
-import Select from 'react-select';
-import { CircleQuestionMarkIcon, X } from 'lucide-react';
-import axios from 'axios';
+import React, { useState } from 'react';
+import { LucideX, LucideLoader2, LucideUsers, LucidePlus, LucideMinus } from 'lucide-react';
 
-const apiUrl = process.env.REACT_APP_API_URL;
-
-const SELECT_STYLES = {
-  control: (base, state) => ({ 
-    ...base, 
-    padding: "2px",
-    borderColor: state.isFocused ? "#00a252" : "#d1d5db",
-    boxShadow: state.isFocused ? "0 0 0 1px #00a252" : "none",
-    "&:hover": {
-      borderColor: "#00a252"
-    }
-  }),
-  option: (base, state) => ({
-    ...base,
-    backgroundColor: state.isSelected ? "#00a252" : state.isFocused ? "#e6f7ef" : "#fff",
-    color: state.isSelected ? "#fff" : "#000",
-    "&:hover": { 
-      backgroundColor: "#00a252",
-      color: "#fff"
-    },
-  }),
-};
-
-export const CreateTeamPopup = ({ isOpen, onClose, teams, setTeam }) => {
-  const [newTeamData, setNewTeamData] = useState({
-    name: '',
-    description: '',
-    webDataId: '',
-    mail:''
-  });
-  
-  const [memberEmails, setMemberEmails] = useState('');
+export const CreateTeamPopup = ({ isOpen, onClose, onCreateTeam }) => {
+  const [name, setName] = useState('');
   const [mail, setMail] = useState('');
-  const [webUrls, setWebUrls] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Get user data and web URLs on mount
-  useEffect(() => {
-    const userDataString = localStorage.getItem('UserData');
-    if (userDataString) {
-      try {
-        const userData = JSON.parse(userDataString);
-        setWebUrls(userData.webURL || []);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-      }
-    }
-  }, []);
-
-  const createTeam = async () => {
-    
-    setIsLoading(true);
-
-
-    // Generate temp ID once
-    const tempId = 'temp-' + Date.now();
-
-    try {
-      // Get current user data
-      const userDataString = localStorage.getItem('UserData');
- 
-      if (!userDataString) {
-        alert('User data not found in localStorage');
-        setIsLoading(false);
-        return;
-      }
-      
-      const userData = JSON.parse(userDataString);
-
-      const currentUser = {
-        id: userData._id,
-        name: userData.name,
-        email: userData.email,
-        mail:userData.mail,
-        profile: userData.profile
-      };
-      console.log('5. Created currentUser:', currentUser);
-
-      // Create temporary team object for optimistic update
-      const tempTeam = {
-        teamId: tempId,
-        teamName: newTeamData.name,
-        description: newTeamData.description,
-        createdAt: new Date().toISOString(),
-        mail:newTeamData.mail,
-        yourRole: 'owner',
-        webData: {
-          id: newTeamData.webDataId,
-          url: newTeamData.webDataId
-        },
-        members: [{ 
-          userId: currentUser.id,
-          name: currentUser.name,
-          email: currentUser.email,
-          profile: currentUser.profile,
-          role: 'owner'
-        }],
-        totalMembers: 1,
-        isOptimistic: true
-      };
-      console.log('6. Created tempTeam:', tempTeam);
-
-      // Ensure teams is always an array before spreading
-      console.log('7. Current teams:', teams);
-      setTeam([tempTeam, ...(Array.isArray(teams) ? teams : [])]);
-      console.log('9. setTeam called successfully - optimistic update done');
-
-      // Prepare API payload
-      const payload = {
-        name: newTeamData.name,
-        webDataId: newTeamData.webDataId,
-        description: newTeamData.description,
-        mail:mail,
-        memberEmails: memberEmails
-          .split(',')
-          .map(email => email.trim())
-          .filter(email => email)
-      };
-
-      console.log('10. Prepared payload:', payload);
-      console.log('11. API URL:', `${apiUrl}/api/team/createTeam`);
-      console.log('12. About to make axios POST request...');
-      
-      // CORRECT API CALL: payload as 2nd param, config as 3rd param
-      const response = await axios.post(
-        `${apiUrl}/api/team/createTeam`,
-        payload,  // <-- Request body data
-        { 
-          withCredentials: true,  // <-- Config option
-        }
-      );
-      
-      console.log('13. Got response:', response);
-      console.log('13a. Response data:', response.data);
-      
-      // Replace temp team with real data from server
-      console.log('14. Replacing temp team with real data');
-      setTeam(prevTeams =>
-        (Array.isArray(prevTeams) ? prevTeams : []).map(t =>
-          t.teamId === tempId ? response.data.team : t
-        )
-      );
-
-      // Reset form
-      console.log('15. Resetting form');
-      setNewTeamData({ name: '', description: '', webDataId: '' });
-      setMemberEmails('');
-      setMail('')
-      console.log('16. Team created successfully!');
-      
-      // Close modal only after successful creation
-      console.log('17. Closing modal');
-      onClose();
-      
-    } catch (error) {
-      console.error('ERROR:', error);
-      console.error('Error response:', error.response);
-      console.error('Error message:', error.message);
-      
-      // Remove temp team on error
-      console.log('18. Removing temp team due to error');
-      setTeam(prevTeams =>
-        (Array.isArray(prevTeams) ? prevTeams : []).filter(t => t.teamId !== tempId)
-      );
-      
-      alert(error.response?.data?.message || 'Failed to create team. Please try again.');
-    } finally {
-      console.log('19. Finally block - setting loading to false');
-      setIsLoading(false);
-    }
-    
-    console.log('=== END createTeam ===');
-  };
-
-  const handleClose = () => {
-    if (!isLoading) {
-      setNewTeamData({ name: '', description: '', webDataId: '' });
-      setMemberEmails('');
-      onClose();
-    }
-  };
+  const [description, setDescription] = useState('');
+  const [memberEmails, setMemberEmails] = useState(['']);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   if (!isOpen) return null;
 
+  const handleEmailChange = (index, value) => {
+    const newEmails = [...memberEmails];
+    newEmails[index] = value;
+    setMemberEmails(newEmails);
+  };
+
+  const addEmailField = () => {
+    setMemberEmails([...memberEmails, '']);
+  };
+
+  const removeEmailField = (index) => {
+    const newEmails = memberEmails.filter((_, i) => i !== index);
+    setMemberEmails(newEmails);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      setError('Team name is required');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const validEmails = memberEmails.filter(email => email.trim() !== '');
+      
+      await onCreateTeam({
+        name,
+        mail,
+        description,
+        memberEmails: validEmails
+      });
+      
+      setName('');
+      setMail('');
+      setDescription('');
+      setMemberEmails(['']);
+      onClose();
+    } catch (err) {
+      setError(err.message || 'Failed to create team');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Create New Team</h2>
-          <button
-            onClick={handleClose}
-            disabled={isLoading}
-            className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
-          >
-            <X className="h-5 w-5 text-gray-500" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-white dark:bg-dark-bg-secondary w-full max-w-lg rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        
+        {/* Header */}
+        <div className="px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary2/10 rounded-lg flex items-center justify-center">
+              <LucideUsers size={20} className="text-primary2" />
+            </div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">Create Team</h2>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-dark-bg-hover rounded-lg transition-colors text-gray-500 dark:text-dark-text-secondary">
+            <LucideX size={20} />
           </button>
         </div>
 
-        <form >
-          <div className="p-6 space-y-4">
+        {/* Content */}
+        <div className="overflow-y-auto px-6 pb-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Team Name <span className="text-red-500">*</span>
-            </label>
+            <label className="block text-sm font-medium text-gray-900 dark:text-dark-text-primary mb-2">Team Name</label>
             <input
               type="text"
-              required
-              value={newTeamData.name}
-              onChange={(e) => setNewTeamData({ ...newTeamData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 focus:outline-primary2 rounded-md"
-              placeholder="Enter team name"
-              onKeyPress={(e) => e.key === 'Enter' && createTeam()}
-              disabled={isLoading}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Engineering, Marketing"
+              className="w-full bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg px-4 py-2.5 text-sm text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-primary2/40 outline-none transition-all"
+              autoFocus
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description
-            </label>
-            <textarea
-            required
-              value={newTeamData.description}
-              onChange={(e) => setNewTeamData({ ...newTeamData, description: e.target.value })}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 focus:outline-primary2 rounded-md resize-none"
-              placeholder="Brief description of the team's purpose"
-              disabled={isLoading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Website <span className="text-red-500">*</span>
-            </label>
-            <Select
-              required={true}
-              options={webUrls.map((u) => ({ value: u, label: u }))}
-              value={webUrls.find((u) => u === newTeamData.webDataId) ? { value: newTeamData.webDataId, label: newTeamData.webDataId } : null}
-              onChange={(option) => setNewTeamData({ ...newTeamData, webDataId: option ? option.value : '' })}
-              placeholder="Select a website"
-              className="text-sm"
-              styles={SELECT_STYLES}
-              isDisabled={isLoading}
-            />
-          </div>
-
-          <div>
-            <label className="flex gap-2 items-center  group text-sm font-medium text-gray-700 mb-2 relative ">
-              Mail
-              <CircleQuestionMarkIcon  size={15}/>
-              <p className='group-hover:flex hidden absolute left-[70px] text-white bg-zinc-600 p-1 text-xs rounded-sm'>mail address where to send reports</p>
-            </label>
-            
+            <label className="block text-sm font-medium text-gray-900 dark:text-dark-text-primary mb-2">Team Email</label>
             <input
-            required
-              type="mail"
+              type="email"
               value={mail}
               onChange={(e) => setMail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 focus:outline-primary2 rounded-md"
-              placeholder="email1@example.com"
-              disabled={isLoading}
+              placeholder="team@company.com (optional)"
+              className="w-full bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg px-4 py-2.5 text-sm text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-primary2/40 outline-none transition-all"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Add Members (Optional)
-            </label>
-            <input
-              type="text"
-              required
-              value={memberEmails}
-              onChange={(e) => setMemberEmails(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 focus:outline-primary2 rounded-md"
-              placeholder="email1@example.com, email2@example.com"
-              disabled={isLoading}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Separate multiple emails with commas
-            </p>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={isLoading}
-              className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            
-            <button
-              type="submit"
-              onClick={() => {
-                console.log('Create Team Button clicked!');
-                createTeam();
-              }}
-              disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all ease-in-out duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Creating...' : 'Create Team'}
-            </button>
+          <div>
+            <label className="block text-sm font-medium text-gray-900 dark:text-dark-text-primary mb-2">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What is this team for? (optional)"
+              rows={3}
+              className="w-full bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg px-4 py-2.5 text-sm text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-primary2/40 outline-none resize-none transition-all"
+            />
           </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-900 dark:text-dark-text-primary">Invite Members</label>
+              <button
+                type="button"
+                onClick={addEmailField}
+                className="text-sm font-medium text-primary2 hover:text-green-600 flex items-center gap-1 transition-colors"
+              >
+                <LucidePlus size={16} />
+                Add
+              </button>
+            </div>
+            
+            <div className="space-y-2">
+              {memberEmails.map((email, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => handleEmailChange(index, e.target.value)}
+                    placeholder="colleague@company.com"
+                    className="flex-1 bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg px-4 py-2.5 text-sm text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-primary2/40 outline-none transition-all"
+                  />
+                  {memberEmails.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeEmailField(index)}
+                      className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    >
+                      <LucideMinus size={18} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {error && (
+            <div className="p-3 rounded-lg bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+              {error}
+            </div>
+          )}
         </div>
-        </form>
+
+        {/* Footer */}
+        <div className="px-6 py-4 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-dark-text-secondary hover:bg-gray-100 dark:hover:bg-dark-bg-hover rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="px-6 py-2.5 bg-primary2 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting && <LucideLoader2 size={16} className="animate-spin" />}
+            Create Team
+          </button>
+        </div>
       </div>
     </div>
   );

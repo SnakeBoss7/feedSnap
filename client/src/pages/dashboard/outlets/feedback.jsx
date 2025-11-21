@@ -92,7 +92,7 @@ export const Feedback = () => {
   const [state, dispatch] = useReducer(dashboardReducer, getCachedData());
   const [userPrompt, setUserPrompt] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile toggle
-  const [isChatExpanded, setIsChatExpanded] = useState(true); // Desktop toggle
+  const [isChatExpanded, setIsChatExpanded] = useState(() => window.innerWidth >= 1024); // Desktop toggle
   const [promptSuggestion, setPromptSuggestion] = useState({
     sug1:'',
     sug2:''
@@ -290,7 +290,7 @@ export const Feedback = () => {
 
   if (state.isLoading) {
     return (
-      <div className="h-screen w-full bg-gray-50 dark:bg-backgr flex flex-col overflow-hidden">
+      <div className="h-screen w-full bg-gray-50 dark:bg-dark-bg-primary flex flex-col overflow-hidden">
         <SimpleHeader color="#2b5fceff" />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -303,7 +303,7 @@ export const Feedback = () => {
   }
 
   return (
-    <div className="h-screen w-full bg-gray-50 dark:bg-backgr flex flex-col overflow-hidden font-sans transition-colors duration-300">
+    <div className="h-screen w-full bg-gray-50 dark:bg-dark-bg-primary flex flex-col overflow-hidden font-sans transition-colors duration-300">
       <SimpleHeader color="#2b5fceff" />
 
       <div className="flex-1 flex overflow-hidden relative">
@@ -323,19 +323,19 @@ export const Feedback = () => {
                setIsSidebarOpen(true);
                setIsChatExpanded(true);
              }}
-             className="absolute bottom-6 right-6 p-4 bg-primary5 text-white rounded-full shadow-xl hover:shadow-2xl hover:bg-blue-600 transition-all z-50 flex items-center gap-2 group"
+             className="absolute bottom-6 right-6 p-4 bg-black text-white dark:bg-white  dark:text-black rounded-full shadow-xl hover:shadow-2xl  transition-all ease-in-out duration-400 z-50 flex items-center gap-2 group"
            >
-             <LucideBot size={24} className="group-hover:rotate-12 transition-transform"/>
-             <span className="font-medium pr-1 hidden group-hover:block transition-all">Ask AI</span>
+             <LucideBot size={24} className="group-hover:rotate-12 transition-all  ease-in-out duration-400 "/>
+             <span className="font-medium pr-1 hidden group-hover:block transition-all  ease-in-out duration-400 ">Ask AI</span>
            </motion.button>
           )}
         </AnimatePresence>
 
         {/* Chat Sidebar */}
         <div 
-          className={`
-            fixed inset-y-0 right-0 z-50 w-full sm:w-[400px] lg:w-[450px] 
-            bg-white dark:bg-secondary border-l border-gray-300 dark:border-gray-800 shadow-2xl lg:shadow-none
+          className={` overflow-y-scroll scrollbar-hide
+            fixed inset-y-0 right-0 z-50 w-full sm:w-[400px] lg:w-[400px] 
+            bg-white dark:bg-black border-l border-gray-200 dark:border-white/10 shadow-2xl lg:shadow-none
             transform transition-transform duration-300 ease-in-out
             ${isSidebarOpen || (isChatExpanded && window.innerWidth >= 1024) ? 'translate-x-0' : 'translate-x-full'}
             lg:relative lg:flex flex-col
@@ -343,14 +343,14 @@ export const Feedback = () => {
           `}
         >
           {/* Chat Header */}
-          <div className="flex-shrink-0 h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-white dark:bg-secondary">
+          <div className="flex-shrink-0 h-16 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-white dark:bg-black px-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary5/10 rounded-xl">
-                <LucideBot size={20} className="text-primary5" />
+              <div className="w-8 h-8 rounded-full bg-black dark:bg-white flex items-center justify-center">
+                <LucideBot size={16} className="text-white dark:text-black" />
               </div>
               <div>
-                <h2 className="font-bold text-gray-900 dark:text-white text-sm">Feedback Assistant</h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Powered by AI</p>
+                <h2 className="font-bold text-gray-900 dark:text-white text-sm">Co-Pilot</h2>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Assistant</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -359,9 +359,9 @@ export const Feedback = () => {
                   setIsSidebarOpen(false);
                   setIsChatExpanded(false);
                 }}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-500 dark:text-gray-400 transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full text-gray-500 dark:text-gray-400 transition-colors"
               >
-                {window.innerWidth >= 1024 ? <LucidePanelRightClose size={20}/> : <LucideX size={20}/>}
+                {window.innerWidth >= 1024 ? <LucidePanelRightClose size={18}/> : <LucideX size={18}/>}
               </button>
             </div>
           </div>
@@ -369,21 +369,17 @@ export const Feedback = () => {
           {/* Chat Messages */}
           <div 
             ref={chatRefContainer}
-            className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 p-4 space-y-6 bg-gray-50/80 dark:bg-[#151e2d]"
+            className="flex-1 overflow-y-auto scrollbar-hide scrollbar-thumb-gray-200 dark:scrollbar-thumb-white/10 p-6 space-y-8 bg-white dark:bg-black"
           >
             {displayedMessages.map((chat, idx) => (
               <div key={idx} className={`flex w-full ${chat.role === "assistant" ? "justify-start" : chat.role === "user" ? "justify-end" : "justify-center"}`}>
-                {chat.role === "assistant" && (
-                   <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center mr-3 flex-shrink-0 mt-1 shadow-sm">
-                     <LucideSparkles size={14} className="text-primary5" />
-                   </div>
-                )}
+
                 
                 {(chat.role === "assistant" || chat.role === "user") && (
-                  <div className={`max-w-[85%] p-4 rounded-2xl shadow-sm text-sm leading-relaxed ${
+                  <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${
                     chat.role === "assistant" 
-                      ? "bg-white dark:bg-secondary border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-none" 
-                      : "bg-primary5 text-white rounded-tr-none shadow-md shadow-blue-500/20"
+                      ? "bg-white dark:bg-black border border-gray-200 dark:border-white/10 text-gray-800 dark:text-gray-200 rounded-tl-none" 
+                      : "bg-black dark:bg-white text-white dark:text-black rounded-tr-none"
                   }`}>
                     <div 
                       className="whitespace-pre-wrap break-words"
@@ -404,9 +400,9 @@ export const Feedback = () => {
                 )}
 
                 {chat.role === "emailSent" && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-green-900/20 border border-green-200 dark:border-green-900 rounded-full shadow-sm">
-                    <LucideMailCheck size={14} className="text-green-600 dark:text-green-400" />
-                    <span className="text-xs font-medium text-green-700 dark:text-green-300">{chat.content}</span>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30 rounded-full">
+                    <LucideMailCheck size={12} className="text-green-600 dark:text-green-400" />
+                    <span className="text-xs font-medium text-green-700 dark:text-green-400">{chat.content}</span>
                   </div>
                 )}
               </div>
@@ -414,13 +410,11 @@ export const Feedback = () => {
             
             {isLoading && (
               <div className="flex justify-start w-full">
-                <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center mr-3 flex-shrink-0 mt-1 shadow-sm">
-                  <LucideSparkles size={14} className="text-primary5" />
-                </div>
-                <div className="bg-white dark:bg-secondary border border-gray-200 dark:border-gray-700 p-4 rounded-2xl rounded-tl-none shadow-sm flex gap-1.5 items-center">
-                  <div className="w-2 h-2 bg-primary5 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-primary5 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-primary5 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+
+                <div className="bg-gray-50 dark:bg-dark-bg-secondary p-3.5 rounded-2xl rounded-tl-none flex gap-1 items-center">
+                  <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                 </div>
               </div>
             )}
@@ -428,25 +422,24 @@ export const Feedback = () => {
           </div>
 
           {/* Suggestions & Input */}
-          <div className="flex-shrink-0 bg-white dark:bg-secondary border-t border-gray-200 dark:border-gray-700 p-5 space-y-4 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.05)] z-10">
+          <div className="flex-shrink-0 bg-white dark:bg-black border-t border-gray-200 dark:border-white/10 p-6 space-y-4 z-10">
             {/* Suggestions */}
             {(promptSuggestion.sug1 || promptSuggestion.sug2 || (!displayedMessages.length || displayedMessages.length <= 1)) && (
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+              <div className="flex flex-col gap-2 overflow-x-auto scrollbar-hide pb-2">
                 <SuggestionButton 
-                  text={promptSuggestion.sug1 || `Analyze feedback for ${state?.userTeams[0]?.label || 'my team'}`} 
+                  text={promptSuggestion.sug2 || "Evaluate the data"} 
                   onClick={setUserPrompt} 
                 />
                 <SuggestionButton 
-                  text={promptSuggestion.sug2 || "Summarize critical issues"} 
+                  text={promptSuggestion.sug1 || `Analyze feedback for ${state?.userTeams[0]?.label || 'my team'}`} 
                   onClick={setUserPrompt} 
                 />
               </div>
             )}
 
             {/* Input Area */}
-            <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl opacity-50 group-hover:opacity-100 transition duration-200 blur"></div>
-              <div className="relative bg-white dark:bg-[#151e2d] rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-200">
+            <div className="relative group ">
+              <div className="relative bg-white dark:bg-black rounded-2xl border border-gray-200 dark:border-white/10 focus-within:border-black dark:focus-within:border-white transition-all duration-200 shadow-sm">
                 <textarea
                   value={userPrompt}
                   onChange={(e) => setUserPrompt(e.target.value)}
@@ -456,18 +449,18 @@ export const Feedback = () => {
                       handleInput();
                     }
                   }}
-                  placeholder="Ask about your feedback..."
-                  className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 min-h-[56px] max-h-[120px] resize-none py-4 pl-4 pr-14 rounded-xl"
+                  placeholder="Ask anything..."
+                  className="w-full scrollbar-hide p-3 bg-transparent border-none focus:ring-0 focus:outline-none text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 min-h-[52px] max-h-[120px] resize-none py-4 pl-4 pr-12 rounded-2xl"
                   rows={1}
                   disabled={isLoading}
                 />
                 <button
                   onClick={handleInput}
                   disabled={!userPrompt.trim() || isLoading}
-                  className={`absolute right-2 bottom-2 p-2 rounded-lg transition-all duration-200 ${
+                  className={`absolute right-2 bottom-2 p-2 rounded-xl transition-all duration-200 ${
                     userPrompt.trim() && !isLoading
-                      ? "bg-primary5 text-white hover:bg-blue-600 shadow-md hover:shadow-lg transform hover:-translate-y-0.5" 
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed"
+                      ? "bg-black dark:bg-white text-white dark:text-black hover:scale-105 shadow-md" 
+                      : "bg-gray-100 dark:bg-white/5 text-gray-300 dark:text-white/20 cursor-not-allowed"
                   }`}
                 >
                   <LucideArrowUp size={18} strokeWidth={2.5} />
@@ -484,7 +477,7 @@ export const Feedback = () => {
 const SuggestionButton = ({ text, onClick }) => (
   <button 
     onClick={() => onClick(text)}
-    className="whitespace-nowrap px-3 py-1.5 text-xs font-medium text-primary5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+    className="whitespace-nowrap px-4 py-2 text-xs w-fit font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-200"
   >
     {text}
   </button>
@@ -500,42 +493,48 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
   const customSelectStyles = {
     control: (base, state) => ({
       ...base,
-      minHeight: '38px',
+      minHeight: '42px',
       fontSize: '13px',
       backgroundColor: 'transparent',
-      borderColor: state.isFocused ? '#2563EB' : 'rgba(209, 213, 219, 0.5)',
+      borderColor: state.isFocused ? '#000000' : 'rgba(229, 231, 235, 1)',
       boxShadow: 'none',
-      '&:hover': { borderColor: '#2563EB' },
-      borderRadius: '0.5rem',
+      '&:hover': { borderColor: '#000000' },
+      borderRadius: '0.75rem',
     }),
     menu: (base) => ({
       ...base,
-      borderRadius: '0.5rem',
+      borderRadius: '0.75rem',
       zIndex: 9999,
       fontSize: '13px',
+      backgroundColor: '#ffffff',
+      border: '1px solid #e5e7eb',
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
     }),
     option: (base, state) => ({
       ...base,
-      backgroundColor: state.isSelected ? '#2563EB' : state.isFocused ? '#eff6ff' : 'transparent',
-      color: state.isSelected ? 'white' : '#1f2937',
+      backgroundColor: state.isSelected ? '#000000' : state.isFocused ? '#f3f4f6' : 'transparent',
+      color: state.isSelected ? 'white' : '#111827',
       cursor: 'pointer',
     }),
   };
 
   return (
-    <div className="w-full max-w-[95%] mx-auto my-2 bg-white dark:bg-secondary border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+    <div className="w-full max-w-[95%] mx-auto my-4 bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl shadow-lg shadow-gray-100 dark:shadow-none overflow-hidden">
       {/* Header */}
-      <div className="bg-gray-50 dark:bg-[#151e2d] px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-md">
-             <LucideMessageSquare size={14} className="text-blue-600 dark:text-blue-400"/>
+      <div className="px-5 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-white dark:bg-black">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-black dark:bg-white rounded-lg">
+             <LucideMessageSquare size={14} className="text-white dark:text-black"/>
           </div>
-          <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">Email Draft</span>
+          <div>
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Email Generator</h3>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">AI-Drafted Content</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => onCopy(body, index)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
           >
             {copiedIndex === index ? <LucideCheck size={12} className="text-green-500"/> : <LucideCopy size={12}/>}
             {copiedIndex === index ? "Copied" : "Copy"}
@@ -543,10 +542,10 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
           <button
             onClick={() => onSend({ subject, body }, index, selectedTeam)}
             disabled={!selectedTeam}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
               selectedTeam
-                ? 'bg-primary5 text-white hover:bg-blue-600 shadow-sm'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                ? 'bg-black dark:bg-white text-white dark:text-black hover:scale-105 shadow-sm'
+                : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600 cursor-not-allowed'
             }`}
           >
             <LucideSend size={12} />
@@ -555,10 +554,10 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-5 space-y-5">
         {/* Recipient */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Recipient</label>
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Recipient</label>
           <Select
             options={teams}
             value={selectedTeam}
@@ -571,23 +570,23 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
         </div>
 
         {/* Subject */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Subject</label>
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Subject</label>
           <input
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full text-sm bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-primary5 dark:focus:border-primary5 text-gray-800 dark:text-gray-200"
+            className="w-full text-sm bg-transparent border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-black dark:focus:border-white text-gray-900 dark:text-white transition-colors"
           />
         </div>
 
         {/* Body */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Content</label>
+        <div className="space-y-2 ">
+          <div className="flex items-center justify-between ml-1">
+            <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Content</label>
             <button
               onClick={() => setIsEditingBody(!isEditingBody)}
-              className="text-xs text-primary5 hover:underline flex items-center gap-1"
+              className="text-xs font-medium text-black dark:text-white hover:underline flex items-center gap-1"
             >
               {isEditingBody ? <><LucideEye size={12}/> Preview</> : <><LucideEdit size={12}/> Edit</>}
             </button>
@@ -597,11 +596,11 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              className="w-full h-48 text-sm bg-gray-50 dark:bg-[#151e2d] border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-primary5 dark:focus:border-primary5 text-gray-800 dark:text-gray-200 font-mono resize-none"
+              className="w-full h-64 text-sm bg-gray-50  scrollbar-hide dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-black dark:focus:border-white text-gray-900 dark:text-white font-mono resize-none leading-relaxed"
             />
           ) : (
             <div 
-              className="w-full h-48 overflow-y-auto scrollbar-thin text-sm bg-gray-50 dark:bg-[#151e2d] border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200 leading-relaxed"
+              className="w-full h-64 overflow-y-auto scrollbar-thin scrollbar-hide text-sm bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white leading-relaxed"
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(body) }}
             />
           )}

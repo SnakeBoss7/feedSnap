@@ -116,8 +116,8 @@ export const DashboardHome = () => {
 
   // Transform analytics for DayBreakdown
   // Assuming analytics is [{ date: 'Mon', count: 5 }, ...]
-  const dayBreakdownData = analytics.map(a => ({
-    day: a.date.charAt(0), // 'M' from 'Mon'
+    const dayBreakdownData = analytics.map(a => ({
+    day: a.date ? a.date.charAt(0) : '', // 'M' from 'Mon'
     value: a.count,
     label: a.date
   }));
@@ -243,7 +243,7 @@ export const DashboardHome = () => {
                 <div key={idx} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 flex items-center justify-center text-sm font-bold text-gray-700 dark:text-dark-text-secondary border border-white dark:border-dark-border-emphasis shadow-sm">
-                      {member.name.charAt(0)}
+                      {member.name ? member.name.charAt(0) : '?'}
                     </div>
                     <div>
                       <p className="text-sm font-bold text-gray-900 dark:text-dark-text-primary">{member.name}</p>

@@ -3,65 +3,45 @@ const User = require('../models/user');
 const WebData = require('../models/WebData');
 
 // Create Team (existing function - for reference)
+// Create Team
 const createTeam = async (req, res) => {
   console.log('=== CREATE TEAM BACKEND ===');
-  console.log('Request body:', req.body);
-  console.log('User from req.user:', req.user);
-  
   try {
-    const { name, webDataId, description, memberEmails,mail } = req.body;
-    console.log('Extracted values:', { name, webDataId, description, memberEmails });
-    
+    const { name, description, memberEmails, mail } = req.body;
     const userId = req.user.id;
-    console.log('User ID:', userId);
 
+    // Initial members array with owner
     const members = [{ user: userId, role: "owner" }];
-    console.log('Initial members (owner):', members);
-    
-    if (memberEmails && memberEmails.length > 0) {
-      console.log('Finding users with emails:', memberEmails);
+
+    // Handle initial member invites
+    if (memberEmails && Array.isArray(memberEmails) && memberEmails.length > 0) {
       const users = await User.find({ email: { $in: memberEmails } });
-      console.log('Found users:', users);
-      
       users.forEach(user => {
         if (user._id.toString() !== userId) {
           members.push({ user: user._id, role: "viewer" });
         }
       });
     }
-    
-    console.log('Final members array:', members);
 
     const team = new Team({
       name,
-      webData: webDataId,
       description,
       mail,
-      members
+      members,
+      // webData is optional in schema, so we can omit it if not provided
     });
-    
-    console.log('Team object before save:', team);
+
     await team.save();
-    console.log('Team saved successfully!');
 
     const populatedTeam = await Team.findById(team._id)
-      .populate('webData', 'webUrl color position')
       .populate('members.user', 'name email profile');
-    
-    console.log('Populated team:', populatedTeam);
 
     const formattedTeam = {
       teamId: populatedTeam._id,
       teamName: populatedTeam.name,
-      motive: populatedTeam.motive,
+      description: populatedTeam.description,
       createdAt: populatedTeam.createdAt,
       yourRole: 'owner',
-      webData: {
-        id: populatedTeam.webData._id,
-        url: populatedTeam.webData.webUrl,
-        color: populatedTeam.webData.color,
-        position: populatedTeam.webData.position
-      },
       members: populatedTeam.members.map(m => ({
         userId: m.user._id,
         name: m.user.name,
@@ -76,14 +56,36 @@ const createTeam = async (req, res) => {
       success: true,
       team: formattedTeam
     });
-    
+
   } catch (error) {
     console.error('ERROR in createTeam:', error);
-    console.error('Error stack:', error.stack);
-    res.status(500).json({ 
-      success: false,
-      message: error.message 
-    });
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Delete Team
+const deleteTeam = async (req, res) => {
+  try {
+    const { teamId } = req.params;
+    const userId = req.user.id;
+
+    const team = await Team.findById(teamId);
+    if (!team) {
+      return res.status(404).json({ success: false, message: 'Team not found' });
+    }
+
+    // Only owner can delete team
+    const userMember = team.members.find(m => m.user.toString() === userId);
+    if (!userMember || userMember.role !== 'owner') {
+      return res.status(403).json({ success: false, message: 'Only the team owner can delete the team' });
+    }
+
+    await Team.findByIdAndDelete(teamId);
+
+    res.status(200).json({ success: true, message: 'Team deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting team:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -403,7 +405,74 @@ const deleteMemberFromTeam = async (req, res) => {
       message: error.message
     });
   }
-};  
+};
+
+// Change Member Role
+const changeMemberRole = async (req, res) => {
+  console.log('=== CHANGE MEMBER ROLE ===');
+  try {
+    const { teamId, memberId } = req.params;
+    const { role } = req.body; // 'admin', 'editor', 'viewer', 'owner'
+    const userId = req.user.id;
+
+    console.log(`User ${userId} changing role of ${memberId} to ${role} in team ${teamId}`);
+
+    if (!['owner', 'admin', 'editor', 'viewer'].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid role specified'
+      });
+    }
+
+    const team = await Team.findById(teamId);
+    if (!team) {
+      return res.status(404).json({ success: false, message: 'Team not found' });
+    }
+
+    // Check permissions
+    const userMember = team.members.find(m => m.user.toString() === userId);
+    if (!userMember || userMember.role !== 'owner') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only the team owner can change member roles'
+      });
+    }
+
+    // Find member to update
+    const memberToUpdate = team.members.find(m => m.user.toString() === memberId);
+    if (!memberToUpdate) {
+      return res.status(404).json({ success: false, message: 'Member not found in team' });
+    }
+
+    // If changing to owner, transfer ownership
+    if (role === 'owner') {
+      // Current owner becomes admin
+      userMember.role = 'admin';
+      memberToUpdate.role = 'owner';
+      console.log(`Ownership transferred from ${userId} to ${memberId}`);
+    } else {
+      // Regular role change
+      memberToUpdate.role = role;
+    }
+
+    await team.save();
+
+    console.log('Role updated successfully');
+
+    res.status(200).json({
+      success: true,
+      message: 'Member role updated successfully',
+      member: {
+        userId: memberToUpdate.user,
+        role: memberToUpdate.role
+      }
+    });
+
+  } catch (error) {
+    console.error('ERROR in changeMemberRole:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 
 
@@ -413,5 +482,7 @@ module.exports = {
   updateTeamMembers,
   addMemberToTeam,
   getUserTeams,
-  deleteMemberFromTeam
+  deleteMemberFromTeam,
+  changeMemberRole,
+  deleteTeam
 };

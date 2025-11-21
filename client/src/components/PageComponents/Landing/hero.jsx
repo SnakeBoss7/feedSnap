@@ -16,14 +16,14 @@ const Hero = () => {
               ✨ Transform feedback into insights
             </div>
             
-            <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-6">
+            <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-6 dark:text-white">
               Turn User Feedback into{" "}
               <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
                 Actionable Insights
               </span>
             </h1>
             
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl font-sans">
+            <p className="text-xl text-muted-foreground dark:text-gray-400 mb-8 max-w-2xl font-sans">
               Customizable widgets, AI chat assistants, and powerful analytics — 
               all in one comprehensive feedback collection system.
             </p>
@@ -34,7 +34,7 @@ const Hero = () => {
                 <LucideMoveRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 
               </Link>
-              <Link variant="outline" size="lg" className="group bg-white rounded-md py-2 px-5   flex gap-2 items-center border border-primary">
+              <Link variant="outline" size="lg" className="group bg-white dark:bg-dark-bg-secondary dark:text-white dark:border-dark-border rounded-md py-2 px-5   flex gap-2 items-center border border-primary">
                 <Play className="  duration-300 mr-2 h-4 w-4" />
                 See Demo
               </Link>

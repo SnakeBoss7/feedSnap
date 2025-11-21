@@ -1,92 +1,115 @@
+import React from "react";
 import { Link } from "react-router-dom";
-import { FileText, Link2Icon,  Mail, MailOpen,  Shield } from "lucide-react";
+import { 
+  Twitter, 
+  Github, 
+  Linkedin, 
+  Mail, 
+  Shield, 
+  FileText, 
+  ArrowRight 
+} from "lucide-react";
+
 export const Footer = () => {
   return (
-  <footer className="font-sans bg-gray-900 text-white py-12 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            {/* Brand */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-               <div className="left text-3xl font-semibold tracking-tight flex  ">
-          <div className="text-white text-3xl text-top">Feed</div>
-          <div className="font-mono text-primary bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent text-4xl text-bottom">SNAP</div>
-        </div>
-              
+    <footer className="bg-gray-50 dark:bg-black border-t border-gray-200 dark:border-white/10 pt-20 pb-10 font-sans transition-colors duration-300">
+      <div className="container mx-auto px-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+          
+          {/* Brand Column */}
+          <div className="space-y-6">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="text-2xl font-bold tracking-tighter">
+                <span className="text-gray-900 dark:text-white">Feed</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">Snap</span>
               </div>
-              <p className="text-gray-400 text-sm">
-                Empowering websites with intelligent feedback collection and analytics.
-              </p>
-            </div>
-
-            {/* Product */}
-            <div className="space-y-4">
-              <h3 className="font-semibold">Product</h3>
-              <div className="space-y-2">
-                <Link to="/" className="block text-gray-400 hover:text-white transition-colors text-sm">
-                  Features
-                </Link>
-                <Link to="/overview" className="block text-gray-400 hover:text-white transition-colors text-sm">
-                  Overview
-                </Link>
-                <Link to="/dashboard" className="block text-gray-400 hover:text-white transition-colors text-sm">
-                  Dashboard
-                </Link>
-              </div>
-            </div>
-
-            {/* Company */}
-            <div className="space-y-4">
-              <h3 className="font-semibold">Company</h3>
-              <div className="space-y-2">
-                <p  className="block text-gray-400 hover:text-white transition-colors text-sm">
-                  About
-                </p>
-                <p href="#" className="block text-gray-400 hover:text-white transition-colors text-sm">
-                  Contact
-                </p>
-                <p href="#" className="block text-gray-400 hover:text-white transition-colors text-sm">
-                  Support
-                </p>
-              </div>
-            </div>
-
-            {/* Legal */}
-            <div className="space-y-4">
-              <h3 className="font-semibold">Legal</h3>
-              <div className="space-y-2">
-                <p className="block text-gray-400 hover:text-white transition-colors text-sm">
-                  <Shield className="inline w-3 h-3 mr-1" />
-                  Privacy Policy
-                </p>
-                <p  className="block text-gray-400 hover:text-white transition-colors text-sm">
-                  <FileText className="inline w-3 h-3 mr-1" />
-                  Terms of Service
-                </p>
-              </div>
+            </Link>
+            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+              Empowering developers to build better products through intelligent user feedback and analytics.
+            </p>
+            <div className="flex gap-4">
+              <SocialLink href="#" icon={<Twitter size={20} />} />
+              <SocialLink href="#" icon={<Github size={20} />} />
+              <SocialLink href="#" icon={<Linkedin size={20} />} />
             </div>
           </div>
 
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">
-              © 2025 FeedbackHub. All rights reserved.
+          {/* Product Links */}
+          <div>
+            <h4 className="font-bold text-gray-900 dark:text-white mb-6">Product</h4>
+            <ul className="space-y-4">
+              <FooterLink to="/overview">Features</FooterLink>
+              <FooterLink to="/dashboard">Dashboard</FooterLink>
+              <FooterLink to="/pricing">Pricing</FooterLink>
+              <FooterLink to="/changelog">Changelog</FooterLink>
+            </ul>
+          </div>
+
+          {/* Company Links */}
+          <div>
+            <h4 className="font-bold text-gray-900 dark:text-white mb-6">Company</h4>
+            <ul className="space-y-4">
+              <FooterLink to="/about">About Us</FooterLink>
+              <FooterLink to="/careers">Careers</FooterLink>
+              <FooterLink to="/blog">Blog</FooterLink>
+              <FooterLink to="/contact">Contact</FooterLink>
+            </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div>
+            <h4 className="font-bold text-gray-900 dark:text-white mb-6">Stay Updated</h4>
+            <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
+              Subscribe to our newsletter for the latest updates and tips.
             </p>
-            <div className="flex items-center gap-4 mt-4 md:mt-0">
-              <a href="mailto:support@feedbackhub.com" className="text-gray-400 hover:text-white transition-colors">
-<div className="flex items-center gap-4">
-        <div className="group relative w-4 h-4">
-          <Mail className="w-4 h-4 transition-all duration-200 group-hover:scale-0 group-hover:opacity-0" />
-          <MailOpen className="w-4 h-4 absolute top-0 left-0 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200" />
+            <form className="flex gap-2">
+              <input 
+                type="email" 
+                placeholder="Enter your email" 
+                className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2 text-sm flex-1 focus:outline-none focus:border-blue-500 transition-colors text-gray-900 dark:text-white"
+              />
+              <button className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
+                <ArrowRight size={18} />
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-200 dark:border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-gray-500 dark:text-gray-500 text-sm">
+            © 2025 FeedSnap. All rights reserved.
+          </p>
+          <div className="flex gap-8">
+            <Link to="/privacy" className="text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white text-sm transition-colors flex items-center gap-2">
+              <Shield size={14} /> Privacy Policy
+            </Link>
+            <Link to="/terms" className="text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white text-sm transition-colors flex items-center gap-2">
+              <FileText size={14} /> Terms of Service
+            </Link>
+          </div>
         </div>
       </div>
-              </a>
-              <p  className="text-gray-400 hover:text-white transition-colors">
-                <Link2Icon className="w-4 h-4" />
-   
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+    </footer>
   );
-}
+};
+
+const SocialLink = ({ href, icon }) => (
+  <a 
+    href={href} 
+    className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-white/10 hover:text-blue-600 dark:hover:text-white transition-all"
+  >
+    {icon}
+  </a>
+);
+
+const FooterLink = ({ to, children }) => (
+  <li>
+    <Link 
+      to={to} 
+      className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white transition-colors"
+    >
+      {children}
+    </Link>
+  </li>
+);

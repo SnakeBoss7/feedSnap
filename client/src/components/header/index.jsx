@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {
-  useSidebarContext,
-} from "../../context/sidebarContext";
+import { useSidebarContext } from "../../context/sidebarContext";
 import Checkbox from "./hamburger";
-import { LucideHome, LucideLogIn, LucideView } from "lucide-react";
+import { LucideHome, LucideLogIn, LucideView, Sun, Moon } from "lucide-react";
 import { useUserContext } from "../../context/userDataContext";
+import { useThemeContext } from "../../context/themeContext";
 
 export default function Header() {
-    const { userData} = useUserContext();
+  const { userData } = useUserContext();
   const { showSidebar, setShowSidebar } = useSidebarContext();
+  const { darkMode, toggleTheme } = useThemeContext();
   const [isScrolling, setIsScrolling] = useState(false);
 
   useEffect(() => {
@@ -26,21 +26,17 @@ export default function Header() {
     <>
       <header className="w-full z-[9999] sticky top-0 flex  ">
         <div
-          className={`w-full flex glass-card ${
-            isScrolling ? "mt-4 mx-4 lg:mx-16 px-6 py-3" : "mt-0 px-4 py-4"
+          className={`w-full flex transition-all duration-500 ease-in-out ${
+            isScrolling 
+              ? "mt-4 mx-4 lg:mx-16 px-6 py-3 rounded-full bg-white/70 dark:bg-black/70 shadow-lg backdrop-blur-md z" 
+              : "mt-0 px-6 py-5 bg-transparent"
           }`}
-          style={{
-
-            backdropFilter: "blur(2px)",
-            borderRadius: isScrolling ? "9999px" : "0",
-            transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
-          }}
         >
           <div className="mx-auto container w-full flex justify-between items-center">
             {/* Logo - Left aligned on all screens */}
             <div className="flex justify-start">
               <div className="text-3xl font-semibold tracking-tight flex items-center">
-                <div className="text-gray-900 text-3xl">Feed</div>
+                <div className="text-gray-900 dark:text-white text-3xl">Feed</div>
                 <div className=" bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent text-3xl">
                   SNAP
                 </div>
@@ -50,51 +46,63 @@ export default function Header() {
             {/* Desktop Navigation */}
             <div className="flex gap-6 font-sans lg:flex hidden items-center">
               <Link
-                className="transition-all duration-300 flex ease-in-out py-2 items-center gap-2 text-black text-lg rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent font-medium"
+                className="group flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 to="/"
               >
-                <LucideHome className="text-black" size={19} />
+                <LucideHome size={18} className="group-hover:scale-110 transition-transform" />
                 Home
               </Link>
               <Link
-                className="transition-all duration-300 flex ease-in-out py-2 items-center gap-2 text-black rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent font-medium"
+                className="group flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 to="/overview"
               >
-                <LucideView className="text-black" size={19} />
+                <LucideView size={18} className="group-hover:scale-110 transition-transform" />
                 Overview
               </Link>
               <Link
-                className="transition-all duration-300 flex ease-in-out py-2 items-center gap-2 text-black rounded-md hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-clip-text hover:text-transparent font-medium"
+                className="group flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 to="/logIn"
               >
-                <LucideLogIn className="text-black" size={19} />
+                <LucideLogIn size={18} className="group-hover:scale-110 transition-transform" />
                 Log In
               </Link>
 
               {/* Get Started Button */}
-              {userData?<Link
-                className="font-bold px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white  text-xl hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
-                to="/dashboard"
-                style={{
-                  borderRadius: isScrolling ? "9999px" : "0.375rem",
-                  transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-full group bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+                aria-label="Toggle theme"
               >
-                Dashboard
-              </Link>:<Link
-                className="font-bold px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white  hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
-                to="/Signup"
-                style={{
-                  borderRadius: isScrolling ? "9999px" : "0.375rem",
-                  transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-              >
-                Get Started
-              </Link>}
+                {darkMode ? <Sun size={20} className="group-hover:text-yellow-500 group-hover:rotate-180 transition-all ease-in-out duration-1000" /> : <Moon size={20} className="group-hover:text-yellow-500 group-hover:rotate-180 transition-all ease-in-out duration-1000" />}
+              </button>
+
+              {/* Get Started Button */}
+              {userData ? (
+                <Link
+                  className="px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold   transition-all duration-300"
+                  to="/dashboard"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <Link
+                  className="px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold   transition-all duration-300"
+                  to="/Signup"
+                >
+                  Get Started
+                </Link>
+              )}
             </div>
 
             {/* Mobile Hamburger - Right aligned */}
-            <div className="lg:hidden flex">
+            <div className="lg:hidden flex items-center gap-4">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300"
+              >
+                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
               <Checkbox show={"false"} />
             </div>
           </div>
@@ -105,55 +113,50 @@ export default function Header() {
       {showSidebar && (
         <div className="lg:hidden fixed top-20 left-0 right-0 z-[9998] px-4 animate-slideDown">
           <div
-            className="w-full rounded-2xl p-6 shadow-2xl"
-            style={{
-              background: "rgba(255, 255, 255, 1)",
-              backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.5)",
-            }}
+            className="w-full rounded-2xl p-6 shadow-2xl bg-white/80 dark:bg-black/80 backdrop-blur-md border border-gray-200 dark:border-white/10"
             onClick={() => setShowSidebar((prev) => !prev)}
           >
             <div className="flex flex-col gap-4 font-medium">
               <Link
-                className="transition-all duration-300 flex items-center  gap-3 ease-in-out text-lg py-3 px-4 text-black rounded-xl hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white hover:shadow-md"
+                className="transition-all duration-300 flex items-center gap-3 ease-in-out text-lg py-3 px-4 text-gray-900 dark:text-white rounded-xl hover:bg-gray-100 dark:hover:bg-white/10"
                 to="/"
               >
-                                <LucideHome className="text-black" size={19} />
+                <LucideHome className="text-gray-900 dark:text-white" size={20} />
                 Home
               </Link>
               <Link
-                className="transition-all duration-300 flex items-center gap-3 ease-in-out text-lg py-3 px-4 text-black rounded-xl hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white hover:shadow-md"
+                className="transition-all duration-300 flex items-center gap-3 ease-in-out text-lg py-3 px-4 text-gray-900 dark:text-white rounded-xl hover:bg-gray-100 dark:hover:bg-white/10"
                 to="/overview"
               >
-                   <LucideView className="text-black" size={19} />
+                <LucideView className="text-gray-900 dark:text-white" size={20} />
                 Overview
               </Link>
               <Link
-                className="transition-all duration-300 flex items-center gap-3  ease-in-out text-lg py-3 px-4 text-black rounded-xl hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white hover:shadow-md"
+                className="transition-all duration-300 flex items-center gap-3 ease-in-out text-lg py-3 px-4 text-gray-900 dark:text-white rounded-xl hover:bg-gray-100 dark:hover:bg-white/10"
                 to="/logIn"
               >
-                <LucideLogIn className="text-black" size={19} />
+                <LucideLogIn className="text-gray-900 dark:text-white" size={20} />
                 Log In
               </Link>
-              {userData?<Link
-                className="font-bold px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white  text-xl hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
-                to="/dashboard"
-                style={{
-                  borderRadius: isScrolling ? "9999px" : "0.375rem",
-                  transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-              >
-                Dashboard
-              </Link>:<Link
-                className="font-bold px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white  hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
-                to="/Signup"
-                style={{
-                  borderRadius: isScrolling ? "9999px" : "0.375rem",
-                  transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-              >
-                Get Started
-              </Link>}
+              {userData ? (
+                <Link
+                  className={`font-bold px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center text-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 ${
+                    isScrolling ? "rounded-full" : "rounded-xl"
+                  }`}
+                  to="/dashboard"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <Link
+                  className={`font-bold px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center text-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 ${
+                    isScrolling ? "rounded-full" : "rounded-xl"
+                  }`}
+                  to="/Signup"
+                >
+                  Get Started
+                </Link>
+              )}
             </div>
           </div>
         </div>

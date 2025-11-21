@@ -30,25 +30,25 @@ module.exports = {
         dark: {
           // Backgrounds
           bg: {
-            primary: '#0F172A',      // Main dark background (slate-900)
-            secondary: '#1E293B',    // Card/surface background (slate-800)
-            tertiary: '#334155',     // Elevated surface (slate-700)
-            hover: '#475569',        // Hover state (slate-600)
-            overlay: '#0F172A99',    // Semi-transparent overlay
+            primary: '#09090b',      // Zinc 950 (Main background)
+            secondary: '#18181b',    // Zinc 900 (Card/surface)
+            tertiary: '#27272a',     // Zinc 800 (Elevated)
+            hover: '#3f3f46',        // Zinc 700 (Hover)
+            overlay: '#09090b99',    // Semi-transparent overlay
           },
           // Text Colors
           text: {
-            primary: '#F8FAFC',      // Main text (slate-50)
-            secondary: '#E2E8F0',    // Secondary text (slate-200)
-            tertiary: '#CBD5E1',     // Tertiary text (slate-300)
-            muted: '#94A3B8',        // Muted text (slate-400)
-            disabled: '#64748B',     // Disabled text (slate-500)
+            primary: '#fafafa',      // Zinc 50 (Main text)
+            secondary: '#a1a1aa',    // Zinc 400 (Secondary text)
+            tertiary: '#71717a',     // Zinc 500 (Tertiary text)
+            muted: '#52525b',        // Zinc 600 (Muted text)
+            disabled: '#3f3f46',     // Zinc 700 (Disabled text)
           },
           // Borders
           border: {
-            DEFAULT: '#334155',      // Default border (slate-700)
-            subtle: '#1E293B',       // Subtle border (slate-800)
-            emphasis: '#475569',     // Emphasis border (slate-600)
+            DEFAULT: '#27272a',      // Zinc 800 (Default border)
+            subtle: '#18181b',       // Zinc 900 (Subtle border)
+            emphasis: '#3f3f46',     // Zinc 700 (Emphasis border)
           },
           // Brand Colors (Dark Mode Variants)
           primary1: '#9F7AEA',       // Lighter purple for dark mode
