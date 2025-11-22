@@ -177,6 +177,7 @@ export const TeamsOverview = () => {
                 onManage={() => setManageTeam(team)} 
               />
             ))}
+                        <div classname="h-[600px] w-full" ></div>
           </div>
         ) : (
           <div className="text-center py-20">
@@ -217,6 +218,7 @@ export const TeamsOverview = () => {
           onDeleteTeam={handleDeleteTeam}
         />
       )}
+
     </div>
   );
 };

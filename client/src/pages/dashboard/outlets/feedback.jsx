@@ -310,6 +310,7 @@ export const Feedback = () => {
         {/* Main Content Area (Table) */}
         <div className="flex-1 overflow-y-auto scrollbar-hide p-4 lg:p-6">
           <FilterTable setSelectedData={setSelectedData} data={state?.data}/>
+          
         </div>
 
         {/* Floating Chat Toggle Button (Mobile & Desktop when closed) */}
@@ -323,7 +324,7 @@ export const Feedback = () => {
                setIsSidebarOpen(true);
                setIsChatExpanded(true);
              }}
-             className="absolute bottom-6 right-6 p-4 bg-black text-white dark:bg-white  dark:text-black rounded-full shadow-xl hover:shadow-2xl  transition-all ease-in-out duration-400 z-50 flex items-center gap-2 group"
+             className="absolute bottom-16 right-6 p-4 bg-black text-white dark:bg-white  dark:text-black rounded-full shadow-xl hover:shadow-2xl  transition-all ease-in-out duration-400 z-50 flex items-center gap-2 group"
            >
              <LucideBot size={24} className="group-hover:rotate-12 transition-all  ease-in-out duration-400 "/>
              <span className="font-medium pr-1 hidden group-hover:block transition-all  ease-in-out duration-400 ">Ask AI</span>
@@ -470,6 +471,7 @@ export const Feedback = () => {
           </div>
         </div>
       </div>
+      
     </div>
   );
 };
@@ -604,7 +606,9 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(body) }}
             />
           )}
+
         </div>
+        
       </div>
     </div>
   );

@@ -177,7 +177,7 @@ export const Analytics = () => {
       <Background color={"#b3a2ebff"}/>
       <SimpleHeader color={'#c5b5ff'}/>
       
-      <div className="relative h-full max-w-[1600px] mx-auto md:px-10 px-5 py-8">
+      <div className="relative h-full max-w-[1600px] mx-auto md:px-10 px-5 py-8 ">
         {/* Header Section */}
         <div className="mb-10">
           <div className="relative header flex flex-col gap-6 sm:flex-row justify-between items-start md:items-center mb-8">
@@ -293,8 +293,11 @@ export const Analytics = () => {
               <DayBreakdown data={dayBreakdownData} />
             </div>
           </ChartCard>
+      <div classname="h-[100px] w-full" ></div>
         </div>
+
       </div>
+
     </div>
   )
 }

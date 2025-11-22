@@ -597,6 +597,7 @@ export function FilterTable({ setSelectedData, data, onAction }) {
             </div>
           )}
         </DialogContent>
+            <div classname="h-[100px] w-full" ></div>
       </Dialog>
     </div>
   )
