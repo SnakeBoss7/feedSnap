@@ -23,7 +23,7 @@ const navItems = [
     to: '/dashboard', 
     icon: LayoutDashboard, 
     label: 'Dashboard', 
-    activeColor: 'text-white ', 
+    activeColor: 'text-white', 
     activeBg: 'bg-primary1 border-0',
     hoverColor: 'group-hover:text-primary1 ',
     gradient: 'from-pink-500 to-rose-500',
@@ -66,7 +66,6 @@ const navItems = [
     activeColor: 'dark:text-black text-white ', 
     activeBg: 'dark:bg-white bg-black border-0',
     hoverColor: 'group-hover:text-white group-hover:text-black  ',
-    gradient: 'from-purple-500 to-indigo-500',
     end: true 
   },
 ];
@@ -197,7 +196,7 @@ export const Sidebar = () => {
                   flex items-center h-12 px-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden
                   ${isActive 
                     ? `${item.activeBg}  shadow-sm` 
-                    : "text-gray-500 dark:text-dark-text-muted hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary "
+                    : " hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary "
                   }
                   ${sidebarSize ? "justify-center" : "justify-start gap-3.5"}
                 `}
@@ -208,7 +207,7 @@ export const Sidebar = () => {
                       <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
                     </div>
                     
-                    <span className={`whitespace-nowrap font-medium z-10 transition-all ease-in-out ${sidebarSize ? "w-0 opacity-0 duration-200 hidden" : "w-auto opacity-100 duration-300"} ${isActive ? 'text-white dark:text-white' : 'text-gray-600 dark:text-dark-text-muted'}`}>
+                    <span className={`${isActive ? item.activeColor : item.hoverColor} whitespace-nowrap font-medium z-10 transition-all ease-in-out ${sidebarSize ? "w-0 opacity-0 duration-200 hidden" : "w-auto opacity-100 duration-300"} ${isActive ? '' : 'text-gray-600 dark:text-dark-text-muted'}`}>
                       {item.label}
                     </span>
 

@@ -324,10 +324,10 @@ export const Feedback = () => {
                setIsSidebarOpen(true);
                setIsChatExpanded(true);
              }}
-             className="absolute bottom-16 right-6 p-4 bg-black text-white dark:bg-white  dark:text-black rounded-full shadow-xl hover:shadow-2xl  transition-all ease-in-out duration-400 z-50 flex items-center gap-2 group"
+             className="absolute lg:bottom-6 bottom-24 right-6 p-4 bg-black text-white dark:bg-white dark:text-black rounded-full shadow-xl hover:shadow-2xl transition-all ease-in-out duration-500 z-50 flex items-center gap-0 hover:gap-2 group overflow-hidden"
            >
-             <LucideBot size={24} className="group-hover:rotate-12 transition-all  ease-in-out duration-400 "/>
-             <span className="font-medium pr-1 hidden group-hover:block transition-all  ease-in-out duration-400 ">Ask AI</span>
+             <LucideBot size={24} className="group-hover:rotate-12 transition-all ease-in-out duration-300"/>
+             <span className="font-medium whitespace-nowrap max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 transition-all ease-in-out duration-300">Ask AI</span>
            </motion.button>
           )}
         </AnimatePresence>
