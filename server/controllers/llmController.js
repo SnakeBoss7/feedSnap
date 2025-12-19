@@ -151,6 +151,46 @@ function optimizeFeedbackForAI(feedbacks) {
   };
 }
 
+// Email generation instructions - Only used when requested
+const EMAIL_INSTRUCTIONS = `
+2. "reports_or_emails" field (CONDITIONAL - ENABLED):
+   Generate ONLY if user explicitly requests:
+   - "send email", "draft email", "notify [team]"
+   - "create report", "write message", "alert team"
+   
+   Otherwise, OMIT this field entirely (don't include empty object)
+
+3. Team Filtering (MANDATORY):
+   Extract team name from user message:
+   - Cyber Team: vulnerabilities, threats, patching, compliance
+   - HR Team: hiring, policies, performance, wellness
+   - DevOps: deployment, CI/CD, monitoring
+   - Filter 100% by team - exclude irrelevant data
+
+4. Email Format (when requested):
+   Subject: Clear, team-specific
+   Body: HTML with:
+   - Greeting: "Dear [Team Name]," or "Dear Team,"
+   - Context paragraph (team-specific)
+   - Bullet points: <ul><li>relevant items</li></ul>
+   - Call to action
+   - MANDATORY Signature:
+   <div style="margin-top:20px;padding-top:15px;border-top:1px solid #ddd;">
+     <p style="margin:0;">Regards,</p>
+     <p style="margin:0;"><strong>\${username}</strong></p>
+     <p style="margin:0;"><a href="mailto:\${userMail}">\${userMail}</a></p>
+     <p style="margin:0;color:#666;">Management Head</p>
+   </div>
+`;
+
+// Standard instructions for normal chat
+const BASE_INSTRUCTIONS = `
+2. "reports_or_emails" field:
+   - DO NOT generate this field.
+   - User has NOT requested an email.
+   - Provide only analysis and suggestions.
+`;
+
 // Enhanced AI assistant for email generation and responses
 const askAI = async (req, res) => {
   try {
@@ -160,6 +200,13 @@ const askAI = async (req, res) => {
         error: "Missing required field: userPrompt",
       });
     }
+
+    const userPrompt = String(req.body.userPrompt).toLowerCase();
+
+    // Check if user is asking for email/report generation
+    const isEmailRequested = [
+      "email", "mail", "send", "draft", "write", "notify", "alert", "report", "message"
+    ].some(keyword => userPrompt.includes(keyword));
 
     // Build chat history with validation
     const chat = (req.body.aiResponse || [])
@@ -186,20 +233,11 @@ const askAI = async (req, res) => {
     const username = req.user?.name || "Unknown User";
     const userMail = req.user?.email || "Unknown Email";
 
-    const completion = await Promise.race([
-      openai_NVIDIA.chat.completions.create({
-        model: "nvidia/llama-3.3-nemotron-super-49b-v1.5",
-        temperature: 0.6,
-        top_p: 0.95,
-        max_tokens: 2048,
-        messages: [
-          {
-            role: "system",
-            content:
-              `CRITICAL: You MUST respond ONLY with valid JSON. No other text before or after.
+    // Dynamic system prompt construction
+    const systemInstructions = `CRITICAL: You MUST respond ONLY with valid JSON. No other text before or after.
 
 Enhanced AI Email Assistant
-You analyze feedback and generate professional emails ONLY WHEN EXPLICITYL ASKED IN THE USER PROMPT WITH MAIL/EMAIL/REPORT generation or conversational responses.
+You analyze feedback and help the user.
 
 Context:
 - User Name: ${username}
@@ -222,67 +260,16 @@ MANDATORY JSON OUTPUT FORMAT:
 
 Response Rules:
 1. "response" field (REQUIRED):
-   - Max 2-3 sentences
+   - MUST contain the DETAILED ANALYSIS.
    - Use simple HTML: <p>, <strong>, <ul>, <li>, <br>
-   - Conversational, friendly tone
-   - NO email structure here
+   - Cite specific numbers/issues from data.
+   - Do NOT put analysis in the suggestions.
 
-2. "reports_or_emails" field (CONDITIONAL):
-   Generate ONLY if user explicitly requests:
-   - "send email", "draft email", "notify [team]"
-   - "create report", "write message", "alert team"
-   
-   Otherwise, OMIT this field entirely (don't include empty object)
-
-3. Team Filtering (MANDATORY):
-   Extract team name from user message:
-   - Cyber Team: vulnerabilities, threats, patching, compliance
-   - HR Team: hiring, policies, performance, wellness
-   - DevOps: deployment, CI/CD, monitoring
-   - Filter 100% by team - exclude irrelevant data
-
-4. Email Format (when requested):
-   Subject: Clear, team-specific
-   Body: HTML with:
-   - Greeting: "Dear [Team Name]," or "Dear Team,"
-   - Context paragraph (team-specific)
-   - Bullet points: <ul><li>relevant items</li></ul>
-   - Call to action
-   - MANDATORY Signature:
-   <div style="margin-top:20px;padding-top:15px;border-top:1px solid #ddd;">
-     <p style="margin:0;">Regards,</p>
-     <p style="margin:0;"><strong>${username}</strong></p>
-     <p style="margin:0;"><a href="mailto:${userMail}">${userMail}</a></p>
-     <p style="margin:0;color:#666;">Management Head</p>
-   </div>
+${isEmailRequested ? EMAIL_INSTRUCTIONS : BASE_INSTRUCTIONS}
 
 5. Suggestions (REQUIRED):
-   - sug1: Action-oriented suggestion
-   - sug2: Follow-up suggestion
-
-Examples:
-
-User: "What are the main Cyber Team issues?"
-Response:
-{
-  "response": "<p>The Cyber Team is facing unpatched servers and weak MFA implementation.</p>",
-  "sug1": "Draft email to Cyber Team about patching timeline",
-  "sug2": "Review MFA implementation status"
-}
-
-User: "Send email to HR about onboarding delays"
-Response:
-{
-  "response": "<p>Email draft prepared for HR regarding onboarding concerns.</p>",
-  "reports_or_emails": {
-    "mail": {
-      "subject": "Action Required: Onboarding Process Delays",
-      "body": "<html><body style='font-family:Arial,sans-serif;max-width:600px;'><p>Dear HR Team,</p><p>Recent feedback indicates delays in our onboarding process...</p><ul><li>New hire documentation pending</li><li>Training schedules not communicated</li></ul><p>Please prioritize addressing these items.</p><div style='margin-top:20px;padding-top:15px;border-top:1px solid #ddd;'><p style='margin:0;'>Regards,</p><p style='margin:0;'><strong>${username}</strong></p><p style='margin:0;'><a href='mailto:${userMail}'>${userMail}</a></p><p style='margin:0;color:#666;'>Management Head</p></div></body></html>"
-    }
-  },
-  "sug1": "Follow up on documentation status",
-  "sug2": "Schedule meeting with HR lead"
-}
+   - sug1: Button Label (Max 3-5 words).
+   - sug2: Button Label (Max 3-5 words).
 
 CRITICAL RULES:
 ✓ Output ONLY valid JSON
@@ -294,7 +281,18 @@ CRITICAL RULES:
 ✓ Filter strictly by team name
 ✗ Never include placeholder text
 ✗ Never return empty objects
-✗ Never add explanatory text outside JSON` + `/no_think`,
+✗ Never add explanatory text outside JSON`;
+
+    const completion = await Promise.race([
+      openai_NVIDIA.chat.completions.create({
+        model: "nvidia/llama-3.3-nemotron-super-49b-v1.5",
+        temperature: 0.6,
+        top_p: 0.95,
+        max_tokens: 2048,
+        messages: [
+          {
+            role: "system",
+            content: systemInstructions + `/no_think`,
           },
           ...chat,
         ],
@@ -316,7 +314,7 @@ CRITICAL RULES:
 
     // Validate the parsed result
     const validatedResult = validateAIResponse(cleanResult);
-
+    console.log(cleanResult);
     return res.status(200).json({ response: validatedResult });
   } catch (error) {
     // Determine appropriate error response

@@ -38,19 +38,16 @@ const getUserData = async (req, res) => {
 };
 const firebaseLogin = async (req, res) => {
   const { idToken } = req.body;
-  //.log({idToken})
   if (!idToken) {
-    //.log('token not found');
     return res.status(400).send("Invalid token"); // Add return
   }
 
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
-    const { email, uid, displayName } = decodedToken;
-    const finalName = displayName;
+    const { email, uid, name: tokenName } = decodedToken;
+    const finalName = tokenName;
     const userRecord = await admin.auth().getUser(uid);
     const photoURL = userRecord.photoURL || null;
-    //.log(email)
     let user = await User.findOne({ email: email });
 
     if (!user) {
