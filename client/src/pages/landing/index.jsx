@@ -1,19 +1,18 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  ArrowRight, 
-  CheckCircle2, 
-  MessageSquare, 
-  BarChart3, 
-  Zap, 
-  Code2, 
-  Shield, 
-  Globe 
+import {
+  ArrowRight,
+  CheckCircle2,
+  MessageSquare,
+  BarChart3,
+  Zap,
+  Code2,
+  Shield,
+  Globe
 } from "lucide-react";
 import Header from "../../components/header";
 import { Footer } from "../../components/footer/footer";
-import HeroImage from "../../img/Landing/hero-abstract-3d.png";
 import showacase1 from "../../img/Landing/showcase_1.png"
 import showacase2 from "../../img/Landing/showcase_2.jpeg"
 
@@ -21,7 +20,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-white font-sans selection:bg-purple-500/30 transition-colors duration-300">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="relative  pt-14 pb-20 lg:pt-24 lg:pb-32 overflow-hidden">
         {/* Background Gradients */}
@@ -32,13 +31,13 @@ const LandingPage = () => {
 
         <div className="container mx-auto px-6 lg:px-24 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12  lg:gap-20">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="lg:w-1/2 text-center lg:text-left"
             >
-            
+
 
               <h1 className="text-5xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.1] text-gray-900 dark:text-white">
                 Feedback that <br />
@@ -46,21 +45,21 @@ const LandingPage = () => {
                   actually matters.
                 </span>
               </h1>
-              
+
               <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Collect, analyze, and act on user feedback with our intelligent widget. 
+                Collect, analyze, and act on user feedback with our intelligent widget.
                 One line of code to transform your product strategy.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-                <Link 
+                <Link
                   to="/Signup"
                   className="w-full sm:w-auto px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 group shadow-lg hover:shadow-xl"
                 >
                   Start for free
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <Link 
+                <Link
                   to="/overview"
                   className="w-full sm:w-auto px-8 py-4 bg-white/60 dark:bg-white/5 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-xl font-semibold hover:bg-white/80 dark:hover:bg-white/10 transition-colors backdrop-blur-sm"
                 >
@@ -80,27 +79,27 @@ const LandingPage = () => {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="lg:w-1/2 relative"
             >
               <div className="relative z-10 rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-2xl shadow-purple-500/10 dark:shadow-purple-500/20">
-                <img 
-                  src={showacase1} 
-                  alt="FeedSnap Dashboard" 
+                <img
+                  src={showacase1}
+                  alt="FeedSnap Dashboard"
                   className="w-full h-auto object-cover block dark:hidden"
                 />
-                <img 
-                  src={showacase2} 
-                  alt="FeedSnap Dashboard" 
+                <img
+                  src={showacase2}
+                  alt="FeedSnap Dashboard"
                   className="w-full h-auto object-cover hidden dark:block"
                 />
                 {/* Glass Overlay */}
-      
+
               </div>
-              
+
               {/* Decorative Elements */}
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/20 dark:bg-blue-500/30 rounded-full blur-2xl" />
               <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/20 dark:bg-purple-500/30 rounded-full blur-2xl" />
@@ -120,32 +119,32 @@ const LandingPage = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <FeatureCard 
+            <FeatureCard
               icon={<Zap className="w-6 h-6 text-yellow-500 dark:text-yellow-400" />}
               title="Lightning Fast"
               description="Optimized for performance. Our widget loads in under 100ms without impacting your site speed."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<MessageSquare className="w-6 h-6 text-blue-500 dark:text-blue-400" />}
               title="AI Analysis"
               description="Automatically categorize and analyze feedback sentiment using advanced machine learning models."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<BarChart3 className="w-6 h-6 text-purple-500 dark:text-purple-400" />}
               title="Deep Analytics"
               description="Visualize trends and user satisfaction scores with our comprehensive dashboard."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<Code2 className="w-6 h-6 text-green-500 dark:text-green-400" />}
               title="Easy Integration"
               description="Just copy and paste one line of code. Works with React, Vue, WordPress, and more."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<Shield className="w-6 h-6 text-red-500 dark:text-red-400" />}
               title="Enterprise Security"
               description="Bank-grade encryption and GDPR compliance to keep your user data safe."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<Globe className="w-6 h-6 text-cyan-500 dark:text-cyan-400" />}
               title="Global Scale"
               description="Built to handle millions of requests. Deploy anywhere with our edge network."
@@ -164,17 +163,17 @@ const LandingPage = () => {
                 <span className="text-blue-600 dark:text-blue-500">less than 2 minutes</span>
               </h2>
               <div className="space-y-8">
-                <Step 
+                <Step
                   number="01"
                   title="Customize your widget"
                   description="Choose colors, position, and questions that match your brand."
                 />
-                <Step 
+                <Step
                   number="02"
                   title="Copy the snippet"
                   description="Get your unique lightweight code snippet from the dashboard."
                 />
-                <Step 
+                <Step
                   number="03"
                   title="Start collecting"
                   description="Paste it into your site and watch the feedback roll in instantly."
@@ -216,7 +215,7 @@ const LandingPage = () => {
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
             Join thousands of developers and product managers who are already using FeedSnap.
           </p>
-          <Link 
+          <Link
             to="/Signup"
             className="inline-flex items-center gap-2 px-10 py-5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all hover:scale-105 shadow-xl shadow-purple-500/10 dark:shadow-white/10"
           >

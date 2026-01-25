@@ -12,7 +12,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Loader from "../../../components/loader/loader";
 import WidgetTabs from "../../../components/PageComponents/ScripGen/tabs/tabs";
-import { Background } from "../../../components/background/background";
 
 let apiUrl = process.env.REACT_APP_API_URL;
 let frontendApiUrl = process.env.REACT_APP_API_FRONTEND_URL;

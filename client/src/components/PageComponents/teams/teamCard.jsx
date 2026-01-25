@@ -1,10 +1,10 @@
 import React from 'react';
-import { LucideUsers, LucideSettings, LucideMoreHorizontal } from 'lucide-react';
+import { LucideUsers, LucideSettings, } from 'lucide-react';
 
 export const TeamCard = ({ team, onManage }) => {
   return (
     <div className="group relative bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-100 dark:border-dark-border-subtle p-5 hover:shadow-xl hover:shadow-gray-200/50 dark:hover:shadow-none hover:border-gray-200 dark:hover:border-dark-border-DEFAULT transition-all duration-300">
-      
+
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
@@ -18,8 +18,8 @@ export const TeamCard = ({ team, onManage }) => {
             </p>
           </div>
         </div>
-        
-        <button 
+
+        <button
           onClick={() => onManage(team)}
           className="p-2 text-gray-400 hover:text-primary2 hover:bg-primary2/5 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
         >
@@ -41,7 +41,7 @@ export const TeamCard = ({ team, onManage }) => {
       <div className="flex items-center justify-between">
         <div className="flex -space-x-2 overflow-hidden">
           {team.members.slice(0, 4).map((member, i) => (
-            <div 
+            <div
               key={i}
               className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-dark-bg-secondary bg-gray-100 dark:bg-dark-bg-tertiary flex items-center justify-center text-xs font-medium text-gray-600 dark:text-dark-text-secondary"
               title={member.name}
@@ -55,8 +55,8 @@ export const TeamCard = ({ team, onManage }) => {
             </div>
           )}
         </div>
-        
-        <button 
+
+        <button
           onClick={() => onManage(team)}
           className="text-xs font-medium text-primary5 hover:text-blue-600 transition-colors"
         >

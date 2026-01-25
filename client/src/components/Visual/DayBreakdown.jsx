@@ -1,5 +1,4 @@
 import React from 'react';
-import { Tooltip } from 'recharts';
 
 const DayBreakdown = ({ data }) => {
   // data expected: [{ day: 'S', value: 10, label: 'Sunday' }, ...]
@@ -32,15 +31,15 @@ const DayBreakdown = ({ data }) => {
 
           return (
             <div key={index} className="flex flex-col items-center gap-2 flex-1 group relative h-full justify-end">
-               {/* Tooltip */}
-               <div className="absolute -top-8 opacity-0 group-hover:opacity-100  transition-opacity bg-white dark:bg-dark-bg-primary  px-2 py-1 rounded shadow-sm text-xs font-bold z-10 whitespace-nowrap dark:text-dark-text-primary">
+              {/* Tooltip */}
+              <div className="absolute -top-8 opacity-0 group-hover:opacity-100  transition-opacity bg-white dark:bg-dark-bg-primary  px-2 py-1 rounded shadow-sm text-xs font-bold z-10 whitespace-nowrap dark:text-dark-text-primary">
                 {item.value} Feedback
               </div>
 
-              <div 
+              <div
                 className={`w-full rounded-full transition-all duration-500 ease-out ${bgColorClass}`}
-                style={{ 
-                  height: `${displayHeight}%`, 
+                style={{
+                  height: `${displayHeight}%`,
                   minHeight: '20px'
                 }}
               ></div>

@@ -18,8 +18,6 @@ import AddButton from "../../../components/button/addButton"
 import { Link } from "react-router-dom"
 import { SimpleHeader } from "../../../components/header/header"
 import { Background } from "../../../components/background/background"
-import { useThemeContext } from "../../../context/themeContext"
-import { BarChart2, Calendar, Filter } from "lucide-react"
 import DayBreakdown from "../../../components/Visual/DayBreakdown"
 
 export const Analytics = () => {
@@ -28,37 +26,37 @@ export const Analytics = () => {
   const [allData, setAllData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
-  const { darkMode } = useThemeContext()
+
 
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true)
       setError(null)
-      
+
       try {
         console.log("[v0] Starting data load...")
         const backendData = await initializeDashboardData()
-        
+
         console.log("[v0] Received data:", backendData)
-        
+
         if (!backendData) {
           throw new Error("No data returned from backend")
         }
-        
+
         if (!Array.isArray(backendData)) {
           throw new Error(`Expected array but got ${typeof backendData}`)
         }
-        
+
         if (backendData.length === 0) {
           setError("No feedback data available. Please add some feedback first.")
           setAllData([])
           setIsLoading(false)
           return
         }
-        
+
         console.log(`[v0] Successfully loaded ${backendData.length} records`)
         setAllData(backendData)
-        
+
       } catch (error) {
         console.error("[v0] Error loading data:", error)
         setError(error.message || "Failed to load analytics data")
@@ -104,7 +102,7 @@ export const Analytics = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary transition-colors duration-300">
-        <SimpleHeader color={'#c5b5ff'}/>
+        <SimpleHeader color={'#c5b5ff'} />
         <div className="flex items-center justify-center h-[80vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
@@ -118,7 +116,7 @@ export const Analytics = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary transition-colors duration-300">
-        <SimpleHeader color={'#c5b5ff'}/>
+        <SimpleHeader color={'#c5b5ff'} />
         <div className="flex items-center justify-center h-[80vh] p-6">
           <div className="text-center max-w-md w-full">
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 shadow-sm">
@@ -144,7 +142,7 @@ export const Analytics = () => {
 
   // Allow rendering with empty filtered data (will show graphs with 0 values)
   const hasFilteredData = filteredData.length > 0
-  
+
   // Always ensure we have valid data structures
   const displayChartData = chartData || {
     reportsByType: [],
@@ -164,7 +162,7 @@ export const Analytics = () => {
       { level: "Critical", avgRating: 0, count: 0 },
     ],
   }
-  
+
   const displayMetrics = metrics || {
     totalReports: 0,
     activeReports: 0,
@@ -174,16 +172,16 @@ export const Analytics = () => {
 
   return (
     <div className="min-h-screen overflow-y-scroll scrollbar-hide font-sans bg-gray-100 dark:bg-dark-bg-primary transition-colors duration-300">
-      <Background color={"#b3a2ebff"}/>
-      <SimpleHeader color={'#c5b5ff'}/>
-      
+      <Background color={"#b3a2ebff"} />
+      <SimpleHeader color={'#c5b5ff'} />
+
       <div className="relative h-full max-w-[1600px] mx-auto md:px-10 px-5 py-8 ">
         {/* Header Section */}
         <div className="mb-10">
           <div className="relative header flex flex-col gap-6 sm:flex-row justify-between items-start md:items-center mb-8">
             <div className="heading flex flex-col gap-2">
               <div className="flex items-center gap-3">
-                
+
                 <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r tracking-tight from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
                   Analytics
                 </h1>
@@ -192,20 +190,20 @@ export const Analytics = () => {
                 Comprehensive overview of your feedback performance
               </p>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <Link
                 to="/dashboard/scriptGen"
                 className="hidden md:flex"
               >
-                <AddButton/>
+                <AddButton />
               </Link>
             </div>
           </div>
 
           {/* Filters Section */}
           <div className="bg-white dark:bg-dark-bg-secondary p-6 rounded-2xl shadow-md border border-gray-300 dark:border-dark-border mb-8 flex justify-between w-full items-center gap-4">
-          
+
             <div className="flex justify-between w-full">
               <Selectors
                 websites={websites}
@@ -256,7 +254,7 @@ export const Analytics = () => {
               <ReportsOverTimeChart data={displayChartData.reportsOverTime} />
             </ChartCard>
           </div>
-          
+
           {/* Active vs Resolved - Spans 4 columns */}
           <div className="lg:col-span-4">
             <ChartCard title="Resolution Status">
@@ -279,21 +277,21 @@ export const Analytics = () => {
             <SeverityRatingChart avgSeverity={displayChartData.avgSeverity} avgRating={displayChartData.avgRating} />
           </ChartCard>
         </div>
-        
+
         {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ChartCard title="Rating Distribution by Severity">
             <div className="h-[400px]">
-               <AvgRatingBySeverityChart data={displayChartData.avgRatingBySeverity} />
+              <AvgRatingBySeverityChart data={displayChartData.avgRatingBySeverity} />
             </div>
           </ChartCard>
-          
+
           <ChartCard title="Weekly Breakdown">
             <div className="h-[400px] p-4">
               <DayBreakdown data={dayBreakdownData} />
             </div>
           </ChartCard>
-      <div classname="h-[100px] w-full" ></div>
+          <div classname="h-[100px] w-full" ></div>
         </div>
 
       </div>

@@ -9,8 +9,6 @@ import {
   LucidePanelLeftClose,
   MessageSquare,
   LogOut,
-  Settings,
-  HelpCircle,
   Sun,
   Moon
 } from "lucide-react";
@@ -19,54 +17,54 @@ import { useUserContext } from "../../context/userDataContext";
 import { useThemeContext } from "../../context/themeContext";
 
 const navItems = [
-  { 
-    to: '/dashboard', 
-    icon: LayoutDashboard, 
-    label: 'Dashboard', 
-    activeColor: 'text-white', 
+  {
+    to: '/dashboard',
+    icon: LayoutDashboard,
+    label: 'Dashboard',
+    activeColor: 'text-white',
     activeBg: 'bg-primary1 border-0',
     hoverColor: 'group-hover:text-primary1 ',
     gradient: 'from-pink-500 to-rose-500',
-    end: true 
+    end: true
   },
-  { 
-    to: 'scriptGen', 
-    icon: Code, 
-    label: 'Script Generator', 
-    activeColor: 'text-white dark:text-white', 
+  {
+    to: 'scriptGen',
+    icon: Code,
+    label: 'Script Generator',
+    activeColor: 'text-white dark:text-white',
     activeBg: 'bg-primary5 border-0',
     hoverColor: 'group-hover:text-primary5 ',
     gradient: 'from-blue-500 to-cyan-500',
-    end: true 
+    end: true
   },
-  { 
-    to: 'teams', 
-    icon: LucideUsers2, 
-    label: 'Teams', 
-    activeColor: 'text-white dark:text-white', 
+  {
+    to: 'teams',
+    icon: LucideUsers2,
+    label: 'Teams',
+    activeColor: 'text-white dark:text-white',
     activeBg: 'bg-primary2 border-0',
     hoverColor: 'group-hover:text-primary2 ',
     gradient: 'from-green-500 to-emerald-500',
-    end: true 
+    end: true
   },
-  { 
-    to: 'analytics', 
-    icon: ChartColumnStacked, 
-    label: 'Analytics', 
-    activeColor: 'text-white ', 
+  {
+    to: 'analytics',
+    icon: ChartColumnStacked,
+    label: 'Analytics',
+    activeColor: 'text-white ',
     activeBg: 'bg-primary3 border-0',
     hoverColor: 'group-hover:text-primary3 ',
     gradient: 'from-orange-500 to-amber-500',
-    end: true 
+    end: true
   },
-  { 
-    to: 'feedbacks', 
-    icon: MessageSquare, 
-    label: 'Feedbacks', 
-    activeColor: 'dark:text-black text-white ', 
+  {
+    to: 'feedbacks',
+    icon: MessageSquare,
+    label: 'Feedbacks',
+    activeColor: 'dark:text-black text-white ',
     activeBg: 'dark:bg-white bg-black border-0',
     hoverColor: 'group-hover:text-white group-hover:text-black  ',
-    end: true 
+    end: true
   },
 ];
 
@@ -82,7 +80,7 @@ export const Sidebar = () => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024);
     };
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -131,7 +129,7 @@ export const Sidebar = () => {
   };
 
   const displayName = userData?.name || userData?.username || "User";
-  const profileImage =  userData?.profile ? userData.profile : logo;
+  const profileImage = userData?.profile ? userData.profile : logo;
 
   const sidebarClasses = `
     font-sans z-[999] flex flex-col bg-white dark:bg-dark-bg-primary h-full border-r border-gray-300 dark:border-dark-border-subtle shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all duration-300 ease-in-out
@@ -144,12 +142,12 @@ export const Sidebar = () => {
     <>
       {/* Mobile Backdrop */}
       {isMobile && showSidebar && (
-        <div 
+        <div
           className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-[998] transition-opacity duration-300"
           onClick={handleClose}
         />
       )}
-      
+
       <aside ref={sidebarRef} className={sidebarClasses}>
         {/* Logo Section */}
         <div className={`flex items-center h-[72px] ${sidebarSize ? "px-2 justify-center gap-2" : "px-6 justify-between"} border-b border-gray-100 dark:border-dark-border-subtle transition-all duration-300`}>
@@ -170,7 +168,7 @@ export const Sidebar = () => {
               <LucidePanelLeftClose size={32} />
             </button>
           )}
-          
+
           {isMobile && (
             <button
               onClick={handleClose}
@@ -183,7 +181,7 @@ export const Sidebar = () => {
 
         {/* Navigation */}
         <nav className="flex-1 flex flex-col gap-2 px-4 py-6 overflow-y-auto scrollbar-hide">
-          
+
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -194,8 +192,8 @@ export const Sidebar = () => {
                 onClick={handleNavClick}
                 className={({ isActive }) => `
                   flex items-center h-12 px-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden
-                  ${isActive 
-                    ? `${item.activeBg}  shadow-sm` 
+                  ${isActive
+                    ? `${item.activeBg}  shadow-sm`
                     : " hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary "
                   }
                   ${sidebarSize ? "justify-center" : "justify-start gap-3.5"}
@@ -206,7 +204,7 @@ export const Sidebar = () => {
                     <div className={`relative z-10 transition-transform duration-300  ${isActive ? item.activeColor : item.hoverColor}`}>
                       <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
                     </div>
-                    
+
                     <span className={`${isActive ? item.activeColor : item.hoverColor} whitespace-nowrap font-medium z-10 transition-all ease-in-out ${sidebarSize ? "w-0 opacity-0 duration-200 hidden" : "w-auto opacity-100 duration-300"} ${isActive ? '' : 'text-gray-600 dark:text-dark-text-muted'}`}>
                       {item.label}
                     </span>
@@ -232,7 +230,7 @@ export const Sidebar = () => {
         {/* Footer/Profile */}
         <div className="p-4 border-t border-gray-100 dark:border-dark-border-subtle bg-gray-50/50 dark:bg-dark-bg-secondary/50">
           {/* Dark Mode Toggle */}
-          <button 
+          <button
             onClick={toggleTheme}
             className={`w-full flex items-center h-10 rounded-lg mb-3 transition-all duration-300 group relative text-gray-500 dark:text-dark-text-muted hover:bg-white dark:hover:bg-dark-bg-tertiary hover:shadow-sm border border-transparent hover:border-gray-200 dark:hover:border-dark-border-emphasis ${sidebarSize ? "justify-center px-0" : "justify-start px-3 gap-3"}`}
           >
@@ -261,7 +259,7 @@ export const Sidebar = () => {
                 <div className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-dark-border-emphasis rounded-full shadow-sm"></div>
               </div>
             )}
-            
+
             <div className={`flex flex-col overflow-hidden transition-all ease-in-out ${sidebarSize ? "w-0 opacity-0 duration-200 hidden" : "w-auto opacity-100 duration-300"}`}>
               {isLoading ? (
                 <div className="space-y-1">
@@ -279,10 +277,10 @@ export const Sidebar = () => {
                 </>
               )}
             </div>
-            
+
             {!sidebarSize && !isLoading && (
               <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                 <LogOut size={18} className="text-gray-400 hover:text-red-500 transition-colors" />
+                <LogOut size={18} className="text-gray-400 hover:text-red-500 transition-colors" />
               </div>
             )}
           </div>

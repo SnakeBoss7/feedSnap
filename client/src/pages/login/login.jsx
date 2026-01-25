@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { Eye, EyeOff, LucideInfo, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, LucideInfo, } from "lucide-react";
 import RoundLoader from "../../components/loader/roundLoader";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../services/firebase";
@@ -78,7 +78,7 @@ export const Login = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-500/20 rounded-full blur-[100px]" />
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}

@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  MessageSquare, 
-  Send, 
-  X, 
-  Star, 
-  BarChart2, 
-  Users, 
+import {
+  MessageSquare,
+  Send,
+  X,
+  Star,
+  Users,
   TrendingUp,
   Mail,
   UserPlus,
@@ -24,11 +23,11 @@ const OverviewPage = () => {
       {/* Page Header */}
       <section className="pt-32 pb-12 text-center relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
-           <div className="absolute top-20 left-1/3 w-64 h-64 bg-blue-500/10 dark:bg-blue-600/20 rounded-full blur-[80px]" />
+          <div className="absolute top-20 left-1/3 w-64 h-64 bg-blue-500/10 dark:bg-blue-600/20 rounded-full blur-[80px]" />
         </div>
-        
+
         <div className="container mx-auto px-6 relative z-10">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl lg:text-6xl font-bold mb-6 text-gray-900 dark:text-white"
@@ -45,13 +44,13 @@ const OverviewPage = () => {
       <section className="py-12 pb-32">
         <div className="container mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-8">
-            
+
             {/* Widget Demo */}
             <DemoCard title="Feedback Widget" description="Try the live feedback collection experience.">
               <div className="relative h-80 bg-gray-100 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden flex items-center justify-center group shadow-inner">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 dark:opacity-5" />
                 <p className="text-gray-400 dark:text-gray-500 text-sm">Your Website Content Here</p>
-                
+
                 {/* Simulated Widget */}
                 <div className="absolute bottom-6 right-6">
                   <WidgetDemo />
@@ -61,9 +60,9 @@ const OverviewPage = () => {
 
             {/* Chat Demo */}
             <DemoCard title="AI Assistant" description="Ask questions and get instant answers from your data.">
-               <div className="h-80 bg-gray-100 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden flex flex-col shadow-inner">
-                  <ChatDemo />
-               </div>
+              <div className="h-80 bg-gray-100 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden flex flex-col shadow-inner">
+                <ChatDemo />
+              </div>
             </DemoCard>
 
           </div>
@@ -74,21 +73,21 @@ const OverviewPage = () => {
               <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Analytics Dashboard</h2>
               <p className="text-gray-600 dark:text-gray-400">Real-time insights at your fingertips.</p>
             </div>
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
               className="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-2xl shadow-blue-900/10 dark:shadow-blue-900/20"
             >
-              <img 
-                src={DashboardImage} 
-                alt="Analytics Dashboard" 
+              <img
+                src={DashboardImage}
+                alt="Analytics Dashboard"
                 className="w-full h-auto object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-gray-50/60 dark:from-black/60 via-transparent to-transparent" />
-              
+
               {/* Floating Stats (Overlay) */}
               <div className="absolute bottom-8 left-8 right-8 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <StatCard icon={<Users className="text-blue-600 dark:text-blue-400" />} label="Total Users" value="12,405" />
@@ -113,25 +112,25 @@ const OverviewPage = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <FeatureCard 
+            <FeatureCard
               icon={<Mail className="w-6 h-6 text-blue-500" />}
               title="Smart Email Gen"
               description="Generate professional emails instantly with our AI-powered drafting engine."
               delay={0.1}
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<Users className="w-6 h-6 text-purple-500" />}
               title="Team Collaboration"
               description="Work together in real-time. Share insights and manage feedback as a team."
               delay={0.2}
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<UserPlus className="w-6 h-6 text-green-500" />}
               title="Team Making"
               description="Easily create and manage teams with granular role-based access control."
               delay={0.3}
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<Zap className="w-6 h-6 text-yellow-500" />}
               title="Advanced Analytics"
               description="Deep dive into your data with powerful visualization and trend analysis tools."
@@ -147,7 +146,7 @@ const OverviewPage = () => {
 };
 
 const DemoCard = ({ title, description, children }) => (
-  <motion.div 
+  <motion.div
     initial={{ opacity: 0, scale: 0.95 }}
     whileInView={{ opacity: 1, scale: 1 }}
     viewport={{ once: true }}
@@ -164,7 +163,7 @@ const DemoCard = ({ title, description, children }) => (
 );
 
 const FeatureCard = ({ icon, title, description, delay }) => (
-  <motion.div 
+  <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
@@ -187,7 +186,7 @@ const WidgetDemo = () => {
     <div className="relative">
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
@@ -201,8 +200,8 @@ const WidgetDemo = () => {
               <p className="mb-4 text-sm text-gray-600">How would you rate your experience?</p>
               <div className="flex justify-center gap-2 mb-4">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <button 
-                    key={star} 
+                  <button
+                    key={star}
                     onClick={() => setRating(star)}
                     className={`${rating >= star ? "text-yellow-400" : "text-gray-300"} hover:scale-110 transition-transform`}
                   >
@@ -217,8 +216,8 @@ const WidgetDemo = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      
-      <motion.button 
+
+      <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
@@ -255,9 +254,9 @@ const ChatDemo = () => {
       </div>
       <div className="p-4 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-transparent">
         <div className="relative">
-          <input 
-            type="text" 
-            placeholder="Type a message..." 
+          <input
+            type="text"
+            placeholder="Type a message..."
             className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full py-2 px-4 pr-10 text-sm focus:outline-none focus:border-blue-500 transition-colors text-gray-900 dark:text-white"
             disabled
           />

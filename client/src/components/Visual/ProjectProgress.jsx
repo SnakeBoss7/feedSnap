@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 const ProjectProgress = ({ resolved, total }) => {
   const percentage = total > 0 ? Math.round((resolved / total) * 100) : 0;
-  
+
   // Data for the semi-circle
   // We want a semi-circle, so we can use startAngle 180, endAngle 0
   const data = [
@@ -11,7 +11,6 @@ const ProjectProgress = ({ resolved, total }) => {
     { name: 'Pending', value: total - resolved }
   ];
 
-  const COLORS = ['#065f46', '#e5e7eb']; // Dark Green, Gray
 
   return (
     <div className="relative w-full h-[200px] flex items-center justify-center">
@@ -41,7 +40,7 @@ const ProjectProgress = ({ resolved, total }) => {
           </defs>
         </PieChart>
       </ResponsiveContainer>
-      
+
       <div className="absolute top-[60%] left-1/2 transform -translate-x-1/2 dark:text-dark-text-primary -translate-y-1/2 text-center">
         <h2 className="text-4xl font-bold dark:text-dark-text-primary text-gray-900">{percentage}%</h2>
         <p className="text-xs text-gray-500 font-medium">Feedbacks Resolved</p>
@@ -49,15 +48,15 @@ const ProjectProgress = ({ resolved, total }) => {
 
       {/* Legend */}
       <div className="absolute bottom-0 w-full flex justify-between px-4 text-xs text-gray-500">
-         <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-[#7E2AC9]"></div>
-            <span>Resolved</span>
-         </div>
-         <div className="flex  items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-[url(#stripedPattern)] bg-[length:12px_12px]" style={{ backgroundImage: 'repeating-linear-gradient(45deg, white, white 4px, #e5e7eb 4px, #e5e7eb 5px)' }}></div> 
-            {/* Note: Using CSS gradient for legend to mimic SVG pattern simply */}
-            <span>Pending</span>
-         </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-full bg-[#7E2AC9]"></div>
+          <span>Resolved</span>
+        </div>
+        <div className="flex  items-center gap-1">
+          <div className="w-3 h-3 rounded-full bg-[url(#stripedPattern)] bg-[length:12px_12px]" style={{ backgroundImage: 'repeating-linear-gradient(45deg, white, white 4px, #e5e7eb 4px, #e5e7eb 5px)' }}></div>
+          {/* Note: Using CSS gradient for legend to mimic SVG pattern simply */}
+          <span>Pending</span>
+        </div>
       </div>
     </div>
   );

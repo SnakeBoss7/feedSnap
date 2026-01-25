@@ -1,13 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { 
-  Twitter, 
-  Github, 
-  Linkedin, 
-  Mail, 
-  Shield, 
-  FileText, 
-  ArrowRight 
+import {
+  Twitter,
+  Github,
+  Linkedin,
+  Shield,
+  FileText,
+  ArrowRight
 } from "lucide-react";
 
 export const Footer = () => {
@@ -15,7 +14,7 @@ export const Footer = () => {
     <footer className="bg-gray-50 dark:bg-black border-t border-gray-200 dark:border-white/10 pt-20 pb-10 font-sans transition-colors duration-300">
       <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-          
+
           {/* Brand Column */}
           <div className="space-y-6">
             <Link to="/" className="flex items-center gap-2">
@@ -63,9 +62,9 @@ export const Footer = () => {
               Subscribe to our newsletter for the latest updates and tips.
             </p>
             <form className="flex gap-2">
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
+              <input
+                type="email"
+                placeholder="Enter your email"
                 className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2 text-sm flex-1 focus:outline-none focus:border-blue-500 transition-colors text-gray-900 dark:text-white"
               />
               <button className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
@@ -95,8 +94,8 @@ export const Footer = () => {
 };
 
 const SocialLink = ({ href, icon }) => (
-  <a 
-    href={href} 
+  <a
+    href={href}
     className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-white/10 hover:text-blue-600 dark:hover:text-white transition-all"
   >
     {icon}
@@ -105,8 +104,8 @@ const SocialLink = ({ href, icon }) => (
 
 const FooterLink = ({ to, children }) => (
   <li>
-    <Link 
-      to={to} 
+    <Link
+      to={to}
       className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white transition-colors"
     >
       {children}

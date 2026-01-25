@@ -1,9 +1,8 @@
-import React, { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import axios from "axios";
 import { SimpleHeader } from "../../../components/header/header";
 import { FilterTable } from "../../../components/PageComponents/feedback/table/filterTable";
 import { FeedbackAssistant } from "../../../components/PageComponents/feedback/FeedbackAssistant";
-import { motion, AnimatePresence } from "framer-motion";
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -11,13 +10,13 @@ const apiUrl = process.env.REACT_APP_API_URL;
 const getCachedData = () => {
   const type = localStorage.getItem('type');
   const cachedData = localStorage.getItem('feedbackData');
-  
-  if(type === 'FETCH_SUCCESS' && cachedData) {
+
+  if (type === 'FETCH_SUCCESS' && cachedData) {
     try {
       const parsed = JSON.parse(cachedData);
       const isRecent = Date.now() - parsed.timestamp < 5 * 60 * 1000; // 5 minutes
-      
-      if(isRecent && parsed.data) {
+
+      if (isRecent && parsed.data) {
         return {
           data: parsed.data.data || [],
           sites: parsed.data.sites || [],
@@ -26,14 +25,14 @@ const getCachedData = () => {
           isLoading: false
         };
       }
-    } catch(e) {
+    } catch (e) {
       console.log('Cache parse error:', e);
     }
   }
   return {
     data: [],
     sites: [],
-    userTeams:[],
+    userTeams: [],
     success: false,
     isLoading: true,
   };
@@ -46,7 +45,7 @@ const dashboardReducer = (state, action) => {
         ...state,
         data: action.payload.data || [],
         sites: action.payload.sites || [],
-        userTeams:action.payload.userTeams || [],
+        userTeams: action.payload.userTeams || [],
         success: action.payload.success || false,
         isLoading: false
       };
@@ -81,7 +80,7 @@ export const Feedback = () => {
           type: 'FETCH_SUCCESS',
           payload: res.data,
         });
-        
+
         const cacheData = {
           data: res.data,
           timestamp: Date.now()
@@ -90,7 +89,7 @@ export const Feedback = () => {
         localStorage.setItem("feedbackData", JSON.stringify(cacheData));
         localStorage.setItem("type", 'FETCH_SUCCESS');
       }
-      catch(err) {
+      catch (err) {
         dispatch({
           type: 'FETCH_FAIL',
           payload: err.response?.data,
@@ -99,7 +98,7 @@ export const Feedback = () => {
       }
     }
 
-    if(state.isLoading) {
+    if (state.isLoading) {
       fetchData();
     }
   }, [state.isLoading]);
@@ -125,7 +124,7 @@ export const Feedback = () => {
       <div className="flex-1 flex overflow-hidden relative">
         {/* Main Content Area (Table) */}
         <div className="flex-1 overflow-y-auto scrollbar-hide p-4 lg:p-6">
-          <FilterTable setSelectedData={setSelectedData} data={state?.data}/>
+          <FilterTable setSelectedData={setSelectedData} data={state?.data} />
         </div>
 
         <FeedbackAssistant
