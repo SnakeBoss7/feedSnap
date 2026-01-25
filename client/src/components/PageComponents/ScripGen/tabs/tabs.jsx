@@ -9,7 +9,6 @@ import {
   Bot,
   Copy,
   Brain,
-  TicketCheckIcon,
   MailCheck,
   LucideAlertTriangle,
   LayoutTemplate,

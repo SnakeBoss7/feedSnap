@@ -7,7 +7,6 @@ import {
   Terminal,
   Sparkles,
   Zap,
-  LayoutDashboard
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -186,9 +185,9 @@ export const ScriptGen = () => {
     <div className="min-h-screen overflow-y-scroll scrollbar-hide font-sans text-gray-900 dark:text-dark-text-primary relative bg-gray-50 dark:bg-dark-bg-primary transition-colors duration-300">
       {/* Background Gradient */}
       <div className="fixed inset-0 bg-gradient-to-br from-blue-700 to-white   dark:from-dark-bg-primary pointer-events-none z-0" />
-      
+
       <div className="relative z-10">
-        <SimpleHeader color={'#2563EB'}/>
+        <SimpleHeader color={'#2563EB'} />
 
         <div className="max-w-7xl mx-auto p-6 md:p-10">
           {/* Header Section */}
@@ -298,7 +297,7 @@ export const ScriptGen = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-6 shadow-md dark:shadow-none border border-gray-100 dark:border-dark-border hover:shadow-lg transition-all duration-300 flex items-start gap-4 group">
                   <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-500 dark:text-blue-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:scale-110 transition-all duration-300">
-                     <Sparkles size={24} />
+                    <Sparkles size={24} />
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 dark:text-dark-text-primary mb-1">Quick Setup</h3>
@@ -310,7 +309,7 @@ export const ScriptGen = () => {
 
                 <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-6 shadow-md dark:shadow-none border border-gray-100 dark:border-dark-border hover:shadow-lg transition-all duration-300 flex items-start gap-4 group">
                   <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-purple-500 dark:text-purple-400 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/30 group-hover:scale-110 transition-all duration-300">
-                     <Zap size={24} />
+                    <Zap size={24} />
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 dark:text-dark-text-primary mb-1">Live Preview</h3>
