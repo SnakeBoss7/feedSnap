@@ -24,6 +24,7 @@
     "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.2",
     "mailersend": "^2.6.0",
+    "mongodb": "^7.0.0",
     "mongoose": "^8.16.2",
     "multer": "^2.0.1",
     "node-mailjet": "^6.0.11",

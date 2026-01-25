@@ -50,9 +50,8 @@ const TabButton = memo(({ tab, index, isActive, onClick }) => (
   <button
     type="button"
     onClick={onClick}
-    className={`relative flex-1 text-lg font-bold py-3 px-2 text-sm  transition-colors duration-300 rounded-xl flex items-center justify-center gap-2 z-10 ${
-      isActive ? "text-white" : "text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text-primary"
-    }`}
+    className={`relative flex-1 text-lg font-bold py-3 px-2 text-sm  transition-colors duration-300 rounded-xl flex items-center justify-center gap-2 z-10 ${isActive ? "text-white" : "text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text-primary"
+      }`}
   >
     {isActive && (
       <motion.div
@@ -98,7 +97,7 @@ const ColorInput = memo(({ color, onChange, text, name }) => (
           value={color}
           className="absolute top-0 left-0 w-full h-full cursor-pointer p-0 border-0 opacity-0"
         />
-        <div 
+        <div
           className="w-full h-full"
           style={{ backgroundColor: color }}
         />
@@ -155,7 +154,7 @@ export default function WidgetTabs({
   showDemo,
 }) {
   const [active, setActive] = useState(0);
-  
+
   // Static tabs array
   const tabs = useMemo(
     () => [
@@ -167,7 +166,7 @@ export default function WidgetTabs({
   );
 
   const contextLength = UrlSettings.botContext?.length || 0;
-  const MAX_CONTEXT_LENGTH = 600;
+  const MAX_CONTEXT_LENGTH = 1300;
 
   // Memoized callbacks
   const handleTabClick = useCallback((index) => {
@@ -234,13 +233,11 @@ export default function WidgetTabs({
                 key={pos.id}
                 type="button"
                 onClick={() => onChange({ value: pos.id })}
-                className={`absolute w-1/3 h-1/3 m-1 transition-all duration-200 rounded-sm ${
-                  pos.class
-                } ${
-                  value === pos.id
+                className={`absolute w-1/3 h-1/3 m-1 transition-all duration-200 rounded-sm ${pos.class
+                  } ${value === pos.id
                     ? "bg-blue-500 shadow-md scale-110 z-10 ring-2 ring-white dark:ring-dark-bg-secondary"
                     : "bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 border border-gray-400/50 dark:border-gray-600"
-                }`}
+                  }`}
                 title={pos.id}
               />
             ))}
@@ -306,7 +303,7 @@ export default function WidgetTabs({
                   value={UrlSettings.webUrl}
                   onChange={handleInputChange}
                 />
-                
+
                 <div className="p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-xl flex items-center justify-between  border border-gray-100 dark:border-dark-border-subtle">
                   <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-3">
                     <MailCheck size={16} className="text-blue-500 dark:text-blue-400" /> Acknowledgment Email
@@ -339,8 +336,8 @@ export default function WidgetTabs({
                           contextLength > MAX_CONTEXT_LENGTH
                             ? "text-red-500"
                             : contextLength > 400
-                            ? "text-orange-500"
-                            : "text-green-600 dark:text-green-400"
+                              ? "text-orange-500"
+                              : "text-green-600 dark:text-green-400"
                         }
                       >
                         {contextLength}
@@ -393,7 +390,7 @@ export default function WidgetTabs({
                     text={"Background Color"}
                   />
                 </div>
-                
+
                 <TextInput
                   value={UrlSettings.text}
                   onChange={handleInputChange}
@@ -469,23 +466,21 @@ export default function WidgetTabs({
           <button
             type="submit"
             disabled={isDisabled}
-            className={`flex-1 flex justify-center items-center gap-2 rounded-xl h-[52px] text-sm font-bold text-white shadow-md transition-all duration-300 ${
-              isDisabled
-                ? "bg-blue-300 dark:bg-blue-900/40 cursor-not-allowed shadow-none opacity-70"
-                : "bg-blue-600 hover:bg-blue-700 hover:shadow-blue-500/30 hover:-translate-y-0.5"
-            }`}
+            className={`flex-1 flex justify-center items-center gap-2 rounded-xl h-[52px] text-sm font-bold text-white shadow-md transition-all duration-300 ${isDisabled
+              ? "bg-blue-300 dark:bg-blue-900/40 cursor-not-allowed shadow-none opacity-70"
+              : "bg-blue-600 hover:bg-blue-700 hover:shadow-blue-500/30 hover:-translate-y-0.5"
+              }`}
           >
             <LucideStars size={18} />
             Generate Script
           </button>
-          
+
           <button
             onClick={(e) => genDemo(e)}
-            className={`flex justify-center items-center gap-2 px-6 rounded-xl h-[52px] min-w-[140px] text-sm font-bold transition-all duration-300 border shadow-sm hover:shadow-md ${
-              showDemo 
-                ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30' 
-                : 'bg-white dark:bg-dark-bg-tertiary text-gray-700 dark:text-dark-text-secondary border-gray-200 dark:border-dark-border-subtle hover:bg-gray-50 dark:hover:bg-dark-bg-hover hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-900 dark:hover:text-dark-text-primary'
-            }`}
+            className={`flex justify-center items-center gap-2 px-6 rounded-xl h-[52px] min-w-[140px] text-sm font-bold transition-all duration-300 border shadow-sm hover:shadow-md ${showDemo
+              ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30'
+              : 'bg-white dark:bg-dark-bg-tertiary text-gray-700 dark:text-dark-text-secondary border-gray-200 dark:border-dark-border-subtle hover:bg-gray-50 dark:hover:bg-dark-bg-hover hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-900 dark:hover:text-dark-text-primary'
+              }`}
           >
             {showDemo === "loading" ? (
               <Spinner size={20} color="#4B5563" />

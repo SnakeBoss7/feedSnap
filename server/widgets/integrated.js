@@ -1,5 +1,5 @@
-const widgetGen =(config)=> {
-   return ` (function() {
+const widgetGen = (config) => {
+    return ` (function() {
     'use strict';
         const INJECTED_CONFIG = ${JSON.stringify(config)};
     // Prevent multiple instances
@@ -126,6 +126,11 @@ const widgetGen =(config)=> {
             if (this.routePollingInterval) {
                 clearInterval(this.routePollingInterval);
             }
+
+            // Clear nudge interval
+            if (this.nudgeInterval) {
+                clearInterval(this.nudgeInterval);
+            }
             
             document.querySelectorAll('style').forEach(style => {
                 if (style.textContent.includes('.fw-container')) {
@@ -137,11 +142,9 @@ const widgetGen =(config)=> {
             
             document.querySelector('.fw-overlay')?.remove();
             document.querySelector('.fw-popup')?.remove();
-            document.querySelector('.fw-button')?.remove();
+            document.querySelector('.fw-button-wrapper')?.remove();
             this.routeObserver?.disconnect();
             this.isOpen = false;
-            
-            //.log("FeedbackSnippet destroyed and cleared from window");
         }
 
         handleRouteChange(source) {
@@ -255,16 +258,14 @@ const widgetGen =(config)=> {
                 }
                 
  .fw-button {
-    position: fixed;
-    \${position[0]}: 20px;
-    \${position[1]}: 20px;
+    position: relative;
     padding: 20px;
     height: 56px;
     background: linear-gradient(135deg, var(--primary-color), \${this.config.color}dd);
     border: 2px solid \${textColor === '#FFFFFF' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.1)'};
     border-radius: 100px;
     cursor: pointer;
-    z-index: 999999;
+    z-index: 2147483647;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
@@ -273,6 +274,7 @@ const widgetGen =(config)=> {
     font-size: 13px;
     font-weight: 600;
     overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .fw-button:hover {
@@ -297,7 +299,7 @@ const widgetGen =(config)=> {
                     left: 0;
                     width: 100%;
                     height: 100%;
-                    z-index: 999998;
+                    z-index: 2147483646;
                     
                    background: rgba(0, 0, 0, 0.4);
                     visibility: hidden;
@@ -324,7 +326,7 @@ const widgetGen =(config)=> {
                     background: var(--bg-color);
                     border-radius: 15px;
                     box-shadow: var(--shadow);
-                    z-index: 999999;
+                    z-index: 2147483647;
                     transform: translateY(20px) scale(0.9);
                     opacity: 0;
                     visibility: hidden;
@@ -860,6 +862,164 @@ const widgetGen =(config)=> {
     margin: 4px 0;
     content: "";
 }
+
+            /* Nudge Tooltip Styles - Modular Edition */
+                .fw-button-wrapper {
+                    position: fixed;
+                    z-index: 2147483647;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .fw-button-wrapper.bottom.right {
+                    bottom: 20px;
+                    right: 20px;
+                    align-items: flex-end;
+                }
+
+                .fw-button-wrapper.bottom.left {
+                    bottom: 20px;
+                    left: 20px;
+                    align-items: flex-start;
+                }
+
+                .fw-button-wrapper.top.right {
+                    top: 20px;
+                    right: 20px;
+                    flex-direction: column-reverse;
+                    align-items: flex-end;
+                }
+
+                .fw-button-wrapper.top.left {
+                    top: 20px;
+                    left: 20px;
+                    flex-direction: column-reverse;
+                    align-items: flex-start;
+                }
+
+                .fw-button-wrapper .fw-button {
+                    position: relative;
+                    bottom: auto;
+                    right: auto;
+                    left: auto;
+                    top: auto;
+                    flex-shrink: 0;
+                }
+
+                .fw-nudge {
+                    background: var(--bg-color);
+                    color: var(--text-color);
+                    padding: 14px 20px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    letter-spacing: -0.01em;
+                    white-space: nowrap;
+                    box-shadow: 
+                        0 4px 24px rgba(0, 0, 0, 0.12),
+                        0 1px 4px rgba(0, 0, 0, 0.08);
+                    border: 1px solid var(--border-color);
+                    opacity: 0;
+                    transform: translateY(16px) scale(0.9);
+                    pointer-events: none;
+                    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    position: relative;
+                    overflow: visible; /* Changed to visible for arrow */
+                }
+
+                /* Subtle gradient accent line at top */
+                .fw-nudge::before {
+                    content: '';
+                    position: absolute;
+                    top: -1px;
+                    left: 0px;
+                    right: 0px;
+                    height: 5px; /* Be thicker to look less "straight" */
+                    background: var(--primary-color);
+                    border-radius: 14px 14px 0 0;
+                    z-index: 2;
+                }
+
+                /* Arrow pointing down to button */
+                .fw-nudge::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -8px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 0;
+                    height: 0;
+                    border-left: 8px solid transparent;
+                    border-right: 8px solid transparent;
+                    border-top: 8px solid var(--bg-color);
+                    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.05));
+                    z-index: 1;
+                }
+
+                /* Position arrow for right-aligned buttons */
+                .fw-button-wrapper.bottom.right .fw-nudge::after,
+                .fw-button-wrapper.top.right .fw-nudge::after {
+                    left: auto;
+                    right: 18px;
+                    transform: none;
+                }
+
+                /* Position arrow for left-aligned buttons */
+                .fw-button-wrapper.bottom.left .fw-nudge::after,
+                .fw-button-wrapper.top.left .fw-nudge::after {
+                    left: 18px;
+                    transform: none;
+                }
+
+                /* For top position, flip the arrow and blend with accent */
+                .fw-button-wrapper.top.right .fw-nudge::after,
+                .fw-button-wrapper.top.left .fw-nudge::after {
+                    bottom: auto;
+                    top: -7px; /* Overlap the accent line (which is at 0px) */
+                    border-top: none;
+                    border-bottom: 8px solid var(--primary-color);
+                    z-index: 3; /* On top of accent line */
+                }
+
+                .fw-nudge.show {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                    pointer-events: auto;
+                }
+
+                /* Hover effect on nudge */
+                .fw-nudge.show:hover {
+                    transform: translateY(-2px) scale(1.02);
+                    box-shadow: var(--shadow);
+                }
+
+                .fw-nudge-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .fw-nudge-emoji {
+                    font-size: 18px;
+                    line-height: 1;
+                }
+
+                .fw-nudge-text {
+                    color: var(--text-color);
+                    font-weight: 600;
+                }
+
+                /* Pulse animation for attention */
+                @keyframes nudgePulse {
+                    0%, 100% { box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), 0 0 0 0 rgba(var(--primary-rgb), 0.4); }
+                    50% { box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), 0 0 0 8px rgba(var(--primary-rgb), 0); }
+                }
+
+                .fw-nudge.show {
+                    animation: nudgePulse 2s ease-in-out 0.5s;
+                }
             \`;
             
             const styleSheet = document.createElement('style');
@@ -868,11 +1028,22 @@ const widgetGen =(config)=> {
         }
         
         createButton() {
+            // Create wrapper for button and nudge
+            const position = this.config.position.split(" ");
+            this.buttonWrapper = document.createElement('div');
+            this.buttonWrapper.className = \`fw-button-wrapper fw-container \${position[0]} \${position[1]}\`;
+
+            // Create nudge element
+            this.nudge = document.createElement('div');
+            this.nudge.className = 'fw-nudge fw-container';
+            this.nudge.innerHTML = '<div class="fw-nudge-content"><span class="fw-nudge-emoji">💬</span><span class="fw-nudge-text">Need help?</span></div>';
+
+            // Create button
             this.button = document.createElement('button');
             this.button.className = 'fw-button fw-container';
             this.button.title = 'Send Feedback';
             this.button.setAttribute('aria-label', 'Open feedback widget');
-            //.log()
+
             if (this.config.widgetText) {
                 this.btnContent = this.config.widgetText;
             } else {
@@ -880,9 +1051,70 @@ const widgetGen =(config)=> {
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>\`;
             }
-            
+
             this.button.innerHTML = this.btnContent;
-            document.body.appendChild(this.button);
+
+            // Append to wrapper
+            this.buttonWrapper.appendChild(this.nudge);
+            this.buttonWrapper.appendChild(this.button);
+            document.body.appendChild(this.buttonWrapper);
+
+            // Start nudge notifications
+            this.startNudgeNotifications();
+        }
+
+        startNudgeNotifications() {
+            // Nudge messages tailored for FeedSnap
+            // Use config nudges or defaults
+            this.nudgeMessages = (this.config.nudges && Array.isArray(this.config.nudges)) 
+                ? this.config.nudges 
+                : [
+                    { emoji: '💬', text: 'Need help?' },
+                    { emoji: '💡', text: 'Share your thoughts' },
+                    { emoji: '🐛', text: 'Found a bug?' },
+                    { emoji: '✨', text: 'Request a feature' },
+                    { emoji: '📝', text: 'Give us feedback' },
+                    { emoji: '🤔', text: 'Have questions?' },
+                    { emoji: '💭', text: 'We\\'re listening!' }
+                ];
+            this.currentNudgeIndex = 0;
+
+            // Show first nudge after 5 seconds for testing (change to 10000 for production)
+            setTimeout(() => {
+                this.showNudge();
+            }, 5000);
+
+            // Then show every 2-3 minutes (random between 120-180 seconds)
+            this.nudgeInterval = setInterval(() => {
+                if (!this.isOpen) {
+                    this.showNudge();
+                }
+            }, this.getRandomInterval());
+        }
+
+        getRandomInterval() {
+            // Random interval between 2-3 minutes (120000-180000 ms)
+            return Math.floor(Math.random() * 60000) + 120000;
+        }
+
+        showNudge() {
+            if (this.isOpen) return;
+
+            const message = this.nudgeMessages[this.currentNudgeIndex];
+            this.nudge.innerHTML = \`<div class="fw-nudge-content"><span class="fw-nudge-emoji">\${message.emoji}</span><span class="fw-nudge-text">\${message.text}</span></div>\`;
+
+            // Show nudge with slight delay for smooth animation
+            requestAnimationFrame(() => {
+                this.nudge.classList.add('show');
+            });
+
+            // Hide after 5 seconds
+            setTimeout(() => {
+                this.nudge.classList.remove('show');
+            }, 5000);
+
+            // Cycle to next message
+            this.currentNudgeIndex = (this.currentNudgeIndex + 1) % this.nudgeMessages.length;
         }
         
         createPopup() {
@@ -1183,6 +1415,11 @@ const widgetGen =(config)=> {
             this.overlay.classList.add('active');
             this.popup.classList.add('active');
             document.body.style.overflow = 'hidden';
+
+            // Hide nudge if visible
+            if (this.nudge) {
+                this.nudge.classList.remove('show');
+            }
             
             if (window.lucide) {
                 lucide.createIcons();
@@ -1398,4 +1635,4 @@ const widgetGen =(config)=> {
 
 })();`;
 };
-module.exports = {widgetGen};
+module.exports = { widgetGen };

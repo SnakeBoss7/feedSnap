@@ -4,12 +4,11 @@ const axios = require('axios');
 const JINA_API_KEY = ''; //
 require('dotenv').config();
 async function getEmbedding(text) {
-    if(!JINA_API_KEY) 
-        {
-            console.log(JINA_API_KEY);
-            console.log('key not foundd ');
-            return null;
-        }
+  if (!JINA_API_KEY) {
+    console.log(JINA_API_KEY);
+    console.log('key not foundd ');
+    return null;
+  }
   try {
     const res = await axios.post(
       'https://api.jina.ai/v1/embeddings',

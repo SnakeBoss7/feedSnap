@@ -6,7 +6,7 @@ const connectDB = require('./config/db');
 const path = require('path')
 const app = express();
 const webData = require('./models/WebData.js');
-const {widgetGen} = require('./widgets/integrated.js');
+const { widgetGen } = require('./widgets/integrated.js');
 
 
 //routes
@@ -14,13 +14,21 @@ const authRoute = require('./routes/authRoutes');
 const scriptRoute = require('./routes/scriptRoute');
 const widgetRoute = require('./routes/widgetRoute');
 const feedRoute = require('./routes/feedback');
-const llmRoute = require('./routes/LLMRoutes'); 
+const llmRoute = require('./routes/LLMRoutes');
 const mailRoute = require('./routes/mailRoutes');
-const  teamRoute = require('./routes/teamRoutes'); 
+const teamRoute = require('./routes/teamRoutes');
 const { findOne } = require('./models/WebData.js');
 
 // Connect DB
 connectDB();
+
+// Development whitelist - these origins bypass database lookup
+const DEV_WHITELIST = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:5173"
+];
 
 app.use(async (req, res, next) => {
   const origin = req.headers.origin;
@@ -33,9 +41,21 @@ app.use(async (req, res, next) => {
 
     console.log("CORS check for origin:", origin);
 
+    // Allow development origins without database lookup
+    if (DEV_WHITELIST.includes(origin)) {
+      console.log("✅ Allowed (dev whitelist):", origin);
+      res.header("Access-Control-Allow-Origin", origin);
+      res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+      res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      res.header("Access-Control-Allow-Credentials", "true");
+      if (req.method === "OPTIONS") return res.sendStatus(200);
+      return next();
+    }
+
     // Check if the origin exists in your WebData DB
     const site = await webData.findOne({ webUrl: origin });
-    
+    console.log(site);
+
     if (site) {
       // ✅ Allow the verified origin
       console.log("✅ Allowed:", origin);
@@ -48,14 +68,14 @@ app.use(async (req, res, next) => {
       if (req.method === "OPTIONS") {
         return res.sendStatus(200);
       }
-      
+
       return next();
     } else {
       // ❌ Block unauthorized origins
       console.log("❌ Blocked:", origin);
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: "Origin not allowed by CORS",
-        origin: origin 
+        origin: origin
       });
     }
 
@@ -74,8 +94,8 @@ app.use('/api/widget', widgetRoute);
 app.use('/api/feedback', feedRoute);
 
 //mail route
-app.use('/api/mail',mailRoute);
-app.use('/check', ()=>{
+app.use('/api/mail', mailRoute);
+app.use('/check', () => {
   console.log("Check route hit");
 });
 
@@ -89,14 +109,14 @@ app.use('/api/llm', llmRoute);
 app.get('/widget/script', async (req, res) => {
   try {
     const url = req.query.webUrl;
-    
+
     if (!url) {
       return res.status(400).send('// Error: webUrl parameter required');
     }
 
     // Fetch config from database
     let config = await webData.findOne({ webUrl: url });
-    
+
     if (!config) {
       // Send default config if not found
       config = {
@@ -109,18 +129,18 @@ app.get('/widget/script', async (req, res) => {
 
     // Generate dynamic widget script
     const dynamicWidget = widgetGen(config);
-    
+
     // ⚡ CRITICAL: Set proper headers for JavaScript
     res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache'); // Prevent caching during development
     res.setHeader('Access-Control-Allow-Origin', '*'); // Allow cross-origin
-    
+
     // Send the script
     res.send(dynamicWidget);
-    
+
   } catch (error) {
     console.error("Error fetching web data:", error);
-    
+
     // Send fallback script on error
     res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
     res.status(500).send('// Error loading widget configuration');
