@@ -1,4 +1,4 @@
-import { ArrowUpRight, Activity, CheckCircle, AlertTriangle, Star, FileText } from "lucide-react"
+import { Activity, CheckCircle, AlertTriangle, Star, FileText } from "lucide-react"
 
 export const MetricCard = ({ label, value, color }) => {
   const config = {
@@ -38,14 +38,14 @@ export const MetricCard = ({ label, value, color }) => {
 
   return (
     <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-6 shadow-md flex justify-between items-center dark:shadow-none border border-gray-300 dark:border-dark-border hover:shadow-lg transition-all duration-300 group">
-      
+
       <div>
         <h3 className="text-sm font-medium text-gray-500 dark:text-dark-text-muted mb-1">{label}</h3>
         <h2 className="text-3xl font-bold text-gray-900 dark:text-dark-text-primary tracking-tight">{value}</h2>
       </div>
       <div className="flex justify-between items-start mb-4">
-       
-          {theme.icon}
+
+        {theme.icon}
 
       </div>
     </div>

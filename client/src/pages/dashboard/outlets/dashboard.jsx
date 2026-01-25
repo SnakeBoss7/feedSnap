@@ -111,7 +111,7 @@ export const DashboardHome = () => {
     );
   }
 
-  const { stats, analytics, recentCriticalFeedback, teamMembers, widgets } = data;
+  const { stats, analytics, teamMembers, widgets } = data;
 
   // Transform analytics for DayBreakdown
   // Assuming analytics is [{ date: 'Mon', count: 5 }, ...]
