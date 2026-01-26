@@ -63,7 +63,7 @@ const navItems = [
     label: 'Feedbacks',
     activeColor: 'dark:text-black text-white ',
     activeBg: 'dark:bg-white bg-black border-0',
-    hoverColor: 'group-hover:text-white group-hover:text-black  ',
+    hoverColor: 'dark:group-hover:text-white group-hover:text-black  ',
     end: true
   },
 ];

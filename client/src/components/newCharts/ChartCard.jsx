@@ -54,31 +54,33 @@ export const ChartCard = ({ title, children }) => {
 
 export const ReportsByTypeChart = ({ data }) => {
   const { darkMode } = useThemeContext()
-  
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data}>
         <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#334155" : "#e5e7eb"} vertical={false} />
-        <XAxis 
-          dataKey="name" 
-          stroke={darkMode ? "#94a3b8" : "#6b7280"} 
-          tick={{ fontSize: 12 }}
+        <XAxis
+          dataKey="name"
+          stroke={darkMode ? "#94a3b8" : "#6b7280"}
+          tick={{ fontSize: 11, angle: -20, textAnchor: 'end' }}
+          interval={0}
           tickLine={false}
           axisLine={false}
+          height={60}
           dy={10}
         />
-        <YAxis 
-          stroke={darkMode ? "#94a3b8" : "#6b7280"} 
+        <YAxis
+          stroke={darkMode ? "#94a3b8" : "#6b7280"}
           tick={{ fontSize: 12 }}
           tickLine={false}
           axisLine={false}
           dx={-10}
         />
         <Tooltip content={<CustomTooltip />} cursor={{ fill: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }} />
-        <Bar 
-          dataKey="value" 
-          fill="#8B5CF6" 
-          radius={[6, 6, 0, 0]} 
+        <Bar
+          dataKey="value"
+          fill="#8B5CF6"
+          radius={[6, 6, 0, 0]}
           barSize={40}
         >
           {data.map((entry, index) => (
@@ -92,7 +94,7 @@ export const ReportsByTypeChart = ({ data }) => {
 
 export const ReportsOverTimeChart = ({ data }) => {
   const { darkMode } = useThemeContext()
-  
+
   const colors = {
     "Bug Report": "#8B5CF6", // Purple
     "Feature Request": "#10B981", // Green
@@ -107,22 +109,22 @@ export const ReportsOverTimeChart = ({ data }) => {
         <defs>
           {Object.entries(colors).map(([key, color]) => (
             <linearGradient key={key} id={`color${key.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={color} stopOpacity={0.3}/>
-              <stop offset="95%" stopColor={color} stopOpacity={0}/>
+              <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+              <stop offset="95%" stopColor={color} stopOpacity={0} />
             </linearGradient>
           ))}
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#334155" : "#e5e7eb"} vertical={false} />
-        <XAxis 
-          dataKey="date" 
-          stroke={darkMode ? "#94a3b8" : "#6b7280"} 
+        <XAxis
+          dataKey="date"
+          stroke={darkMode ? "#94a3b8" : "#6b7280"}
           tick={{ fontSize: 12 }}
           tickLine={false}
           axisLine={false}
           dy={10}
         />
-        <YAxis 
-          stroke={darkMode ? "#94a3b8" : "#6b7280"} 
+        <YAxis
+          stroke={darkMode ? "#94a3b8" : "#6b7280"}
           tick={{ fontSize: 12 }}
           tickLine={false}
           axisLine={false}
@@ -153,11 +155,11 @@ export const ReportsByTitleChart = ({ data }) => {
       <BarChart data={data} layout="vertical">
         <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#334155" : "#e5e7eb"} horizontal={false} />
         <XAxis type="number" stroke={darkMode ? "#94a3b8" : "#6b7280"} hide />
-        <YAxis 
-          dataKey="name" 
-          type="category" 
-          width={100} 
-          stroke={darkMode ? "#94a3b8" : "#6b7280"} 
+        <YAxis
+          dataKey="name"
+          type="category"
+          width={100}
+          stroke={darkMode ? "#94a3b8" : "#6b7280"}
           tick={{ fontSize: 12 }}
           tickLine={false}
           axisLine={false}
@@ -173,13 +175,13 @@ export const ActiveVsResolvedChart = ({ data }) => {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>
-        <Pie 
-          data={data} 
-          cx="50%" 
-          cy="50%" 
-          innerRadius={80} 
-          outerRadius={120} 
-          paddingAngle={5} 
+        <Pie
+          data={data}
+          cx="50%"
+          cy="50%"
+          innerRadius={80}
+          outerRadius={120}
+          paddingAngle={5}
           dataKey="value"
           stroke="none"
         >
@@ -203,7 +205,7 @@ export const SeverityRatingChart = ({ avgSeverity, avgRating }) => {
   const formattedRating = avgRating > 0 ? Number(avgRating).toFixed(1) : "0.0"
 
   return (
-    <div className="flex items-center justify-around h-full p-4">
+    <div className="flex lg:flex-col gap-3 flex-row items-center justify-around h-full p-4">
       <div className="text-center group">
         <div
           className="w-32 h-32 rounded-full flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 mb-4 mx-auto relative overflow-hidden"
@@ -216,8 +218,8 @@ export const SeverityRatingChart = ({ avgSeverity, avgRating }) => {
         </div>
         <p className="text-gray-500 dark:text-dark-text-muted text-sm font-medium">Avg Severity</p>
       </div>
-      
-      <div className="h-20 w-px bg-gray-200 dark:bg-dark-border-subtle"></div>
+
+      {/* <div className="h-20 w-px bg-gray-200 dark:bg-dark-border-subtle"></div> */}
 
       <div className="text-center group">
         <div
@@ -262,18 +264,18 @@ export const SeverityVsRatingChart = ({ data }) => {
     <ResponsiveContainer width="100%" height="100%">
       <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#334155" : "#e5e7eb"} />
-        <XAxis 
-          dataKey="severity" 
-          name="Severity" 
+        <XAxis
+          dataKey="severity"
+          name="Severity"
           stroke={darkMode ? "#94a3b8" : "#6b7280"}
           tick={{ fontSize: 12 }}
           tickLine={false}
           axisLine={false}
           dy={10}
         />
-        <YAxis 
-          dataKey="rating" 
-          name="Rating" 
+        <YAxis
+          dataKey="rating"
+          name="Rating"
           stroke={darkMode ? "#94a3b8" : "#6b7280"}
           tick={{ fontSize: 12 }}
           tickLine={false}

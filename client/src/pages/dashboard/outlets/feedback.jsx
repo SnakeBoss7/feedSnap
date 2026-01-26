@@ -109,7 +109,7 @@ export const Feedback = () => {
         <SimpleHeader color="#2b5fceff" />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary5 mx-auto"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-black dark:border-white mx-auto"></div>
             <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 font-medium">Loading feedback data...</p>
           </div>
         </div>

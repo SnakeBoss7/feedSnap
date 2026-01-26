@@ -101,12 +101,12 @@ export const Analytics = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary transition-colors duration-300">
-        <SimpleHeader color={'#c5b5ff'} />
-        <div className="flex items-center justify-center h-[80vh]">
+      <div className="h-screen w-full bg-gray-50 dark:bg-dark-bg-primary flex flex-col overflow-hidden">
+        <SimpleHeader color={'#E94057'} />
+        <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-dark-text-muted">Loading dashboard data...</p>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary3  mx-auto"></div>
+            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 font-medium">Loading feedback data...</p>
           </div>
         </div>
       </div>
@@ -116,7 +116,7 @@ export const Analytics = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary transition-colors duration-300">
-        <SimpleHeader color={'#c5b5ff'} />
+        <SimpleHeader color={'#E94057'} />
         <div className="flex items-center justify-center h-[80vh] p-6">
           <div className="text-center max-w-md w-full">
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 shadow-sm">
@@ -264,18 +264,24 @@ export const Analytics = () => {
         </div>
 
         {/* Secondary Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <ChartCard title="Reports by Type">
-            <ReportsByTypeChart data={displayChartData.reportsByType} />
-          </ChartCard>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-5">
+            <ChartCard title="Reports by Type">
+              <ReportsByTypeChart data={displayChartData.reportsByType} />
+            </ChartCard>
+          </div>
 
-          <ChartCard title="Severity vs Rating">
-            <SeverityVsRatingChart data={displayChartData.severityVsRating} />
-          </ChartCard>
+          <div className="lg:col-span-4">
+            <ChartCard title="Severity vs Rating">
+              <SeverityVsRatingChart data={displayChartData.severityVsRating} />
+            </ChartCard>
+          </div>
 
-          <ChartCard title="Impact Analysis">
-            <SeverityRatingChart avgSeverity={displayChartData.avgSeverity} avgRating={displayChartData.avgRating} />
-          </ChartCard>
+          <div className="lg:col-span-3">
+            <ChartCard title="Impact Analysis">
+              <SeverityRatingChart avgSeverity={displayChartData.avgSeverity} avgRating={displayChartData.avgRating} />
+            </ChartCard>
+          </div>
         </div>
 
         {/* Bottom Section */}

@@ -45,7 +45,10 @@ export const DashboardHome = () => {
       <div className="min-h-screen overflow-scroll  scrollbar-hide bg-gradient-to-br from-purple-400 to-gray-100 dark:from-dark-bg-primary dark:to-dark-bg-primary font-sans text-gray-900 dark:text-dark-text-primary">
         <SimpleHeader color={'#c5b5ff'} />
         <div className="">
-          <SkeletonTheme baseColor="#e0e0e0" highlightColor="#f5f5f5">
+          <SkeletonTheme
+            baseColor="var(--skeleton-base)"
+            highlightColor="var(--skeleton-highlight)"
+          >
             <div className="p-6 md:p-10">
               {/* Header Skeleton */}
               <div className="flex flex-col md:flex-row mt-5 md:mt-0 justify-between items-start md:items-center mb-5 md:mb-12">
@@ -95,9 +98,9 @@ export const DashboardHome = () => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-dark-bg-primary">
-        <SimpleHeader color={'#c5b5ff'} />
-        <div className="text-center ">
+      <div className="flex flex-col  items-center  h-screen bg-gray-50 dark:bg-dark-bg-primary">
+        <SimpleHeader color={'#b563f9ff'} />
+        <div className="text-center h-full flex flex-col items-center justify-center">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text-primary mb-2">Oops!</h2>
           <p className="text-gray-600 dark:text-dark-text-muted">{error}</p>
           <button
