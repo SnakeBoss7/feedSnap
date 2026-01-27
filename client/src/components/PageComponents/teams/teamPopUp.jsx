@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LucideX, LucideUsers, LucideSettings, LucidePlus, LucideLoader2, LucideTrash2 } from 'lucide-react';
+import { LucideX, LucideUsers, LucideSettings, LucidePlus, LucideLoader2, LucideTrash2, LucideGlobe } from 'lucide-react';
 import { MemberRow } from './MemberRow';
 import { ConfirmationDialog } from './ConfirmationDialog';
 
@@ -40,43 +40,51 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onAddMember, onRole
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm">
-        <div className="bg-white dark:bg-dark-bg-secondary w-full h-full sm:h-auto sm:max-w-3xl sm:rounded-xl shadow-2xl overflow-hidden flex flex-col sm:max-h-[85vh]">
-          
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm">
+        <div className="bg-white dark:bg-dark-bg-secondary w-full h-full sm:h-auto sm:max-w-3xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col sm:max-h-[85vh]">
+
           {/* Header */}
-          <div className="px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between shrink-0">
+          <div className="px-4 sm:px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-dark-border-subtle">
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary truncate">{team.teamName}</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-text-primary truncate">{team.teamName}</h2>
               <p className="text-sm text-gray-500 dark:text-dark-text-muted mt-0.5">{team.members.length} members</p>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-dark-bg-hover rounded-lg transition-colors text-gray-500 dark:text-dark-text-secondary shrink-0">
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-dark-bg-hover rounded-lg transition-all text-gray-400 hover:text-gray-600 dark:hover:text-dark-text-secondary shrink-0">
               <LucideX size={20} />
             </button>
           </div>
 
           {/* Tabs */}
-          <div className="flex px-4 sm:px-6 gap-1 shrink-0">
+          <div className="flex px-4 sm:px-6 gap-1 border-b border-gray-100 dark:border-dark-border-subtle">
             <button
               onClick={() => setActiveTab('members')}
-              className={`py-3 px-3 sm:px-4 text-sm font-medium rounded-t-lg transition-colors flex items-center gap-2 ${
-                activeTab === 'members'
-                  ? 'bg-gray-50 dark:bg-dark-bg-tertiary text-primary2'
-                  : 'text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text-secondary'
-              }`}
+              className={`py-3 px-4 text-sm font-medium transition-all relative ${activeTab === 'members'
+                ? 'text-primary2'
+                : 'text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text-secondary'
+                }`}
             >
-              <LucideUsers size={16} />
-              <span className="hidden sm:inline">Members</span>
+              <span className="flex items-center gap-2">
+                <LucideUsers size={16} />
+                <span className="hidden sm:inline">Members</span>
+              </span>
+              {activeTab === 'members' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary2"></div>
+              )}
             </button>
             <button
               onClick={() => setActiveTab('settings')}
-              className={`py-3 px-3 sm:px-4 text-sm font-medium rounded-t-lg transition-colors flex items-center gap-2 ${
-                activeTab === 'settings'
-                  ? 'bg-gray-50 dark:bg-dark-bg-tertiary text-primary2'
-                  : 'text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text-secondary'
-              }`}
+              className={`py-3 px-4 text-sm font-medium transition-all relative ${activeTab === 'settings'
+                ? 'text-primary2'
+                : 'text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text-secondary'
+                }`}
             >
-              <LucideSettings size={16} />
-              <span className="hidden sm:inline">Settings</span>
+              <span className="flex items-center gap-2">
+                <LucideSettings size={16} />
+                <span className="hidden sm:inline">Settings</span>
+              </span>
+              {activeTab === 'settings' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary2"></div>
+              )}
             </button>
           </div>
 
@@ -84,6 +92,21 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onAddMember, onRole
           <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-dark-bg-tertiary p-4 sm:p-6">
             {activeTab === 'members' && (
               <div className="space-y-4">
+                {/* Website Info Card */}
+                {team.webData?.url && (
+                  <div className="bg-white dark:bg-dark-bg-secondary p-4 rounded-lg border border-gray-200 dark:border-dark-border-subtle">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 bg-primary2/10 rounded-lg flex items-center justify-center shrink-0">
+                        <LucideGlobe size={18} className="text-primary2" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-xs font-medium text-gray-500 dark:text-dark-text-muted uppercase tracking-wider mb-0.5">Team Website</h4>
+                        <p className="text-sm font-medium text-gray-900 dark:text-dark-text-primary truncate">{team.webData.url}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Add Member */}
                 <div className="bg-white dark:bg-dark-bg-secondary p-4 rounded-lg">
                   <h3 className="text-sm font-medium text-gray-900 dark:text-dark-text-primary mb-3">Invite Member</h3>
@@ -145,7 +168,7 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onAddMember, onRole
         </div>
       </div>
 
-      <ConfirmationDialog 
+      <ConfirmationDialog
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleDeleteTeam}

@@ -12,7 +12,7 @@ export const TeamsOverview = () => {
   const [teams, setTeams] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   // Modal States
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [manageTeam, setManageTeam] = useState(null);
@@ -24,6 +24,7 @@ export const TeamsOverview = () => {
       const res = await axios.get(`${apiUrl}/api/team/getTeams`, {
         withCredentials: true,
       });
+      console.log('Fetched teams:', res.data.teams);
       setTeams(res.data.teams || []);
     } catch (error) {
       console.error("Error fetching teams:", error);
@@ -122,14 +123,14 @@ export const TeamsOverview = () => {
   };
 
   // Filtered Teams
-  const filteredTeams = teams.filter(team => 
+  const filteredTeams = teams.filter(team =>
     team.teamName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-y-scroll scrollbar-hide dark:bg-dark-bg-primary font-sans transition-colors duration-300">
       <SimpleHeader color={"#5BAE83"} />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -139,11 +140,11 @@ export const TeamsOverview = () => {
               Manage your teams, members, and permissions.
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <div className="relative hidden md:block">
               <LucideSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input 
+              <input
                 type="text"
                 placeholder="Search teams..."
                 value={searchQuery}
@@ -151,7 +152,7 @@ export const TeamsOverview = () => {
                 className="pl-10 pr-4 py-2 bg-white dark:bg-dark-bg-secondary rounded-xl text-sm focus:ring-2 focus:ring-primary2/20 outline-none w-64 transition-all"
               />
             </div>
-            <button 
+            <button
               onClick={() => setIsCreateOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-primary2/70 hover:bg-primary2 text-white rounded-lg text-sm font-medium transition-all transform "
             >
@@ -171,13 +172,13 @@ export const TeamsOverview = () => {
         ) : filteredTeams.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredTeams.map((team) => (
-              <TeamCard 
-                key={team.teamId} 
-                team={team} 
-                onManage={() => setManageTeam(team)} 
+              <TeamCard
+                key={team.teamId}
+                team={team}
+                onManage={() => setManageTeam(team)}
               />
             ))}
-                        <div classname="h-[600px] w-full" ></div>
+            <div classname="h-[600px] w-full" ></div>
           </div>
         ) : (
           <div className="text-center py-20">
@@ -189,7 +190,7 @@ export const TeamsOverview = () => {
               {searchQuery ? "Try adjusting your search terms." : "Get started by creating your first team to collaborate with others."}
             </p>
             {!searchQuery && (
-              <button 
+              <button
                 onClick={() => setIsCreateOpen(true)}
                 className="mt-4 text-primary2 font-medium hover:underline"
               >
@@ -201,9 +202,9 @@ export const TeamsOverview = () => {
       </div>
 
       {/* Modals */}
-      <CreateTeamPopup 
-        isOpen={isCreateOpen} 
-        onClose={() => setIsCreateOpen(false)} 
+      <CreateTeamPopup
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
         onCreateTeam={handleCreateTeam}
       />
 

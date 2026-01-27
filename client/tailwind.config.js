@@ -6,25 +6,25 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
-         fontFamily: {
+      fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui'],
       },
-          boxShadow: {
+      boxShadow: {
         right: '5px 0 10px 0px rgba(134, 134, 134, 0.43)', // adjust as needed
       },
       colors: {
         // Brand Colors (Light Mode)
-        primary2:'#5BAE83',
-        primary1:'#7E2AC9',
-        primary5:"#2563EB",
-        primary3:"#E94057",
-        backgr:'#111828',
-        secondary:'#1E2939',
-        feed1:'#A855F7',
-        feed2:'#5BAE83',
-        feed3:'#2563EB',
-        feed4:'#fdf25aff',
-        feed5:'#b80404ff',
+        primary1: '#7E2AC9',
+        primary2: '#5BAE83',
+        primary3: "#E94057",
+        primary5: "#2563EB",
+        backgr: '#111828',
+        secondary: '#1E2939',
+        feed1: '#A855F7',
+        feed2: '#5BAE83',
+        feed3: '#2563EB',
+        feed4: '#fdf25aff',
+        feed5: '#b80404ff',
 
         // Dark Mode Color System
         dark: {
@@ -148,7 +148,7 @@ module.exports = {
         },
       },
 
-  },
-  plugins: [require('tailwind-scrollbar-hide')],
-}
+    },
+    plugins: [require('tailwind-scrollbar-hide')],
+  }
 }

@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 const teamSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  mail:String,
-  webData: String,
-  description:String,
+  mail: String,
+  webData: { type: mongoose.Types.ObjectId, ref: "webData" },
+  description: String,
   members: [
     {
       user: { type: mongoose.Types.ObjectId, ref: "User" },

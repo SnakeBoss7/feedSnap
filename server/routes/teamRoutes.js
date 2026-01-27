@@ -2,7 +2,8 @@
 const express = require('express');
 const jwtverify = require('../middleware/jwtverify');
 const router = express.Router();
-const { getUserTeams, deleteMemberFromTeam, addMemberToTeam, createTeam, updateTeamMembers } = require('../controllers/teamController');
+const { getUserTeams, deleteMemberFromTeam, addMemberToTeam, createTeam, updateTeamMembers, getUserWebsites } = require('../controllers/teamController');
+router.get('/websites', jwtverify, getUserWebsites);
 router.post('/createTeam', jwtverify, createTeam);
 router.get('/getTeams', jwtverify, getUserTeams);
 router.put('/:teamId/members', jwtverify, updateTeamMembers);

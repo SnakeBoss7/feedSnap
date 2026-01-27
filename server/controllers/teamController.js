@@ -7,8 +7,34 @@ const WebData = require('../models/WebData');
 const createTeam = async (req, res) => {
   console.log('=== CREATE TEAM BACKEND ===');
   try {
-    const { name, description, memberEmails, mail } = req.body;
+    const { name, description, memberEmails, mail, webDataId } = req.body;
     const userId = req.user.id;
+
+    // Validate webDataId is provided
+    if (!webDataId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Website selection is required'
+      });
+    }
+
+    // Verify the website exists and user has access to it
+    const website = await WebData.findById(webDataId);
+    if (!website) {
+      return res.status(404).json({
+        success: false,
+        message: 'Selected website not found'
+      });
+    }
+
+    // Check if user is owner of the website
+    const isOwner = website.owner.some(ownerId => ownerId.toString() === userId);
+    if (!isOwner) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to create a team for this website'
+      });
+    }
 
     // Initial members array with owner
     const members = [{ user: userId, role: "owner" }];
@@ -28,13 +54,14 @@ const createTeam = async (req, res) => {
       description,
       mail,
       members,
-      // webData is optional in schema, so we can omit it if not provided
+      webData: webDataId
     });
 
     await team.save();
 
     const populatedTeam = await Team.findById(team._id)
-      .populate('members.user', 'name email profile');
+      .populate('members.user', 'name email profile')
+      .populate('webData', 'webUrl color position');
 
     const formattedTeam = {
       teamId: populatedTeam._id,
@@ -42,6 +69,12 @@ const createTeam = async (req, res) => {
       description: populatedTeam.description,
       createdAt: populatedTeam.createdAt,
       yourRole: 'owner',
+      webData: populatedTeam.webData ? {
+        id: populatedTeam.webData._id,
+        url: populatedTeam.webData.webUrl,
+        color: populatedTeam.webData.color,
+        position: populatedTeam.webData.position
+      } : null,
       members: populatedTeam.members.map(m => ({
         userId: m.user._id,
         name: m.user.name,
@@ -94,7 +127,7 @@ const updateTeamMembers = async (req, res) => {
   console.log('=== UPDATE TEAM MEMBERS ===');
   console.log('Request body:', req.body);
   console.log('Team ID from params:', req.params.teamId);
-  
+
   try {
     const { teamId } = req.params;
     const { members } = req.body; // Array of { userId, role }
@@ -105,7 +138,7 @@ const updateTeamMembers = async (req, res) => {
 
     // Find the team
     const team = await Team.findById(teamId);
-    
+
     if (!team) {
       return res.status(404).json({
         success: false,
@@ -179,7 +212,7 @@ const addMemberToTeam = async (req, res) => {
   console.log('=== ADD MEMBER TO TEAM ===');
   console.log('Request body:', req.body);
   console.log('Team ID from params:', req.params.teamId);
-  
+
   try {
     const { teamId } = req.params;
     const { email, role = 'viewer' } = req.body;
@@ -190,7 +223,7 @@ const addMemberToTeam = async (req, res) => {
 
     // Find the team
     const team = await Team.findById(teamId);
-    
+
     if (!team) {
       return res.status(404).json({
         success: false,
@@ -209,7 +242,7 @@ const addMemberToTeam = async (req, res) => {
 
     // Find the user to add by email
     const userToAdd = await User.findOne({ email: email.trim().toLowerCase() });
-    
+
     if (!userToAdd) {
       return res.status(404).json({
         success: false,
@@ -287,7 +320,7 @@ const getUserTeams = async (req, res) => {
       teamId: team._id,
       teamName: team.name,
       description: team.description,
-      mail:team.mail,
+      mail: team.mail,
       createdAt: team.createdAt,
       webData: {
         id: team.webData?._id,
@@ -327,7 +360,7 @@ const deleteMemberFromTeam = async (req, res) => {
   console.log('=== DELETE MEMBER FROM TEAM ===');
   console.log('Request params:', req.params);
   console.log('Authenticated user:', req.user);
-  
+
   try {
     const { teamId, memberId } = req.params;
     const userId = req.user._id || req.user.id;
@@ -338,7 +371,7 @@ const deleteMemberFromTeam = async (req, res) => {
 
     // Find the team and populate to get full member data
     const team = await Team.findById(teamId).populate('members.user', 'name email');
-    
+
     if (!team) {
       return res.status(404).json({
         success: false,
@@ -367,7 +400,7 @@ const deleteMemberFromTeam = async (req, res) => {
 
     // Check if the member to delete exists in the team
     const memberToDelete = team.members.find(m => m.user._id.toString() === memberId);
-    
+
     if (!memberToDelete) {
       return res.status(404).json({
         success: false,
@@ -387,7 +420,7 @@ const deleteMemberFromTeam = async (req, res) => {
 
     // Remove the member
     team.members = team.members.filter(m => m.user._id.toString() !== memberId);
-    
+
     await team.save();
     console.log('Member deleted successfully');
 
@@ -474,7 +507,37 @@ const changeMemberRole = async (req, res) => {
   }
 };
 
+// Get User's Accessible Websites
+const getUserWebsites = async (req, res) => {
+  console.log('=== GET USER WEBSITES ===');
+  try {
+    const userId = req.user.id;
 
+    // Find websites where user is owner
+    const websites = await WebData.find({
+      owner: userId
+    }).select('_id webUrl color position');
+
+    const formattedWebsites = websites.map(web => ({
+      id: web._id,
+      url: web.webUrl,
+      color: web.color,
+      position: web.position
+    }));
+
+    res.status(200).json({
+      success: true,
+      websites: formattedWebsites
+    });
+
+  } catch (error) {
+    console.error('ERROR in getUserWebsites:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
 
 module.exports = {
@@ -484,5 +547,6 @@ module.exports = {
   getUserTeams,
   deleteMemberFromTeam,
   changeMemberRole,
-  deleteTeam
+  deleteTeam,
+  getUserWebsites
 };
