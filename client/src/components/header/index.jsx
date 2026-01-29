@@ -26,11 +26,10 @@ export default function Header() {
     <>
       <header className="w-full z-[9999] sticky top-0 flex  ">
         <div
-          className={`w-full flex transition-all duration-500 ease-in-out ${
-            isScrolling 
-              ? "mt-4 mx-4 lg:mx-16 px-6 py-3 rounded-full bg-white/70 dark:bg-black/70 shadow-lg backdrop-blur-md z" 
-              : "mt-0 px-6 py-5 bg-transparent"
-          }`}
+          className={`w-full flex transition-all duration-500 ease-in-out ${isScrolling
+            ? "mt-4 mx-4 lg:mx-16 px-6 py-3 rounded-full bg-white/70 dark:bg-black/70 shadow-lg backdrop-blur-md z"
+            : "mt-0 px-6 py-5 bg-transparent"
+            }`}
         >
           <div className="mx-auto container w-full flex justify-between items-center">
             {/* Logo - Left aligned on all screens */}
@@ -111,9 +110,9 @@ export default function Header() {
 
       {/* Mobile Dropdown Menu - Separated from header */}
       {showSidebar && (
-        <div className="lg:hidden fixed top-20 left-0 right-0 z-[9998] px-4 animate-slideDown">
+        <div className="lg:hidden mt-6 fixed top-20 left-0 right-0 z-[9998] px-4 animate-slideDown">
           <div
-            className="w-full rounded-2xl p-6 shadow-2xl bg-white/80 dark:bg-black/80 backdrop-blur-md border border-gray-200 dark:border-white/10"
+            className="w-full rounded-2xl glass-card p-6 shadow-2xl"
             onClick={() => setShowSidebar((prev) => !prev)}
           >
             <div className="flex flex-col gap-4 font-medium">
@@ -140,18 +139,16 @@ export default function Header() {
               </Link>
               {userData ? (
                 <Link
-                  className={`font-bold px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center text-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 ${
-                    isScrolling ? "rounded-full" : "rounded-xl"
-                  }`}
+                  className={`font-bold px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center text-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 ${isScrolling ? "rounded-full" : "rounded-xl"
+                    }`}
                   to="/dashboard"
                 >
                   Dashboard
                 </Link>
               ) : (
                 <Link
-                  className={`font-bold px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center text-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 ${
-                    isScrolling ? "rounded-full" : "rounded-xl"
-                  }`}
+                  className={`font-bold px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center text-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 ${isScrolling ? "rounded-full" : "rounded-xl"
+                    }`}
                   to="/Signup"
                 >
                   Get Started

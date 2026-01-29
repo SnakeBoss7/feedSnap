@@ -182,40 +182,60 @@ body,
   }
 }
 
+/* Glass Card Background - Light Mode */
 .glass-card-bg {
-  background: rgba(0, 0, 0, 0.562);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(20px);
-  /* border-radius: 20px; */
-  border-bottom: 1px solid rgba(187, 187, 187, 0.562);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-bottom: 1px solid rgba(187, 187, 187, 0.3);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    inset 0 0px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 0 0px 0px rgba(255, 255, 255, 0);
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
   z-index: 9000000;
 }
 
-.glass-card {
+/* Glass Card Background - Dark Mode */
+.dark .glass-card-bg {
+  background: rgba(15, 15, 25, 0.7);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
 
+/* Glass Card - Light Mode */
+.glass-card {
   position: sticky;
   top: 0px;
   overflow: hidden;
-  /* width: 240px; */
-  /* height: 360px; */
-  background: rgba(255, 250, 250, 0.76);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(20px);
-  /* border-radius: 20px; */
-  border: 1px solid rgba(187, 187, 187, 0.562);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
+  border: 1px solid rgba(187, 187, 187, 0.3);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.1),
-    inset 0 0px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 0 0px 0px rgba(255, 255, 255, 0);
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
   z-index: 9000000;
 }
 
+/* Glass Card - Dark Mode */
+.dark .glass-card {
+  background: rgba(20, 20, 35, 0.75);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Glass Card Top Highlight - Light Mode */
 .glass-card::before {
   content: '';
   position: absolute;
@@ -223,14 +243,21 @@ body,
   left: 0;
   right: 0;
   height: 1px;
-  /* background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(0, 0, 0, 0.9),
-    transparent
-  ); */
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.8),
+      transparent);
 }
 
+/* Glass Card Top Highlight - Dark Mode */
+.dark .glass-card::before {
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent);
+}
+
+/* Glass Card Side Gradient - Light Mode */
 .glass-card::after {
   content: '';
   position: absolute;
@@ -239,9 +266,17 @@ body,
   width: 1px;
   height: 100%;
   background: linear-gradient(180deg,
-      rgba(255, 255, 255, 0.8),
+      rgba(187, 187, 187, 0.6),
       transparent,
-      rgba(255, 255, 255, 0.575));
+      rgba(187, 187, 187, 0.4));
+}
+
+/* Glass Card Side Gradient - Dark Mode */
+.dark .glass-card::after {
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.15),
+      transparent,
+      rgba(255, 255, 255, 0.08));
 }
 
 /* //calender */

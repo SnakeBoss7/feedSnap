@@ -7,33 +7,42 @@ const path = require('path')
 const { Parser } = require("json2csv");
 const PDFDocument = require("pdfkit");
 const fs = require('fs')
-const { sendFeedbackEmail } = require("../utils/ackMails");
-const {computeSeverity} = require("../utils/severityCompute");
+const { sendEmail } = require("../utils/ackMails");
+const { computeSeverity } = require("../utils/severityCompute");
 
 // Helper function to get all websites accessible to a user
 const getUserAccessibleWebsites = async (userId) => {
   try {
-    const directWebData = await webData.find({
-      $or: [
-        { owner: userId },
-        { members: userId }
-      ]
-    });
+    // 1. Direct ownership: owner is an array of IDs in the schema
+    const directWebData = await webData.find({ owner: userId });
 
+    // 2. Team membership: find teams where userId is in members.user
     const userTeams = await Team.find({
       'members.user': userId
-    }).select('webData');
+    }).populate('webData');
+    console.log({ userTeams })
 
     const directSites = directWebData.map(web => web.webUrl);
+
+    // Extract webUrl from populated webData in teams
     const teamSites = userTeams
-      .map(team => team.webData)
-      .filter(webData => webData);
+      .filter(team => team && team.webData)
+      .map(team => team.webData.webUrl);
 
     const allSites = [...new Set([...directSites, ...teamSites])];
 
+    // Combine webData objects for dashboard and other uses
+    const teamWebDataObjects = userTeams
+      .filter(team => team && team.webData)
+      .map(team => team.webData);
+
+    const allWebDataObjects = [...directWebData, ...teamWebDataObjects];
+    // Unique by _id to avoid duplicates if someone is owner AND in a team (unlikely but safe)
+    const uniqueWebDataObjects = Array.from(new Map(allWebDataObjects.map(item => [item._id.toString(), item])).values());
+
     return {
       sites: allSites,
-      webDataObjects: directWebData,
+      webDataObjects: uniqueWebDataObjects,
       teams: userTeams
     };
   } catch (error) {
@@ -46,7 +55,7 @@ const exportFeedback = async (req, res) => {
   try {
     const user = req.user;
     const { sites } = await getUserAccessibleWebsites(user.id);
-    
+
     const feedbacks = await feedback
       .find({ webUrl: { $in: sites } })
       .sort({ createdOn: -1, webUrl: 1 });
@@ -54,7 +63,7 @@ const exportFeedback = async (req, res) => {
     const { format } = req.query;
 
     if (format === "csv") {
-      const fields = ["title", "description", "rating", "webUrl", "pathname", "createdOn","severity","status"];
+      const fields = ["title", "description", "rating", "webUrl", "pathname", "createdOn", "severity", "status"];
       const parser = new Parser({ fields });
       const csv = parser.parse(feedbacks);
 
@@ -95,13 +104,13 @@ const exportFeedback = async (req, res) => {
 
 const createFeed = async (req, res) => {
   console.log("Hello there");
-  const {webUrl,pathname,title,email,description,rating,config}= req.body;
-  console.log({webUrl,pathname,title,email,description,rating});
-  let severity = computeSeverity({title,rating,description,email,status:false});
+  const { webUrl, pathname, title, email, description, rating, config } = req.body;
+  console.log({ webUrl, pathname, title, email, description, rating });
+  let severity = computeSeverity({ title, rating, description, email, status: false });
   res.status(200).json({ mess: "cooked" });
-  let data = await feedback.create({...req.body,severity,status:false});
-  
-  if(req.body.config?.ackMail) {
+  let data = await feedback.create({ ...req.body, severity, status: false });
+
+  if (req.body.config?.ackMail) {
     const currentDate = new Date().toLocaleString("en-IN", {
       timeZone: "Asia/Kolkata",
       weekday: "short",
@@ -111,10 +120,10 @@ const createFeed = async (req, res) => {
       hour: "2-digit",
       minute: "2-digit",
     });
-    let filepath = path.join(process.cwd(),"utils","ackMail.html")
-    let  mailContent = fs.readFileSync(filepath,"utf-8")
-    console.log({filepath,mailContent})
-        mailContent= mailContent
+    let filepath = path.join(process.cwd(), "utils", "ackMail.html")
+    let mailContent = fs.readFileSync(filepath, "utf-8")
+    console.log({ filepath, mailContent })
+    mailContent = mailContent
       .replace(/{{email}}/g, email)
       .replace(/{{title}}/g, title)
       .replace(/{{webUrl}}/g, webUrl)
@@ -124,7 +133,8 @@ const createFeed = async (req, res) => {
       .replace(/{{currentDate}}/g, currentDate);
     // const templatePath = path.join(process.cwd(), "templates", "ackMail.html");
     // console.log({filepath});
-    sendFeedbackEmail(email,`Your feedback has been received — ${webUrl} Team`,mailContent);
+    console.log({ mailContent })
+    sendEmail(email, `Your feedback has been received — ${webUrl} Team`, mailContent);
   }
 };
 
@@ -233,10 +243,10 @@ const allFeedback = async (req, res) => {
   try {
     console.log("[allFeedback] START");
     const user = req.user;
-    
+
     const { sites } = await getUserAccessibleWebsites(user.id);
     console.log("[allFeedback] User sites:", sites);
-    
+
     if (!sites || sites.length === 0) {
       return res.status(200).json({
         success: true,
@@ -245,22 +255,22 @@ const allFeedback = async (req, res) => {
         count: 0
       });
     }
-        const userTeams = await Team.find({
-  'members.user': user.id,
-  'members.role': { $in: ['owner', 'editor'] },
-});
-const teamOptions = userTeams.map(team => ({
-  value: team.mail,   // the email will be the value
-  label: team.name    // the team name will be shown in the dropdown
-}));
+    const userTeams = await Team.find({
+      'members.user': user.id,
+      'members.role': { $in: ['owner', 'editor'] },
+    });
+    const teamOptions = userTeams.map(team => ({
+      value: team.mail,   // the email will be the value
+      label: team.name    // the team name will be shown in the dropdown
+    }));
     // Fetch all feedback sorted by creation date (ascending for proper chart rendering)
     const feedbacks = await feedback
       .find({ webUrl: { $in: sites } })
       .sort({ createdOn: 1 })
       .lean();
-    
+
     console.log(`[allFeedback] Total feedback: ${feedbacks.length}`);
-    
+
     // Group by date to verify multiple entries per day
     const byDate = {};
     feedbacks.forEach(fb => {
@@ -268,11 +278,11 @@ const teamOptions = userTeams.map(team => ({
       byDate[date] = (byDate[date] || 0) + 1;
     });
     console.log("[allFeedback] Feedback per date:", byDate);
-    
+
     return res.status(200).json({
       success: true,
       data: feedbacks,
-     userTeams:teamOptions,
+      userTeams: teamOptions,
       sites: sites,
       count: feedbacks.length
     });
@@ -291,11 +301,11 @@ const display = async (req, res) => {
   console.log("\n========================================");
   console.log("=== DISPLAY ANALYTICS CALLED ===");
   console.log("========================================");
-  
+
   try {
     console.log("Step 1: Got request");
     console.log("Step 2: Checking user...");
-    
+
     if (!req.user) {
       console.log("ERROR: No user in request!");
       return res.status(401).json({
@@ -303,10 +313,10 @@ const display = async (req, res) => {
         message: "User not authenticated"
       });
     }
-    
+
     const user = req.user;
     console.log("Step 3: User found:", user.id);
-    
+
     console.log("Step 4: Getting accessible websites...");
     const { sites } = await getUserAccessibleWebsites(user.id);
     console.log("Step 5: User sites:", sites);
@@ -325,7 +335,7 @@ const display = async (req, res) => {
     const analytics = await getDetailedFeedbackAnalyticsOptimized(sites);
     console.log("Step 8: Analytics complete!");
     console.log("Step 9: Sending response...");
-    
+
     return res.status(200).json({
       success: true,
       data: analytics,
@@ -351,11 +361,11 @@ const getDetailedFeedbackAnalyticsOptimized = async (webUrls) => {
 
     for (const webUrl of webUrls) {
       console.log(`\nProcessing ${webUrl}...`);
-      
+
       // Simple query - just get all feedback for this site
       const allFeedbackForSite = await feedback.find({ webUrl }).sort({ createdOn: 1 });
       console.log(`Found ${allFeedbackForSite.length} total feedback for ${webUrl}`);
-      
+
       if (allFeedbackForSite.length === 0) {
         analytics[webUrl] = {
           totalFeedback: 0,
@@ -367,50 +377,50 @@ const getDetailedFeedbackAnalyticsOptimized = async (webUrls) => {
         };
         continue;
       }
-      
+
       // Initialize counters
       const categories = { bug: 0, complaint: 0, feature: 0, general: 0, improvement: 0, other: 0 };
       const currentMonthCat = { bug: 0, complaint: 0, feature: 0, general: 0, improvement: 0, other: 0 };
       const lastMonthCat = { bug: 0, complaint: 0, feature: 0, general: 0, improvement: 0, other: 0 };
       const dailyBreakdown = {};
-      
+
       // Initialize daily breakdown for current month
       for (let day = 1; day <= currentDay; day++) {
         dailyBreakdown[day] = { bug: 0, complaint: 0, feature: 0, general: 0, improvement: 0, other: 0 };
       }
-      
+
       let currentMonthCount = 0;
       let lastMonthCount = 0;
-      
+
       // Process each feedback
       allFeedbackForSite.forEach(fb => {
         const fbDate = new Date(fb.createdOn);
         const fbMonth = fbDate.getMonth();
         const fbYear = fbDate.getFullYear();
         const fbDay = fbDate.getDate();
-        
+
         const category = categorizeFeedback(fb.title);
         categories[category]++;
-        
+
         // Current month
         if (fbYear === dateRanges.current.year && fbMonth === dateRanges.current.monthIndex) {
           currentMonthCat[category]++;
           currentMonthCount++;
-          
+
           if (fbDay <= currentDay) {
             dailyBreakdown[fbDay][category]++;
           }
         }
-        
+
         // Last month
         if (fbYear === dateRanges.last.year && fbMonth === dateRanges.last.monthIndex) {
           lastMonthCat[category]++;
           lastMonthCount++;
         }
       });
-      
+
       console.log(`${webUrl} - Current month: ${currentMonthCount}, Last month: ${lastMonthCount}`);
-      
+
       analytics[webUrl] = {
         totalFeedback: allFeedbackForSite.length,
         currentMonth: {
@@ -484,14 +494,14 @@ const categorizeFeedback = (title) => {
   if (FEEDBACK_CATEGORIES[title]) {
     return FEEDBACK_CATEGORIES[title];
   }
-  
+
   const titleLower = (title || '').toLowerCase().trim();
   if (titleLower.includes('bug')) return 'bug';
   if (titleLower.includes('complaint')) return 'complaint';
   if (titleLower.includes('feature')) return 'feature';
   if (titleLower.includes('improvement')) return 'improvement';
   if (titleLower.includes('general')) return 'general';
-  
+
   return 'other';
 };
 
@@ -499,7 +509,7 @@ const getDashboardData = async (req, res) => {
   try {
     const user = req.user;
     const { sites, webDataObjects, teams } = await getUserAccessibleWebsites(user.id);
-
+    console.log({ sites })
     if (!sites || sites.length === 0) {
       return res.status(200).json({
         stats: {
@@ -520,10 +530,10 @@ const getDashboardData = async (req, res) => {
 
     // 2. Calculate Stats
     const totalFeedbacks = allFeedback.length;
-    
+
     const ratedFeedbacks = allFeedback.filter(f => f.rating && !isNaN(f.rating));
-    const avgRating = ratedFeedbacks.length > 0 
-      ? (ratedFeedbacks.reduce((acc, curr) => acc + curr.rating, 0) / ratedFeedbacks.length).toFixed(1) 
+    const avgRating = ratedFeedbacks.length > 0
+      ? (ratedFeedbacks.reduce((acc, curr) => acc + curr.rating, 0) / ratedFeedbacks.length).toFixed(1)
       : 0;
 
     const totalWidgets = sites.length;
@@ -531,7 +541,7 @@ const getDashboardData = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const newFeedbackToday = allFeedback.filter(f => new Date(f.createdOn) >= today).length;
-    
+
     // Calculate resolved count (status === true)
     const resolvedCount = allFeedback.filter(f => f.status === true).length;
 
@@ -542,7 +552,7 @@ const getDashboardData = async (req, res) => {
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
       const dayFeedbacks = allFeedback.filter(f => f.createdOn.toISOString().split('T')[0] === dateStr);
-      
+
       analytics.push({
         date: d.toLocaleDateString('en-US', { weekday: 'short' }), // Mon, Tue
         count: dayFeedbacks.length,
@@ -560,43 +570,43 @@ const getDashboardData = async (req, res) => {
     // 5. Team Members (Mocking or fetching real if available)
     let teamMembers = [];
 
-    
+
     // Better approach for Team Members: Fetch distinct users from teams
     // For now, let's return empty or implement a separate call if it's heavy. 
     // Actually, let's try to get some basic info.
     // We can fetch the team details with populated members.
     const populatedTeams = await Team.find({ _id: { $in: teams.map(t => t._id) } }).populate('members.user', 'name email profile');
-    
+
     const membersMap = new Map();
     populatedTeams.forEach(team => {
-        team.members.forEach(m => {
-            if (m.user && !membersMap.has(m.user._id.toString())) {
-                membersMap.set(m.user._id.toString(), {
-                    name: m.user.name,
-                    email: m.user.email,
-                    profile: m.user.profile,
-                    role: m.role,
-                    teamName: team.name
-                });
-            }
-        });
+      team.members.forEach(m => {
+        if (m.user && !membersMap.has(m.user._id.toString())) {
+          membersMap.set(m.user._id.toString(), {
+            name: m.user.name,
+            email: m.user.email,
+            profile: m.user.profile,
+            role: m.role,
+            teamName: team.name
+          });
+        }
+      });
     });
     teamMembers = Array.from(membersMap.values()).slice(0, 5); // Top 5 members
 
     // 6. Widgets List with specific stats
     const widgets = webDataObjects.map(site => {
-        const siteFeedbacks = allFeedback.filter(f => f.webUrl === site.webUrl);
-        const siteRated = siteFeedbacks.filter(f => f.rating);
-        const siteAvg = siteRated.length > 0 
-            ? (siteRated.reduce((acc, f) => acc + f.rating, 0) / siteRated.length).toFixed(1) 
-            : 0;
-        
-        return {
-            webUrl: site.webUrl,
-            totalFeedback: siteFeedbacks.length,
-            avgRating: siteAvg,
-            lastActive: siteFeedbacks.length > 0 ? siteFeedbacks[0].createdOn : site.createdAt
-        };
+      const siteFeedbacks = allFeedback.filter(f => f.webUrl === site.webUrl);
+      const siteRated = siteFeedbacks.filter(f => f.rating);
+      const siteAvg = siteRated.length > 0
+        ? (siteRated.reduce((acc, f) => acc + f.rating, 0) / siteRated.length).toFixed(1)
+        : 0;
+
+      return {
+        webUrl: site.webUrl,
+        totalFeedback: siteFeedbacks.length,
+        avgRating: siteAvg,
+        lastActive: siteFeedbacks.length > 0 ? siteFeedbacks[0].createdOn : site.createdAt
+      };
     });
 
     res.status(200).json({
@@ -619,10 +629,10 @@ const getDashboardData = async (req, res) => {
   }
 };
 
-module.exports = { 
-  createFeed, 
-  getFeed, 
-  display, 
+module.exports = {
+  createFeed,
+  getFeed,
+  display,
   allFeedback,
   exportFeedback,
   getUserAccessibleWebsites,

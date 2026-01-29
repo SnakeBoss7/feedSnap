@@ -7,7 +7,9 @@ const openai_NVIDIA = new OpenAI({
   apiKey: process.env.NVIDIA_API_KEY,
   baseURL: "https://integrate.api.nvidia.com/v1",
 });
-
+const {
+  getUserAccessibleWebsites,
+} = require("../controllers/feebackController");
 
 function extractCleanJSON(aiResponse) {
   try {
@@ -57,11 +59,10 @@ A: "<p>Plans start at <strong>$X/month</strong>! 💰</p>"
 **Your Platform Info:**
 `;
 
-    // HOW TO USE:
     const finalPrompt = UNIVERSAL_CONTEXT + botContext;
 
     const completion = await openai_NVIDIA.chat.completions.create({
-      model: "nvidia/llama-3.3-nemotron-super-49b-v1.5", // Fast + high quality
+      model: "nvidia/llama-3.3-nemotron-super-49b-v1.5",
       messages: [
         {
           role: "system",
@@ -75,7 +76,7 @@ A: "<p>Plans start at <strong>$X/month</strong>! 💰</p>"
       temperature: 0.6,
       top_p: 0.7,
       max_tokens: 2048,
-      stream: false, // No streaming
+      stream: false,
     });
 
     const response = completion.choices[0]?.message?.content;
@@ -93,62 +94,89 @@ A: "<p>Plans start at <strong>$X/month</strong>! 💰</p>"
   }
 };
 
+const feedback = require("../models/feedback");
+
 //optimized data for ai
-function optimizeFeedbackForAI(feedbacks) {
-  const TITLES = [
-    "Bug Report",
-    "Feature Request",
-    "Improvement",
-    "General Feedback",
-    "complaint",
-  ];
+async function optimizeFeedbackForAI(webUrl) {
+  try {
+    const feedbacks = await feedback.find({ webUrl: webUrl });
+    const TITLES = [
+      "Bug Report",
+      "Feature Request",
+      "Improvement",
+      "General Feedback",
+      "complaint",
+    ];
 
-  // Calculate statistics
-  const stats = {
-    total: feedbacks.length,
-    unresolved: feedbacks.filter((f) => !f.status).length,
-    resolved: feedbacks.filter((f) => f.status).length,
-    avgRating: (
-      feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length
-    ).toFixed(1),
-    avgSeverity: (
-      feedbacks.reduce((sum, f) => sum + f.severity, 0) / feedbacks.length
-    ).toFixed(1),
-  };
-
-  // Count by title
-  const titleCounts = {};
-  TITLES.forEach((title) => {
-    titleCounts[title] = feedbacks.filter((f) => f.title === title).length;
-  });
-
-  // Group descriptions by title - ONLY DESCRIPTIONS AS ARRAY OF STRINGS
-  const descByTitle = {};
-  TITLES.forEach((title) => {
-    const items = feedbacks
-      .filter((f) => f.title === title)
-      .map((f) => f.description.trim()); // Just the description string
-
-    if (items.length > 0) {
-      descByTitle[title] = items;
+    if (!feedbacks || feedbacks.length === 0) {
+      return {
+        webUrl,
+        stats: {
+          total: 0,
+          unresolved: 0,
+          resolved: 0,
+          avgRating: "0.0",
+          avgSeverity: "0.0",
+        },
+        titleCounts: {},
+        severityBreakdown: {},
+        feedbacks: {},
+      };
     }
-  });
 
-  // Severity breakdown for 0-10 scale
-  const severityBreakdown = {
-    critical: feedbacks.filter((f) => f.severity >= 8).length,
-    high: feedbacks.filter((f) => f.severity >= 6 && f.severity < 8).length,
-    medium: feedbacks.filter((f) => f.severity >= 4 && f.severity < 6).length,
-    low: feedbacks.filter((f) => f.severity >= 2 && f.severity < 4).length,
-    veryLow: feedbacks.filter((f) => f.severity < 2).length,
-  };
+    // Calculate statistics
+    const stats = {
+      total: feedbacks.length,
+      unresolved: feedbacks.filter((f) => !f.status).length,
+      resolved: feedbacks.filter((f) => f.status).length,
+      avgRating: (
+        feedbacks.reduce((sum, f) => sum + (f.rating || 0), 0) / (feedbacks.length || 1)
+      ).toFixed(1),
+      avgSeverity: (
+        feedbacks.reduce((sum, f) => sum + (f.severity || 0), 0) / (feedbacks.length || 1)
+      ).toFixed(1),
+    };
 
-  return {
-    stats,
-    titleCounts,
-    severityBreakdown,
-    feedbacks: descByTitle,
-  };
+    // Count by title
+    const titleCounts = {};
+    TITLES.forEach((title) => {
+      titleCounts[title] = feedbacks.filter((f) => f.title === title).length;
+    });
+
+    // Group descriptions by title - ONLY DESCRIPTIONS AS ARRAY OF STRINGS
+    const descByTitle = {};
+    TITLES.forEach((title) => {
+      const items = feedbacks
+        .filter((f) => f.title === title)
+        .map((f) => (f.description || "").trim()); // Just the description string
+
+      if (items.length > 0) {
+        descByTitle[title] = items;
+      }
+    });
+
+    // Severity breakdown for 0-10 scale
+    // Assuming severity is 1-5 based on previous context, but code said 0-10?
+    // keeping existing logic of 2, 4, 6, 8 thresholds
+    const severityBreakdown = {
+      critical: feedbacks.filter((f) => f.severity >= 8).length,
+      high: feedbacks.filter((f) => f.severity >= 6 && f.severity < 8).length,
+      medium: feedbacks.filter((f) => f.severity >= 4 && f.severity < 6).length,
+      low: feedbacks.filter((f) => f.severity >= 2 && f.severity < 4).length,
+      veryLow: feedbacks.filter((f) => f.severity < 2).length,
+    };
+    // console.log({ stats, titleCounts, severityBreakdown, descByTitle })
+    return {
+      webUrl,
+      stats,
+      titleCounts,
+      severityBreakdown,
+      feedbacks: descByTitle,
+    };
+  } catch (error) {
+    console.error(`Error optimizing feedback for ${webUrl}:`, error);
+    return { webUrl, error: "Failed to fetch data" };
+  }
 }
 
 // Email generation instructions - Only used when requested
@@ -223,9 +251,23 @@ const askAI = async (req, res) => {
       ]);
 
     // Safely stringify feedback data
-    const feedbackData = req.body.feedbackData || {};
-    let optimizedData = optimizeFeedbackForAI(feedbackData);
+    // Safely stringify feedback data
+    // const feedbackData = req.body.feedbackData || {};
+    console.log(req.user)
+    const websites = await getUserAccessibleWebsites(req.user.id);
+    console.log(websites)
 
+    let optimizedData = [];
+    if (websites.sites && websites.sites.length > 0) {
+      for (const site of websites.sites) {
+        if (site) {
+          const siteAnalysis = await optimizeFeedbackForAI(site);
+          optimizedData.push(siteAnalysis);
+        }
+      }
+    }
+    console.log(optimizedData)
+    // return { message: "success", data: optimizedData }
     const data = JSON.stringify(optimizedData)
       .replace(/`/g, "\\`")
       .replace(/\$/g, "\\$");
