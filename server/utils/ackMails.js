@@ -221,10 +221,10 @@ const sendEmail = async (to, subject, html) => {
         "Content-Type": "application/json",
       }
     });
-    console.log("Email sent successfully!");
+    // console.log("Email sent successfully!");
     return { success: true, data: response.data };
   } catch (err) {
-    console.error("Email failed:", err);
+    // console.error("Email failed:", err);
     return { success: false, error: err.message };
   }
 };

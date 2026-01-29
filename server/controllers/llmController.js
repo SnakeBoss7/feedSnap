@@ -250,12 +250,9 @@ const askAI = async (req, res) => {
         },
       ]);
 
-    // Safely stringify feedback data
-    // Safely stringify feedback data
-    // const feedbackData = req.body.feedbackData || {};
-    console.log(req.user)
+
     const websites = await getUserAccessibleWebsites(req.user.id);
-    console.log(websites)
+
 
     let optimizedData = [];
     if (websites.sites && websites.sites.length > 0) {
@@ -266,8 +263,7 @@ const askAI = async (req, res) => {
         }
       }
     }
-    console.log(optimizedData)
-    // return { message: "success", data: optimizedData }
+
     const data = JSON.stringify(optimizedData)
       .replace(/`/g, "\\`")
       .replace(/\$/g, "\\$");
@@ -356,7 +352,7 @@ CRITICAL RULES:
 
     // Validate the parsed result
     const validatedResult = validateAIResponse(cleanResult);
-    console.log(cleanResult);
+
     return res.status(200).json({ response: validatedResult });
   } catch (error) {
     // Determine appropriate error response
