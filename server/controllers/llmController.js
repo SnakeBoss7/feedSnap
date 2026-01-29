@@ -38,8 +38,7 @@ const llmQuery = async (req, res) => {
     }
     const UNIVERSAL_CONTEXT = `You're a friendly AI chatbot assistant.
 
-**Response Rules:**
-- Keep it SHORT (1-2 sentences)
+**Response Rules:*
 - Always use HTML: <p>, <strong>, <ul>, <li>, <br>
 - Be casual & helpful 😊
 - Use emojis naturally
@@ -80,7 +79,7 @@ A: "<p>Plans start at <strong>$X/month</strong>! 💰</p>"
     });
 
     const response = completion.choices[0]?.message?.content;
-
+    console.log(response)
     if (!response) {
       throw new Error("Empty response from AI");
     }
@@ -221,6 +220,7 @@ const BASE_INSTRUCTIONS = `
 
 // Enhanced AI assistant for email generation and responses
 const askAI = async (req, res) => {
+  console.log("Icame i saw")
   try {
     // Validate request body
     if (!req.body || !req.body.userPrompt) {

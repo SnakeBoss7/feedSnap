@@ -1358,10 +1358,13 @@ const widgetGen = (config) => {
                     // Remove loading message
                     loadingMsg.remove();
                     
-                    // Add bot response
-                     const formattedMessage = data.data.replace(/\\n/g, '<br>');
-                     //.log(formattedMessage)
-    this.addChatMessage(formattedMessage, 'bot');
+                    // Add bot response - check if AI already returned HTML
+                    // If the response contains block-level HTML tags, don't add <br> for newlines
+                    const hasHtmlBlocks = /<(p|ul|ol|li|div|h[1-6]|br)[^>]*>/i.test(data.data);
+                    const formattedMessage = hasHtmlBlocks 
+                        ? data.data.replace(/\\n\\s*\\n/g, '').replace(/\\n/g, '') // Remove newlines from HTML
+                        : data.data.replace(/\\n/g, '<br>'); // Only add <br> for plain text
+                    this.addChatMessage(formattedMessage, 'bot');
                 })
                 .catch(error => {
                     //.error('Error fetching LLM response:', error);
