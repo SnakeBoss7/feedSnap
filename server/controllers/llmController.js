@@ -40,6 +40,7 @@ const llmQuery = async (req, res) => {
 
 **Response Rules:*
 - Always use HTML: <p>, <strong>, <ul>, <li>, <br>
+- NEVER use Markdown (no **, ##, - or 1.)
 - Be casual & helpful 😊
 - Use emojis naturally
 
@@ -300,6 +301,7 @@ Response Rules:
 1. "response" field (REQUIRED):
    - MUST contain the DETAILED ANALYSIS.
    - Use simple HTML: <p>, <strong>, <ul>, <li>, <br>
+   - NEVER use Markdown (no **, ##)
    - Cite specific numbers/issues from data.
    - Do NOT put analysis in the suggestions.
 

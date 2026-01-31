@@ -71,7 +71,7 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 font-sans bg-gray-50 dark:bg-black transition-colors duration-300 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center  font-sans bg-gray-50 dark:bg-black transition-colors duration-300 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-500/20 rounded-full blur-[100px]" />
@@ -94,7 +94,7 @@ export const Login = () => {
           </Link>
         </div>
 
-        <Card className="border-2 border-gray-300 dark:border-white/10 shadow-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl">
+        <Card className="border-2 border-gray-300 dark:border-white/10 my-10 mx-4 shadow-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl">
           <CardHeader className="text-center pb-6 space-y-1">
             <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Welcome Back</CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">

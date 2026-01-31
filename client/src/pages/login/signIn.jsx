@@ -86,25 +86,25 @@ export const SignIn = () => {
         <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-blue-500/20 rounded-full blur-[100px]" />
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md relative z-10"
+        className="w-full max-w-md  relative z-10"
       >
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 group">
-            <div className="text-3xl font-bold tracking-tighter">
+            <div className="text-2xl font-bold tracking-tighter">
               <span className="text-gray-900 dark:text-white">Feed</span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">SNAP</span>
             </div>
           </Link>
         </div>
 
-        <Card className="border-2 border-gray-300 dark:border-white/10 shadow-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl">
+        <Card className="border-2  border-gray-300 dark:border-white/10 shadow-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl">
           <CardHeader className="text-center pb-2 space-y-1">
-            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Create Account</CardTitle>
+            <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">Create Account</CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
               Start collecting feedback in minutes
             </CardDescription>
@@ -112,7 +112,7 @@ export const SignIn = () => {
           <CardContent>
             <form onSubmit={(e) => handleSignIn(e)} className="space-y-4">
               <div className="space-y-2 flex flex-col">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="name">
+                <label className="text-xs font-medium text-gray-700 dark:text-gray-300" htmlFor="name">
                   Full Name
                 </label>
                 <input
@@ -122,12 +122,12 @@ export const SignIn = () => {
                   value={formData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   required
-                  className="p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all text-gray-900 dark:text-white placeholder:text-gray-400"
+                  className="p-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all text-gray-900 dark:text-white placeholder:text-gray-400"
                 />
               </div>
               <div className="space-y-2 flex flex-col">
                 <label
-                  className={`text-sm font-medium ${mess ? "text-red-500" : "text-gray-700 dark:text-gray-300"}`}
+                  className={`text-xs font-medium ${mess ? "text-red-500" : "text-gray-700 dark:text-gray-300"}`}
                   htmlFor="email"
                 >
                   Email
@@ -139,11 +139,10 @@ export const SignIn = () => {
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   required
-                  className={`p-3 rounded-xl bg-gray-50 dark:bg-white/5 border focus:ring-2 focus:outline-none transition-all text-gray-900 dark:text-white placeholder:text-gray-400 ${
-                    mess 
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500/20" 
-                      : "border-gray-200 dark:border-white/10 focus:border-blue-500 focus:ring-blue-500/20"
-                  }`}
+                  className={`p-2 rounded-xl bg-gray-50 dark:bg-white/5 border focus:ring-2 focus:outline-none transition-all text-gray-900 dark:text-white placeholder:text-gray-400 ${mess
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                    : "border-gray-200 dark:border-white/10 focus:border-blue-500 focus:ring-blue-500/20"
+                    }`}
                 />
                 {mess && (
                   <span className="text-xs flex items-center gap-1 text-red-500 mt-1">
@@ -153,7 +152,7 @@ export const SignIn = () => {
                 )}
               </div>
               <div className="space-y-2 flex flex-col">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="password">
+                <label className="text-xs font-medium text-gray-700 dark:text-gray-300" htmlFor="password">
                   Password
                 </label>
                 <div className="relative">
@@ -164,7 +163,7 @@ export const SignIn = () => {
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
                     required
-                    className="w-full p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all text-gray-900 dark:text-white placeholder:text-gray-400 pr-10"
+                    className="w-full p-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all text-gray-900 dark:text-white placeholder:text-gray-400 pr-10"
                   />
                   <button
                     type="button"
@@ -180,7 +179,7 @@ export const SignIn = () => {
                 </div>
               </div>
               <div className="space-y-2 flex flex-col">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="confirmPassword">
+                <label className="text-xs font-medium text-gray-700 dark:text-gray-300" htmlFor="confirmPassword">
                   Confirm Password
                 </label>
                 <input
@@ -190,7 +189,7 @@ export const SignIn = () => {
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                   required
-                  className="p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all text-gray-900 dark:text-white placeholder:text-gray-400"
+                  className="p-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all text-gray-900 dark:text-white placeholder:text-gray-400"
                 />
               </div>
 
@@ -235,7 +234,7 @@ export const SignIn = () => {
             </Button>
 
             <div className="mt-8 text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 Already have an account?{" "}
                 <Link
                   to="/login"

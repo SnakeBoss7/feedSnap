@@ -858,11 +858,7 @@ const widgetGen = (config) => {
     text-decoration: underline;
 }
 
-.fw-message.bot br {
-    display: block;
-    margin: 4px 0;
-    content: "";
-}
+
 
             /* Nudge Tooltip Styles - Modular Edition */
                 .fw-button-wrapper {

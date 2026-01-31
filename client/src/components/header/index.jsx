@@ -43,28 +43,40 @@ export default function Header() {
             </div>
 
             {/* Desktop Navigation */}
+            <div className="flex gap-12 text-md font-bold text-gray-600 dark:text-gray-300">
+              <div className="flex group flex-col">
+                <Link
+                  className="group flex items-center gap-2  dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  to="/"
+                >
+                  {/* <LucideHome size={18} className="group-hover:scale-110 transition-transform" /> */}
+                  Home
+                </Link>
+                <div className="h-[2px] w-0 bg-purple-600 dark:bg-purple-400 transition-all duration-300 group-hover:w-full"></div>
+              </div>
+              <div className="flex group flex-col">
+                <Link
+                  className="group flex items-center gap-2   dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  to="/overview"
+                >
+                  {/* <LucideView size={18} className="group-hover:scale-110 transition-transform" /> */}
+                  Overview
+                </Link>
+                <div className="h-[2px] w-0 bg-blue-600 dark:bg-blue-400 transition-all duration-300 group-hover:w-full"></div>
+              </div>
+              <div className="flex group flex-col">
+                <Link
+                  className="group flex items-center gap-2   dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                  to="/logIn"
+                >
+                  {/* <LucideLogIn size={18} className="group-hover:scale-110 transition-transform" /> */}
+                  Log In
+                </Link>
+                <div className="h-[2px] w-0 bg-green-600 dark:bg-green-400 transition-all duration-300 group-hover:w-full"></div>
+              </div>
+
+            </div>
             <div className="flex gap-6 font-sans lg:flex hidden items-center">
-              <Link
-                className="group flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                to="/"
-              >
-                <LucideHome size={18} className="group-hover:scale-110 transition-transform" />
-                Home
-              </Link>
-              <Link
-                className="group flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                to="/overview"
-              >
-                <LucideView size={18} className="group-hover:scale-110 transition-transform" />
-                Overview
-              </Link>
-              <Link
-                className="group flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                to="/logIn"
-              >
-                <LucideLogIn size={18} className="group-hover:scale-110 transition-transform" />
-                Log In
-              </Link>
 
               {/* Get Started Button */}
               {/* Theme Toggle */}
