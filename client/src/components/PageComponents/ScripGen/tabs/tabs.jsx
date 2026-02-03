@@ -304,7 +304,7 @@ export default function WidgetTabs({
                 />
 
                 <div className="p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-xl flex items-center justify-between  border border-gray-100 dark:border-dark-border-subtle">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-3">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-dark-text-secondary ">
                     <MailCheck size={16} className="text-blue-500 dark:text-blue-400" /> Acknowledgment Email
                   </label>
                   <div className="pl-1">
@@ -461,11 +461,11 @@ export default function WidgetTabs({
           )}
         </div>
 
-        <div className="pt-6 mt-auto flex gap-3 border-t border-gray-100 dark:border-dark-border-subtle">
+        <div className="pt-6 flex gap-3 border-t border-gray-100 dark:border-dark-border-subtle">
           <button
             type="submit"
             disabled={isDisabled}
-            className={`flex-1 flex justify-center items-center gap-2 rounded-xl h-[52px] text-sm font-bold text-white shadow-md transition-all duration-300 ${isDisabled
+            className={`flex-1 flex justify-center md:w-[70%] w-[60%] items-center gap-2 rounded-xl h-[52px] text-sm font-bold text-white shadow-md transition-all duration-300 ${isDisabled
               ? "bg-blue-300 dark:bg-blue-900/40 cursor-not-allowed shadow-none opacity-70"
               : "bg-blue-600 hover:bg-blue-700 hover:shadow-blue-500/30 hover:-translate-y-0.5"
               }`}
@@ -476,7 +476,7 @@ export default function WidgetTabs({
 
           <button
             onClick={(e) => genDemo(e)}
-            className={`flex justify-center items-center gap-2 px-6 rounded-xl h-[52px] min-w-[140px] text-sm font-bold transition-all duration-300 border shadow-sm hover:shadow-md ${showDemo
+            className={`flex justify-center items-center gap-2 rounded-xl h-[52px] md:w-[30%] w-[40%] text-sm font-bold transition-all duration-300 border shadow-sm hover:shadow-md ${showDemo
               ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30'
               : 'bg-white dark:bg-dark-bg-tertiary text-gray-700 dark:text-dark-text-secondary border-gray-200 dark:border-dark-border-subtle hover:bg-gray-50 dark:hover:bg-dark-bg-hover hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-900 dark:hover:text-dark-text-primary'
               }`}

@@ -43,7 +43,7 @@ export default function Header() {
             </div>
 
             {/* Desktop Navigation */}
-            <div className="flex gap-12 text-md font-bold text-gray-600 dark:text-gray-300">
+            <div className=" gap-12 text-md font-bold text-gray-600 dark:text-gray-300 lg:flex hidden">
               <div className="flex group flex-col">
                 <Link
                   className="group flex items-center gap-2  dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
@@ -124,7 +124,7 @@ export default function Header() {
       {showSidebar && (
         <div className="lg:hidden mt-6 fixed top-20 left-0 right-0 z-[9998] px-4 animate-slideDown">
           <div
-            className="w-full rounded-2xl glass-card p-6 shadow-2xl"
+            className="w-full rounded-2xl bg-white dark:bg-black p-6 shadow-2xl"
             onClick={() => setShowSidebar((prev) => !prev)}
           >
             <div className="flex flex-col gap-4 font-medium">

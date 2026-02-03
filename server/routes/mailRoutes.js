@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const verifyUser = require('../middleware/jwtverify');
-const { sendEmail } = require('../utils/ackMails');
 
 router.post('/send', verifyUser, (req, res) => {
     console.log(req.body);

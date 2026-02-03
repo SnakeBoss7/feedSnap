@@ -43,7 +43,7 @@ app.use(async (req, res, next) => {
 
     // Allow development origins without database lookup
     if (DEV_WHITELIST.includes(origin)) {
-      console.log("✅ Allowed (dev whitelist):", origin);
+      console.log(" Allowed (dev whitelist):", origin);
       res.header("Access-Control-Allow-Origin", origin);
       res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
       res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -57,8 +57,8 @@ app.use(async (req, res, next) => {
     console.log(site);
 
     if (site) {
-      // ✅ Allow the verified origin
-      console.log("✅ Allowed:", origin);
+      //  Allow the verified origin
+      console.log(" Allowed:", origin);
       res.header("Access-Control-Allow-Origin", origin);
       res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
       res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -71,8 +71,8 @@ app.use(async (req, res, next) => {
 
       return next();
     } else {
-      // ❌ Block unauthorized origins
-      console.log("❌ Blocked:", origin);
+      // Block unauthorized origins
+      console.log(" Blocked:", origin);
       return res.status(403).json({
         error: "Origin not allowed by CORS",
         origin: origin
@@ -105,7 +105,6 @@ app.use('/api/team', teamRoute);
 app.use('/api/llm', llmRoute);
 
 //widget script hosting
-// ✅ CORRECTED CODE
 app.get('/widget/script', async (req, res) => {
   try {
     const url = req.query.webUrl;

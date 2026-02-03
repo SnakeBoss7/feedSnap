@@ -2,12 +2,11 @@ const user = require("../models/user");
 const webData = require("../models/WebData");
 const feedback = require("../models/feedback");
 const Team = require("../models/teamSchema");
-const cloudinary = require("../config/cloudinary");
 const path = require('path')
 const { Parser } = require("json2csv");
 const PDFDocument = require("pdfkit");
 const fs = require('fs')
-const { sendEmail } = require("../utils/ackMails");
+const { sendEmail } = require("../utils/mailService");
 const { computeSeverity } = require("../utils/severityCompute");
 
 // Helper function to get all websites accessible to a user
