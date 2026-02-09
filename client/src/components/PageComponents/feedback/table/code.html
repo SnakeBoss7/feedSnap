@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Feedback Management Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#8b5cf6", // Violet/Purple as seen in some screenshots
+                        "primary-hover": "#7c3aed",
+                        "background-light": "#f3f4f6", // Light gray for light mode
+                        "background-dark": "#0f1115", // Deep almost black for dark mode
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#181b21", // Slightly lighter dark for cards/panels
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#2d3139",
+                        "text-main-light": "#111827",
+                        "text-main-dark": "#f9fafb",
+                        "text-muted-light": "#6b7280",
+                        "text-muted-dark": "#9ca3af",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                    },
+                    boxShadow: {
+                        'glow': '0 0 10px rgba(139, 92, 246, 0.3)',
+                        'glow-success': '0 0 10px rgba(16, 185, 129, 0.2)',
+                        'glow-warning': '0 0 10px rgba(245, 158, 11, 0.2)',
+                        'glow-danger': '0 0 10px rgba(239, 68, 68, 0.2)',
+                    }
+                },
+            },
+        };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; }::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563; 
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark h-screen overflow-hidden flex transition-colors duration-200">
+<aside class="w-16 md:w-20 flex-shrink-0 flex flex-col items-center py-6 border-r border-border-light dark:border-border-dark bg-surface-light dark:bg-[#0b0c0f]">
+<div class="mb-8 text-primary">
+<span class="material-icons-round text-3xl">feedback</span>
+</div>
+<nav class="flex-1 flex flex-col gap-4 w-full px-2">
+<a class="p-3 rounded-xl flex justify-center items-center text-text-muted-light dark:text-text-muted-dark hover:bg-gray-100 dark:hover:bg-white/5 hover:text-primary transition-all" href="#">
+<span class="material-icons-round">dashboard</span>
+</a>
+<a class="p-3 rounded-xl flex justify-center items-center bg-primary text-white shadow-glow" href="#">
+<span class="material-icons-round">chat_bubble</span>
+</a>
+<a class="p-3 rounded-xl flex justify-center items-center text-text-muted-light dark:text-text-muted-dark hover:bg-gray-100 dark:hover:bg-white/5 hover:text-primary transition-all" href="#">
+<span class="material-icons-round">people</span>
+</a>
+<a class="p-3 rounded-xl flex justify-center items-center text-text-muted-light dark:text-text-muted-dark hover:bg-gray-100 dark:hover:bg-white/5 hover:text-primary transition-all" href="#">
+<span class="material-icons-round">code</span>
+</a>
+<a class="p-3 rounded-xl flex justify-center items-center text-text-muted-light dark:text-text-muted-dark hover:bg-gray-100 dark:hover:bg-white/5 hover:text-primary transition-all" href="#">
+<span class="material-icons-round">analytics</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-4 w-full px-2 items-center">
+<button class="p-3 rounded-xl text-text-muted-light dark:text-text-muted-dark hover:bg-gray-100 dark:hover:bg-white/5 transition-all" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-icons-round">light_mode</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-blue-500 p-0.5 relative cursor-pointer">
+<img alt="User Profile" class="rounded-full w-full h-full object-cover border-2 border-surface-light dark:border-surface-dark" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRRWKzyWIcBGVVYDf__S18co_f4oN2dlS6khclZpQX7mRj0lk5kIL1n2iM0781elQ6UB-JKrOpeOaBfB_ulEg5_ErwkCEfeHl3Hxye8-6f4KHMicDSVCgVCovCayjQtWUkyTpW1hp29PHk007lpfPNHTPoLRsiqm_CrPpnwQSB-4i016OUpbQMxHeWus3AyoxsJF-DAKSBMyaG0TcEzcST5tB3PieA4QGm7uuR0UMSE-QBELqFa5jb4wQ-hb9qKBurmNRGOPbqfwY9"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-surface-light dark:border-surface-dark"></div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col min-w-0 bg-background-light dark:bg-background-dark relative">
+<header class="h-16 px-8 flex items-center justify-between border-b border-border-light dark:border-border-dark bg-surface-light/50 dark:bg-background-dark/50 backdrop-blur-sm z-10">
+<div>
+<h1 class="text-xl font-semibold tracking-tight text-text-main-light dark:text-white">Feedback Management</h1>
+<p class="text-xs text-text-muted-light dark:text-text-muted-dark">Monitor and analyze user feedback across all your sites.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-text-muted-light dark:text-text-muted-dark border border-border-light dark:border-border-dark rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<span class="material-icons-round text-base">refresh</span>
+                    Refresh
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-text-main-light dark:text-text-main-dark bg-white dark:bg-white/10 border border-border-light dark:border-transparent rounded-lg hover:bg-gray-50 dark:hover:bg-white/20 transition-colors shadow-sm">
+<span class="material-icons-round text-base">download</span>
+                    Export Report
+                </button>
+</div>
+</header>
+<div class="px-8 py-6">
+<div class="p-1 bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark flex flex-wrap items-center gap-2 shadow-sm">
+<div class="flex-1 min-w-[240px] relative group">
+<span class="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-text-muted-light dark:text-text-muted-dark group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-transparent border-none text-sm text-text-main-light dark:text-text-main-dark placeholder-text-muted-light dark:placeholder-text-muted-dark pl-10 pr-4 py-2.5 focus:ring-0 rounded-lg" placeholder="Search feedback, emails, or keywords..." type="text"/>
+</div>
+<div class="h-6 w-px bg-border-light dark:bg-border-dark hidden md:block"></div>
+<div class="flex items-center gap-2 px-2 overflow-x-auto hide-scrollbar">
+<select class="bg-transparent border-none text-sm font-medium text-text-main-light dark:text-text-main-dark focus:ring-0 cursor-pointer py-2 pl-2 pr-8 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">
+<option>All Severities</option>
+<option>Critical</option>
+<option>High</option>
+<option>Medium</option>
+<option>Low</option>
+</select>
+<select class="bg-transparent border-none text-sm font-medium text-text-main-light dark:text-text-main-dark focus:ring-0 cursor-pointer py-2 pl-2 pr-8 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">
+<option>All Websites</option>
+<option>feed-snap.vercel.app</option>
+<option>localhost:3000</option>
+<option>demo-topaz.app</option>
+</select>
+<button class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-text-main-light dark:hover:text-text-main-dark hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors whitespace-nowrap">
+<span class="material-icons-round text-base">calendar_today</span>
+                        Oct 10 - Oct 22
+                    </button>
+</div>
+</div>
+</div>
+<div class="flex-1 px-8 pb-8 overflow-hidden flex gap-6">
+<div class="flex-1 overflow-hidden bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl shadow-sm flex flex-col">
+<div class="grid grid-cols-12 gap-4 px-6 py-3 border-b border-border-light dark:border-border-dark bg-gray-50/50 dark:bg-white/5 text-xs font-semibold text-text-muted-light dark:text-text-muted-dark uppercase tracking-wider items-center">
+<div class="col-span-1 flex items-center">
+<input class="rounded border-border-light dark:border-border-dark bg-transparent text-primary focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4" type="checkbox"/>
+</div>
+<div class="col-span-3">Details</div>
+<div class="col-span-2">Severity</div>
+<div class="col-span-2">Rating</div>
+<div class="col-span-2">Source</div>
+<div class="col-span-2 text-right">Date</div>
+</div>
+<div class="overflow-y-auto flex-1 custom-scrollbar">
+<div class="grid grid-cols-12 gap-4 px-6 py-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/[0.02] items-center group transition-colors cursor-pointer">
+<div class="col-span-1 flex items-center">
+<input class="rounded border-border-light dark:border-border-dark bg-transparent text-primary focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" type="checkbox"/>
+</div>
+<div class="col-span-3">
+<h3 class="text-sm font-medium text-text-main-light dark:text-white mb-0.5">General Feedback</h3>
+<p class="text-xs text-text-muted-light dark:text-text-muted-dark truncate">rahuldharwal12005@gmail.com</p>
+</div>
+<div class="col-span-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/20 shadow-glow-success">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                Low (2)
+                            </span>
+</div>
+<div class="col-span-2 flex items-center gap-0.5 text-yellow-400">
+<span class="material-icons-round text-base">star</span>
+<span class="material-icons-round text-base">star</span>
+<span class="material-icons-round text-base">star</span>
+<span class="material-icons-round text-base">star</span>
+<span class="material-icons-round text-base">star</span>
+</div>
+<div class="col-span-2 flex items-center gap-2">
+<div class="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] text-text-muted-light dark:text-text-muted-dark">
+<span class="material-icons-round text-xs">public</span>
+</div>
+<span class="text-sm text-text-muted-light dark:text-gray-300">localhost</span>
+</div>
+<div class="col-span-2 text-right text-sm text-text-muted-light dark:text-text-muted-dark font-medium">
+                            Oct 10, 2025
+                        </div>
+</div>
+<div class="grid grid-cols-12 gap-4 px-6 py-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/[0.02] items-center group transition-colors cursor-pointer bg-primary/5 dark:bg-primary/5 border-l-2 border-l-primary relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="col-span-1 flex items-center pl-0.5">
+<input class="rounded border-border-light dark:border-border-dark bg-transparent text-primary focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" type="checkbox"/>
+</div>
+<div class="col-span-3">
+<h3 class="text-sm font-medium text-text-main-light dark:text-white mb-0.5">Complaint</h3>
+<p class="text-xs text-text-muted-light dark:text-text-muted-dark truncate">sarah.j@enterprise.co</p>
+</div>
+<div class="col-span-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 shadow-glow-danger">
+<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                High (8)
+                            </span>
+</div>
+<div class="col-span-2 flex items-center gap-0.5">
+<span class="material-icons-round text-base text-yellow-400">star</span>
+<span class="material-icons-round text-base text-yellow-400">star</span>
+<span class="material-icons-round text-base text-gray-300 dark:text-gray-600">star</span>
+<span class="material-icons-round text-base text-gray-300 dark:text-gray-600">star</span>
+<span class="material-icons-round text-base text-gray-300 dark:text-gray-600">star</span>
+</div>
+<div class="col-span-2 flex items-center gap-2">
+<img alt="favicon" class="w-5 h-5 rounded-sm opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcE_NM8gopdLFQ7AYMcJJHqLJWNTflkdrm-oACOewEY6Myg-h2E-KqtE8j9uEDUUHqLi3EdUT0xhUUWjAHG2_8nR5tnmTa58pkA0p8PbYNrmkYH_6SQE5W5FWs-8YrOeiMvF8_I5bA7zzbbOTyC5DUyHzbDmLnbRJimmvJAmUyYwhUn7ff8m_KSN5GCLZKIKRYK4osvTed8ke9eIVlD0lLdna1n_oDQN6RNHuLz5ccEI6rdhOb8w9zmx2Y5ouHkp8as99jXJ3dXS9H"/>
+<span class="text-sm text-text-muted-light dark:text-gray-300 truncate">demo-topaz.app</span>
+</div>
+<div class="col-span-2 text-right text-sm text-text-muted-light dark:text-text-muted-dark font-medium">
+                            Oct 11, 2025
+                        </div>
+</div>
+<div class="grid grid-cols-12 gap-4 px-6 py-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/[0.02] items-center group transition-colors cursor-pointer">
+<div class="col-span-1 flex items-center">
+<input class="rounded border-border-light dark:border-border-dark bg-transparent text-primary focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" type="checkbox"/>
+</div>
+<div class="col-span-3">
+<h3 class="text-sm font-medium text-text-main-light dark:text-white mb-0.5">Bug Report</h3>
+<p class="text-xs text-text-muted-light dark:text-text-muted-dark truncate">mike.dev@startup.io</p>
+</div>
+<div class="col-span-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 shadow-glow-warning">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                Medium (5)
+                            </span>
+</div>
+<div class="col-span-2 flex items-center gap-0.5">
+<span class="material-icons-round text-base text-yellow-400">star</span>
+<span class="material-icons-round text-base text-yellow-400">star</span>
+<span class="material-icons-round text-base text-yellow-400">star</span>
+<span class="material-icons-round text-base text-gray-300 dark:text-gray-600">star</span>
+<span class="material-icons-round text-base text-gray-300 dark:text-gray-600">star</span>
+</div>
+<div class="col-span-2 flex items-center gap-2">
+<img alt="favicon" class="w-5 h-5 rounded-sm opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjtf6VDPPoBZP5sbgnhDZRFErPE1ZflabTFxK5xoItgFvv5Pm24SOUu10csSio4WbZstSfxVBxOhZYRFWI0sBgu7rO4iXHEtopZJgp5Wn0rshKmhi7gXxR4PI9UXC3NnoN3F595oGnDCAkqTj2PkpQyvclUTdvSsKZ2GgHNkykNKLxsT8O3cLotQ9Eo7n8d7OaEFvdjJyY8CQNAk81tEnFUNXXvVWQ5IQqbV2TmPzVMPx3lzbhi96-LBSWx7TOJ8El1VXl8sP2wXjB"/>
+<span class="text-sm text-text-muted-light dark:text-gray-300 truncate">feed-snap-nine</span>
+</div>
+<div class="col-span-2 text-right text-sm text-text-muted-light dark:text-text-muted-dark font-medium">
+                            Oct 12, 2025
+                        </div>
+</div>
+<div class="grid grid-cols-12 gap-4 px-6 py-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/[0.02] items-center group transition-colors cursor-pointer">
+<div class="col-span-1 flex items-center">
+<input class="rounded border-border-light dark:border-border-dark bg-transparent text-primary focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" type="checkbox"/>
+</div>
+<div class="col-span-3">
+<h3 class="text-sm font-medium text-text-main-light dark:text-white mb-0.5">Feature Request</h3>
+<p class="text-xs text-text-muted-light dark:text-text-muted-dark truncate">alice.wonder@design.net</p>
+</div>
+<div class="col-span-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/20 shadow-glow-success">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                Low (1)
+                            </span>
+</div>
+<div class="col-span-2 flex items-center gap-0.5">
+<span class="material-icons-round text-base text-yellow-400">star</span>
+<span class="material-icons-round text-base text-yellow-400">star</span>
+<span class="material-icons-round text-base text-yellow-400">star</span>
+<span class="material-icons-round text-base text-yellow-400">star</span>
+<span class="material-icons-round text-base text-yellow-400">star</span>
+</div>
+<div class="col-span-2 flex items-center gap-2">
+<img alt="favicon" class="w-5 h-5 rounded-sm opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2iCKyaQwJYcWZa-Hfw-CFQO-MKvr1VI1feWWfdyE451uyCIODa0TEpXDMOWe2TEc_BjfKpBVuEPnaMW4f6etzqW1TffVe19FFY2cBjyhB_yDguIkHjoS1JkzmKhf7pyXao1WOxNA35Ems25TD8S14RLsgi6OH9Z7rfQ31_RyKXlODU_Q7yG1PGuEBA1Ji1BucyIxxHimQ5n6e-vHW-8EAXnSkLSsMKCKfPUQ_oay43Xd_9xuEkW8Bk8oUUBOhyw_2-QzughBhrp3s"/>
+<span class="text-sm text-text-muted-light dark:text-gray-300 truncate">feed-snap-nine</span>
+</div>
+<div class="col-span-2 text-right text-sm text-text-muted-light dark:text-text-muted-dark font-medium">
+                            Oct 15, 2025
+                        </div>
+</div>
+<div class="grid grid-cols-12 gap-4 px-6 py-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/[0.02] items-center group transition-colors cursor-pointer">
+<div class="col-span-1 flex items-center">
+<input class="rounded border-border-light dark:border-border-dark bg-transparent text-primary focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" type="checkbox"/>
+</div>
+<div class="col-span-3">
+<h3 class="text-sm font-medium text-text-main-light dark:text-white mb-0.5">Complaint</h3>
+<p class="text-xs text-text-muted-light dark:text-text-muted-dark truncate">john.doe@unknown.com</p>
+</div>
+<div class="col-span-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 shadow-glow-warning">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                Medium (6)
+                            </span>
+</div>
+<div class="col-span-2 flex items-center gap-0.5">
+<span class="material-icons-round text-base text-yellow-400">star</span>
+<span class="material-icons-round text-base text-yellow-400">star</span>
+<span class="material-icons-round text-base text-yellow-400">star</span>
+<span class="material-icons-round text-base text-gray-300 dark:text-gray-600">star</span>
+<span class="material-icons-round text-base text-gray-300 dark:text-gray-600">star</span>
+</div>
+<div class="col-span-2 flex items-center gap-2">
+<div class="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] text-text-muted-light dark:text-text-muted-dark">
+<span class="material-icons-round text-xs">public</span>
+</div>
+<span class="text-sm text-text-muted-light dark:text-gray-300 truncate">localhost</span>
+</div>
+<div class="col-span-2 text-right text-sm text-text-muted-light dark:text-text-muted-dark font-medium">
+                            Oct 16, 2025
+                        </div>
+</div>
+</div>
+<div class="px-6 py-4 border-t border-border-light dark:border-border-dark bg-gray-50/50 dark:bg-white/5 flex items-center justify-between">
+<span class="text-xs text-text-muted-light dark:text-text-muted-dark">Showing <span class="font-medium text-text-main-light dark:text-white">1-5</span> of <span class="font-medium text-text-main-light dark:text-white">48</span> results</span>
+<div class="flex items-center gap-2">
+<button class="p-1 rounded hover:bg-gray-200 dark:hover:bg-white/10 text-text-muted-light dark:text-text-muted-dark transition-colors disabled:opacity-50" disabled="">
+<span class="material-icons-round text-lg">chevron_left</span>
+</button>
+<button class="p-1 rounded hover:bg-gray-200 dark:hover:bg-white/10 text-text-muted-light dark:text-text-muted-dark transition-colors">
+<span class="material-icons-round text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<aside class="w-[400px] flex-shrink-0 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl shadow-lg flex flex-col overflow-hidden animate-slide-in-right relative">
+<div class="px-5 py-4 border-b border-border-light dark:border-border-dark flex items-center justify-between bg-white dark:bg-[#1a1d23]">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-icons-round text-lg">smart_toy</span>
+</div>
+<div>
+<h2 class="text-sm font-semibold text-text-main-light dark:text-white">Co-Pilot</h2>
+<p class="text-[10px] uppercase tracking-wider font-bold text-primary">Assistant</p>
+</div>
+</div>
+<button class="text-text-muted-light dark:text-text-muted-dark hover:text-text-main-light dark:hover:text-white transition-colors">
+<span class="material-icons-round">close_fullscreen</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar">
+<div class="bg-gray-50 dark:bg-black/20 rounded-xl p-4 border border-border-light dark:border-border-dark relative overflow-hidden">
+<div class="flex items-start justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="material-icons-round text-primary text-lg">auto_awesome</span>
+<span class="text-sm font-semibold text-text-main-light dark:text-white">Email Generator</span>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded bg-white dark:bg-white/10 border border-border-light dark:border-transparent hover:bg-gray-100 dark:hover:bg-white/20 transition-colors text-text-main-light dark:text-text-main-dark">
+<span class="material-icons-round text-[12px]">content_copy</span> Copy
+                                </button>
+</div>
+</div>
+<div class="space-y-4">
+<div>
+<label class="text-[10px] uppercase tracking-wider font-semibold text-text-muted-light dark:text-text-muted-dark block mb-1.5">Recipient</label>
+<div class="relative">
+<input class="w-full bg-white dark:bg-background-dark border border-border-light dark:border-border-dark rounded-lg px-3 py-2 text-sm text-text-main-light dark:text-text-main-dark focus:ring-1 focus:ring-primary focus:border-primary" readonly="" type="text" value="sarah.j@enterprise.co"/>
+<span class="material-icons-round absolute right-2 top-2 text-text-muted-light dark:text-text-muted-dark text-lg cursor-pointer">expand_more</span>
+</div>
+</div>
+<div>
+<label class="text-[10px] uppercase tracking-wider font-semibold text-text-muted-light dark:text-text-muted-dark block mb-1.5">Subject</label>
+<input class="w-full bg-white dark:bg-background-dark border border-border-light dark:border-border-dark rounded-lg px-3 py-2 text-sm font-medium text-text-main-light dark:text-white focus:ring-1 focus:ring-primary focus:border-primary" type="text" value="Re: Urgent: Bug Fix Requests Across Platform"/>
+</div>
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<label class="text-[10px] uppercase tracking-wider font-semibold text-text-muted-light dark:text-text-muted-dark">Message Body</label>
+<button class="text-[10px] text-primary hover:underline flex items-center gap-1">
+<span class="material-icons-round text-[12px]">edit</span> Edit Mode
+                                    </button>
+</div>
+<div class="w-full bg-white dark:bg-background-dark border border-border-light dark:border-border-dark rounded-lg p-3 text-sm text-text-main-light dark:text-gray-300 leading-relaxed min-h-[140px] resize-none focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary relative">
+<p class="mb-2">Dear Sarah,</p>
+<p class="mb-2">Thank you for bringing the critical bugs to our attention. Our team has reviewed the issues on <span class="font-semibold text-primary">demo-topaz.app</span>.</p>
+<p>We have escalated this to high priority and our engineering team is currently deploying a hotfix. We expect resolution within 2 hours.</p>
+<div class="absolute right-1 top-1 bottom-1 w-1 bg-transparent flex flex-col justify-start">
+<div class="w-full h-8 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-4 flex justify-end">
+<button class="bg-primary hover:bg-primary-hover text-white text-xs font-medium px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-glow">
+<span class="material-icons-round text-sm">send</span>
+                                Send Response
+                            </button>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-semibold text-text-muted-light dark:text-text-muted-dark mb-3 uppercase tracking-wider">Suggested Actions</h3>
+<div class="flex flex-wrap gap-2">
+<button class="px-3 py-1.5 rounded-full bg-surface-light dark:bg-background-dark border border-border-light dark:border-border-dark text-xs text-text-main-light dark:text-gray-300 hover:border-primary hover:text-primary transition-colors">
+                                Assign &amp; Track Progress
+                             </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-light dark:bg-background-dark border border-border-light dark:border-border-dark text-xs text-text-main-light dark:text-gray-300 hover:border-primary hover:text-primary transition-colors">
+                                Prioritize Critical Bugs
+                             </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-light dark:bg-background-dark border border-border-light dark:border-border-dark text-xs text-text-main-light dark:text-gray-300 hover:border-primary hover:text-primary transition-colors">
+                                View User History
+                             </button>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-border-light dark:border-border-dark bg-gray-50 dark:bg-[#1a1d23]">
+<div class="relative">
+<input class="w-full bg-white dark:bg-black/20 border border-border-light dark:border-border-dark rounded-full pl-4 pr-12 py-2.5 text-sm text-text-main-light dark:text-white placeholder-text-muted-light dark:placeholder-text-muted-dark focus:ring-1 focus:ring-primary focus:border-primary transition-all" placeholder="Ask Co-Pilot anything..." type="text"/>
+<button class="absolute right-1.5 top-1.5 w-8 h-8 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-text-muted-light dark:text-text-muted-dark hover:bg-primary hover:text-white transition-colors">
+<span class="material-icons-round text-lg">arrow_upward</span>
+</button>
+</div>
+</div>
+</aside>
+</div>
+</main>
+
+</body></html>

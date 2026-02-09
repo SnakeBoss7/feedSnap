@@ -7,20 +7,20 @@ const Loader = () => {
       <div className='border-l border-orange-400 bg-backgr h-full w-full absolute top-0 left-0 z-[999999999999999999999999]'>
 
         <div className="loader w-full h-full  z-[999999999999999999999999]">
-        <div className="ph1">
-          <div className="record" />
-          <div className="record-text">REC</div>
+          <div className="ph1">
+            <div className="record" />
+            <div className="record-text">REC</div>
+          </div>
+          <div className="ph2">
+            <div className="laptop-b" />
+            <svg className="laptop-t" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 30">
+              <path d="M21 1H5C2.78 1 1 2.78 1 5V25a4 4 90 004 4H37a4 4 90 004-4V5c0-2.22-1.8-4-4-4H21" pathLength={100} strokeWidth={2} stroke="currentColor" fill="none" />
+            </svg>
+          </div>
+          <div className="icon" />
         </div>
-        <div className="ph2">
-          <div className="laptop-b" />
-          <svg className="laptop-t" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 30">
-            <path d="M21 1H5C2.78 1 1 2.78 1 5V25a4 4 90 004 4H37a4 4 90 004-4V5c0-2.22-1.8-4-4-4H21" pathLength={100} strokeWidth={2} stroke="currentColor" fill="none" />
-          </svg>
-        </div>
-        <div className="icon" />
       </div>
-      </div>
-      
+
     </StyledWrapper>
   );
 }

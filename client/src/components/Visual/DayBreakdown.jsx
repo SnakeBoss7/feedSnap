@@ -40,7 +40,7 @@ const DayBreakdown = ({ data }) => {
                 className={`w-full rounded-full transition-all duration-500 ease-out ${bgColorClass}`}
                 style={{
                   height: `${displayHeight}%`,
-                  minHeight: '20px'
+                  minHeight: '100px'
                 }}
               ></div>
               <span className="text-xs text-black font-bold dark:text-dark-text-primary">{item.day}</span>

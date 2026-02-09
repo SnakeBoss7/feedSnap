@@ -15,3 +15,29 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Remove focus outlines from Radix UI components */
+[data-radix-popper-content-wrapper] {
+  outline: none !important;
+}
+
+button[data-state],
+[role="combobox"],
+[data-radix-collection-item] {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+button:focus-visible,
+[role="combobox"]:focus-visible,
+input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Clean select trigger styling */
+[data-state="open"][role="combobox"],
+[data-state="closed"][role="combobox"] {
+  outline: none !important;
+  box-shadow: none !important;
+}
