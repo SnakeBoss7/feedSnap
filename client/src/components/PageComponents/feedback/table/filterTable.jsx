@@ -20,7 +20,6 @@ import {
 } from "lucide-react"
 import { SeverityBadge } from "../../../button/severity"
 import { Button } from "../../../ui/button"
-import { Input } from "../../../ui/input"
 import { Checkbox } from "../../../ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../../ui/dropdown-menu"
