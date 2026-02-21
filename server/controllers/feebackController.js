@@ -238,6 +238,26 @@ const getFeed = async (req, res) => {
     mess: "data fetched succesfully",
   });
 };
+// Helper: determine user's highest role across direct ownership + all teams
+const getUserHighestRole = async (userId) => {
+  // Direct site owner = 'owner' role
+  const directWebDataCount = await webData.countDocuments({ owner: userId });
+  if (directWebDataCount > 0) return 'owner';
+
+  // Check team memberships
+  const userTeams = await Team.find({ 'members.user': userId });
+  const rolePriority = { owner: 3, editor: 2, viewer: 1 };
+  let highest = 'viewer';
+
+  for (const team of userTeams) {
+    const member = team.members.find(m => m.user.toString() === userId);
+    if (member && (rolePriority[member.role] || 0) > (rolePriority[highest] || 0)) {
+      highest = member.role;
+    }
+  }
+  return highest;
+};
+
 const allFeedback = async (req, res) => {
   try {
     console.log("[allFeedback] START");
@@ -246,11 +266,15 @@ const allFeedback = async (req, res) => {
     const { sites } = await getUserAccessibleWebsites(user.id);
     console.log("[allFeedback] User sites:", sites);
 
+    // Get user's highest RBAC role for frontend permission checks
+    const userRole = await getUserHighestRole(user.id);
+
     if (!sites || sites.length === 0) {
       return res.status(200).json({
         success: true,
         data: [],
         sites: [],
+        userRole,
         count: 0
       });
     }
@@ -282,6 +306,7 @@ const allFeedback = async (req, res) => {
       success: true,
       data: feedbacks,
       userTeams: teamOptions,
+      userRole,
       sites: sites,
       count: feedbacks.length
     });
@@ -628,6 +653,92 @@ const getDashboardData = async (req, res) => {
   }
 };
 
+// Delete single feedback by ID (RBAC: owner/editor only)
+const deleteFeedback = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    console.log(id)
+    // RBAC check
+    const userRole = await getUserHighestRole(userId);
+    if (userRole === "viewer") {
+      return res.status(403).json({ success: false, message: "You do not have permission to delete feedback" });
+    }
+
+    // Get accessible sites
+    const { sites } = await getUserAccessibleWebsites(userId);
+
+    // Cast ID to ObjectId
+    const mongoose = require("mongoose");
+    let objectId;
+    try {
+      objectId = new mongoose.Types.ObjectId(id);
+    } catch (castErr) {
+      return res.status(400).json({ success: false, message: "Invalid feedback ID format" });
+    }
+
+    // Single combined query: find and delete if feedback belongs to user sites
+    const deletedItem = await feedback.findOneAndDelete({
+      _id: objectId,
+      webUrl: { $in: sites }
+    });
+
+    if (!deletedItem) {
+      // Check if item exists at all to differentiate 403 vs 404
+      const exists = await feedback.findOne({ _id: objectId });
+      if (exists) {
+        return res.status(403).json({ success: false, message: "You do not have access to this feedback" });
+      }
+      return res.status(404).json({ success: false, message: "Feedback not found" });
+    }
+
+    return res.status(200).json({ success: true, message: "Feedback deleted successfully" });
+  } catch (error) {
+    console.error("[deleteFeedback] ERROR:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+// Bulk delete feedbacks by IDs (RBAC: owner/editor only)
+const bulkDeleteFeedback = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    const userId = req.user.id;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: 'No feedback IDs provided' });
+    }
+
+    // RBAC check
+    const userRole = await getUserHighestRole(userId);
+    if (userRole === 'viewer') {
+      return res.status(403).json({ success: false, message: 'You do not have permission to delete feedback' });
+    }
+
+    // Verify all feedbacks belong to user's accessible sites
+    const { sites } = await getUserAccessibleWebsites(userId);
+    const feedbackItems = await feedback.find({ _id: { $in: ids } }).lean();
+
+    const validIds = feedbackItems
+      .filter(fb => sites.includes(fb.webUrl))
+      .map(fb => fb._id);
+
+    if (validIds.length === 0) {
+      return res.status(403).json({ success: false, message: 'No accessible feedback found to delete' });
+    }
+
+    const result = await feedback.deleteMany({ _id: { $in: validIds } });
+
+    return res.status(200).json({
+      success: true,
+      message: `${result.deletedCount} feedback(s) deleted successfully`,
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    console.error('[bulkDeleteFeedback] ERROR:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createFeed,
   getFeed,
@@ -635,5 +746,7 @@ module.exports = {
   allFeedback,
   exportFeedback,
   getUserAccessibleWebsites,
-  getDashboardData
+  getDashboardData,
+  deleteFeedback,
+  bulkDeleteFeedback
 };

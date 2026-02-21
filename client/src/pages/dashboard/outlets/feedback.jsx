@@ -1,5 +1,7 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useState, useCallback } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
+import { MessageSquareText, Plus } from "lucide-react";
 import { SimpleHeader } from "../../../components/header/header";
 import { FilterTable } from "../../../components/PageComponents/feedback/table/filterTable";
 import { FeedbackAssistant } from "../../../components/PageComponents/feedback/FeedbackAssistant";
@@ -21,6 +23,7 @@ const getCachedData = () => {
           data: parsed.data.data || [],
           sites: parsed.data.sites || [],
           userTeams: parsed.data.userTeams || [],
+          userRole: parsed.data.userRole || 'viewer',
           success: parsed.data.success || false,
           isLoading: false
         };
@@ -33,6 +36,7 @@ const getCachedData = () => {
     data: [],
     sites: [],
     userTeams: [],
+    userRole: 'viewer',
     success: false,
     isLoading: true,
   };
@@ -46,6 +50,7 @@ const dashboardReducer = (state, action) => {
         data: action.payload.data || [],
         sites: action.payload.sites || [],
         userTeams: action.payload.userTeams || [],
+        userRole: action.payload.userRole || 'viewer',
         success: action.payload.success || false,
         isLoading: false
       };
@@ -53,6 +58,11 @@ const dashboardReducer = (state, action) => {
       return {
         ...state,
         isLoading: false,
+      };
+    case 'DELETE_ITEMS':
+      return {
+        ...state,
+        data: state.data.filter(item => !action.payload.ids.includes(item._id)),
       };
     default:
       return state;
@@ -103,6 +113,101 @@ export const Feedback = () => {
     }
   }, [state.isLoading]);
 
+  // Invalidate localStorage cache after delete
+  const invalidateCache = useCallback(() => {
+    localStorage.removeItem('feedbackData');
+    localStorage.setItem('type', 'FETCH_FAIL');
+  }, []);
+
+  // Single delete handler
+  const handleDeleteFeedback = useCallback(async (id) => {
+    try {
+      const res = await axios.delete(`${apiUrl}/api/feedback/delete/${id}`, {
+        withCredentials: true
+      });
+      if (res.data.success) {
+        dispatch({ type: 'DELETE_ITEMS', payload: { ids: [id] } });
+        invalidateCache();
+        return { success: true, message: res.data.message };
+      }
+      return { success: false, message: res.data.message || 'Delete failed' };
+    } catch (err) {
+      // If item not found (404), treat as success to remove ghost item from UI
+      if (err.response && err.response.status === 404) {
+        dispatch({ type: 'DELETE_ITEMS', payload: { ids: [id] } });
+        invalidateCache();
+        return { success: true, message: 'Feedback already deleted' };
+      }
+      const msg = err.response?.data?.message || 'Failed to delete feedback';
+      return { success: false, message: msg };
+    }
+  }, [invalidateCache]);
+
+  // Bulk delete handler
+  const handleBulkDeleteFeedback = useCallback(async (ids) => {
+    try {
+      const res = await axios.post(`${apiUrl}/api/feedback/bulk-delete`, { ids }, {
+        withCredentials: true
+      });
+      if (res.data.success) {
+        dispatch({ type: 'DELETE_ITEMS', payload: { ids } });
+        invalidateCache();
+        return { success: true, message: res.data.message, deletedCount: res.data.deletedCount };
+      }
+      return { success: false, message: res.data.message || 'Bulk delete failed' };
+    } catch (err) {
+      // If items not found (404) or none accessible (403 with specific message), remove them
+      // Note: 403 might catch "No accessible feedback", which could mean they are all ghosts.
+      // But strictly speaking we only want to auto-remove if we are sure they don't exist.
+      // For bulk, let's just handle 404 if API returns it, or if we want to be aggressive, 403 too.
+      // Currently backend returns 403 if validIds.length === 0.
+      if (err.response && (err.response.status === 404 || (err.response.status === 403 && err.response.data.message === 'No accessible feedback found to delete'))) {
+        dispatch({ type: 'DELETE_ITEMS', payload: { ids } });
+        invalidateCache();
+        return { success: true, message: 'Selected feedback already deleted' };
+      }
+
+      const msg = err.response?.data?.message || 'Failed to delete feedback';
+      return { success: false, message: msg };
+    }
+  }, [invalidateCache]);
+
+  // Empty state — no feedback entries
+  if (!state.isLoading && state.data.length === 0) {
+    return (
+      <div className="h-screen w-full bg-gray-50 dark:bg-dark-bg-primary flex flex-col overflow-hidden">
+        <SimpleHeader color="#2b5fceff" />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="text-center max-w-lg w-full">
+            {/* Gradient Icon Circle */}
+            <div className="w-24 h-24 mx-auto mb-8 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/40 dark:to-indigo-900/40 flex items-center justify-center shadow-lg shadow-blue-200/50 dark:shadow-blue-900/20">
+              <MessageSquareText className="w-12 h-12 text-blue-500 dark:text-blue-400" />
+            </div>
+
+            {/* Heading */}
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-3">
+              No Feedback Yet
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-gray-500 dark:text-dark-text-muted text-lg mb-8 max-w-sm mx-auto">
+              When you start receiving feedback from your widgets, it will appear here for you to manage.
+            </p>
+
+            {/* CTA Button */}
+            <Link
+              to="/dashboard/scriptGen"
+              className="inline-flex items-center gap-2 px-8 py-3 text-white font-semibold rounded-full bg-gradient-to-r from-blue-600 to-indigo-500 hover:from-blue-700 hover:to-indigo-600 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105"
+            >
+              <Plus size={20} />
+              Create a Widget
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (state.isLoading) {
     return (
       <div className="h-screen w-full bg-gray-50 dark:bg-dark-bg-primary flex flex-col overflow-hidden">
@@ -123,8 +228,14 @@ export const Feedback = () => {
 
       <div className="flex-1 flex overflow-hidden relative">
         {/* Main Content Area (Table) */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide p-4 lg:p-6">
-          <FilterTable setSelectedData={setSelectedData} data={state?.data} />
+        <div className="flex-1 overflow-y-auto scrollbar-hide p-4 lg:p-6 pb-24">
+          <FilterTable
+            setSelectedData={setSelectedData}
+            data={state?.data}
+            userRole={state.userRole}
+            onDeleteFeedback={handleDeleteFeedback}
+            onBulkDeleteFeedback={handleBulkDeleteFeedback}
+          />
         </div>
 
         <FeedbackAssistant

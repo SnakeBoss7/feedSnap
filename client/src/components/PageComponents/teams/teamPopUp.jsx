@@ -40,7 +40,7 @@ export const TeamManagementPopup = ({ team, isOpen, onClose, onAddMember, onRole
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[1000] flex items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm">
         <div className="bg-white dark:bg-dark-bg-secondary w-full h-full sm:h-auto sm:max-w-3xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col sm:max-h-[85vh]">
 
           {/* Header */}

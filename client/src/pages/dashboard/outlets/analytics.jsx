@@ -16,6 +16,7 @@ import { filterDataByTimeframe, getChartData, getMetrics, getDayBreakdownData } 
 import { initializeDashboardData } from "../../../components/newCharts/dataAdapter"
 import AddButton from "../../../components/button/addButton"
 import { Link } from "react-router-dom"
+import { BarChart3, Plus } from "lucide-react"
 import { SimpleHeader } from "../../../components/header/header"
 import { Background } from "../../../components/background/background"
 import DayBreakdown from "../../../components/Visual/DayBreakdown"
@@ -25,6 +26,7 @@ export const Analytics = () => {
   const [selectedTimeframe, setSelectedTimeframe] = useState("all")
   const [allData, setAllData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isEmpty, setIsEmpty] = useState(false)
   const [error, setError] = useState(null)
 
 
@@ -48,7 +50,7 @@ export const Analytics = () => {
         }
 
         if (backendData.length === 0) {
-          setError("No feedback data available. Please add some feedback first.")
+          setIsEmpty(true)
           setAllData([])
           setIsLoading(false)
           return
@@ -134,6 +136,41 @@ export const Analytics = () => {
                 Try Again
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (isEmpty) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary transition-colors duration-300">
+        <SimpleHeader color={'#E94057'} />
+        <div className="flex items-center justify-center h-[80vh] p-6">
+          <div className="text-center max-w-lg w-full">
+            {/* Gradient Icon Circle */}
+            <div className="w-24 h-24 mx-auto mb-8 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 flex items-center justify-center shadow-lg shadow-purple-200/50 dark:shadow-purple-900/20">
+              <BarChart3 className="w-12 h-12 text-purple-500 dark:text-purple-400" />
+            </div>
+
+            {/* Heading */}
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-3">
+              No Analytics Data Yet
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-gray-500 dark:text-dark-text-muted text-lg mb-8 max-w-sm mx-auto">
+              Start collecting feedback to unlock powerful analytics and insights about your projects.
+            </p>
+
+            {/* CTA Button */}
+            <Link
+              to="/dashboard/scriptGen"
+              className="inline-flex items-center gap-2 px-8 py-3 text-white font-semibold rounded-full bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105"
+            >
+              <Plus size={20} />
+              Create Your First Widget
+            </Link>
           </div>
         </div>
       </div>
@@ -297,7 +334,7 @@ export const Analytics = () => {
               <DayBreakdown data={dayBreakdownData} />
             </div>
           </ChartCard>
-          <div classname="h-[100px] w-full" ></div>
+          <div className="h-24 w-full" ></div>
         </div>
 
       </div>

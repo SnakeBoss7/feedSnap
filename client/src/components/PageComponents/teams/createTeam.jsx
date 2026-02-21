@@ -114,7 +114,7 @@ export const CreateTeamPopup = ({ isOpen, onClose, onCreateTeam }) => {
   const selectedWebsiteData = websites.find(w => w.id === selectedWebsite);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white dark:bg-dark-bg-secondary w-full max-w-lg rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
 
         {/* Header */}

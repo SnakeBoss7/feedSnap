@@ -16,7 +16,15 @@ import {
   Download,
   Trash2,
   Archive,
-  Share2
+  Share2,
+  Mail,
+  Clock,
+  Globe,
+  Copy,
+  Check,
+  AlertCircle,
+  CheckCircle2,
+  MapPin
 } from "lucide-react"
 import { SeverityBadge } from "../../../button/severity"
 import { Button } from "../../../ui/button"
@@ -30,7 +38,7 @@ import { format } from "date-fns"
 import { RatingStar } from "../../../star/star"
 import { exportData } from "../../../../services/exportData"
 
-export const FilterTable = React.memo(({ setSelectedData, data, onAction }) => {
+export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRole, onDeleteFeedback, onBulkDeleteFeedback }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [formatType] = useState('csv')
   const [severityFilter, setSeverityFilter] = useState("all")
@@ -39,8 +47,61 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction }) => {
   const [selectedItems, setSelectedItems] = useState(new Set())
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
   const [viewDetailsItem, setViewDetailsItem] = useState(null)
+  const [copiedField, setCopiedField] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+
+  // Delete confirmation state
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, type: null, id: null, count: 0 })
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
+
+  const canDelete = userRole === 'owner' || userRole === 'editor'
+
+  // Show toast helper
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type })
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000)
+  }
+
+  // Handle single delete confirmation
+  const handleDeleteClick = (itemId) => {
+    setDeleteConfirm({ open: true, type: 'single', id: itemId, count: 1 })
+  }
+
+  // Handle bulk delete confirmation
+  const handleBulkDeleteClick = () => {
+    setDeleteConfirm({ open: true, type: 'bulk', id: null, count: selectedItems.size })
+  }
+
+  // Execute delete after confirmation
+  const executeDelete = async () => {
+    setIsDeleting(true)
+    try {
+      if (deleteConfirm.type === 'single' && onDeleteFeedback) {
+        const result = await onDeleteFeedback(deleteConfirm.id)
+        if (result.success) {
+          showToast(result.message || 'Feedback deleted successfully')
+        } else {
+          showToast(result.message || 'Failed to delete', 'error')
+        }
+      } else if (deleteConfirm.type === 'bulk' && onBulkDeleteFeedback) {
+        const ids = [...selectedItems]
+        const result = await onBulkDeleteFeedback(ids)
+        if (result.success) {
+          setSelectedItems(new Set())
+          showToast(result.message || `${result.deletedCount} feedback(s) deleted`)
+        } else {
+          showToast(result.message || 'Failed to delete', 'error')
+        }
+      }
+    } catch (err) {
+      showToast('An unexpected error occurred', 'error')
+    } finally {
+      setIsDeleting(false)
+      setDeleteConfirm({ open: false, type: null, id: null, count: 0 })
+    }
+  }
 
   // Get unique web URLs for filter dropdown
   const uniqueWebUrls = useMemo(() => {
@@ -134,6 +195,37 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction }) => {
 
   const handleViewDetails = (item) => {
     setViewDetailsItem(item)
+    setCopiedField(null)
+  }
+
+  const handleCopy = (text, field) => {
+    navigator.clipboard.writeText(text)
+    setCopiedField(field)
+    setTimeout(() => setCopiedField(null), 2000)
+  }
+
+  const getSeverityAccentColor = (severity) => {
+    const s = Number(severity)
+    if (s >= 9) return { bar: 'bg-red-600', glow: 'shadow-red-500/20' }
+    if (s >= 7) return { bar: 'bg-red-500', glow: 'shadow-red-500/15' }
+    if (s >= 4) return { bar: 'bg-amber-500', glow: 'shadow-amber-500/15' }
+    if (s >= 1) return { bar: 'bg-emerald-500', glow: 'shadow-emerald-500/15' }
+    return { bar: 'bg-gray-400', glow: 'shadow-gray-400/10' }
+  }
+
+  const getRelativeTime = (dateStr) => {
+    const now = new Date()
+    const date = new Date(dateStr)
+    const diffMs = now - date
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    if (diffDays < 7) return `${diffDays}d ago`
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`
+    return `${Math.floor(diffDays / 30)}mo ago`
   }
 
   return (
@@ -391,10 +483,17 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction }) => {
                             <DropdownMenuItem className="cursor-pointer text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-white/10 rounded-lg m-1">
                               <Archive className="mr-2 h-4 w-4" /> Archive
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-gray-200 dark:bg-white/10" />
-                            <DropdownMenuItem className="text-red-600 dark:text-red-400 cursor-pointer focus:bg-red-50 dark:focus:bg-red-900/20 rounded-lg m-1">
-                              <Trash2 className="mr-2 h-4 w-4" /> Delete
-                            </DropdownMenuItem>
+                            {canDelete && (
+                              <>
+                                <DropdownMenuSeparator className="bg-gray-200 dark:bg-white/10" />
+                                <DropdownMenuItem
+                                  onClick={(e) => { e.stopPropagation(); handleDeleteClick(item._id); }}
+                                  className="text-red-600 dark:text-red-400 cursor-pointer focus:bg-red-50 dark:focus:bg-red-900/20 rounded-lg m-1"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                </DropdownMenuItem>
+                              </>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </td>
@@ -469,9 +568,11 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction }) => {
                 <Share2 className="h-2 w-2" />
               </Button>
 
-              <Button size="icon" variant="ghost" className="h-7 w-7 rounded-full text-white/80 dark:text-black/80 hover:bg-red-500/20 hover:text-red-400 dark:hover:text-red-600" title="Delete Selected">
-                <Trash2 className="h-2 w-2" />
-              </Button>
+              {canDelete && (
+                <Button size="icon" variant="ghost" className="h-7 w-7 rounded-full text-white/80 dark:text-black/80 hover:bg-red-500/20 hover:text-red-400 dark:hover:text-red-600" title="Delete Selected" onClick={handleBulkDeleteClick}>
+                  <Trash2 className="h-2 w-2" />
+                </Button>
+              )}
 
               <Button size="icon" variant="ghost" className="h-7 w-7 rounded-full text-white/60 dark:text-black/60 hover:bg-white/20 dark:hover:bg-black/10 hover:text-white dark:hover:text-black ml-1" onClick={() => handleSelectAll(false)} title="Clear Selection">
                 <X className="h-2 w-2" />
@@ -483,89 +584,259 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction }) => {
 
       {/* View Details Dialog */}
       <Dialog open={!!viewDetailsItem} onOpenChange={() => setViewDetailsItem(null)}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto font-sans bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl p-0">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto font-sans bg-white dark:bg-[#0a0a0f] border border-gray-200 dark:border-white/[0.08] rounded-2xl shadow-2xl p-0 scrollbar-hide">
           <DialogHeader className="sr-only">
             <DialogTitle>Feedback Details</DialogTitle>
           </DialogHeader>
 
-          {viewDetailsItem && (
-            <>
-              {/* Sticky Header */}
-              <div className="sticky top-0 z-10 bg-white dark:bg-black px-6 py-4 border-b border-gray-100 dark:border-white/10">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white truncate">{viewDetailsItem.title}</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{viewDetailsItem.email}</p>
-                  </div>
-                  <SeverityBadge severity={viewDetailsItem.severity} />
-                </div>
-              </div>
+          {viewDetailsItem && (() => {
+            const accent = getSeverityAccentColor(viewDetailsItem.severity)
+            return (
+              <>
+                {/* Severity Accent Bar */}
+                <div className={`h-1 w-full ${accent.bar} rounded-t-2xl`} />
 
-              {/* Content */}
-              <div className="px-6 py-5 space-y-5">
-                {/* Description */}
-                <div>
-                  <label className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 block">Description</label>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-white/5 rounded-xl p-4">
-                    {viewDetailsItem.description}
-                  </p>
-                </div>
-
-                {/* Metrics Row */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="text-center p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">{viewDetailsItem.rating}<span className="text-xs text-gray-500 dark:text-gray-400 font-normal">/5</span></p>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Rating</span>
-                  </div>
-                  <div className="text-center p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">{viewDetailsItem.severity}</p>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Severity</span>
-                  </div>
-                  <div className="text-center p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">v{viewDetailsItem.__v}</p>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Version</span>
-                  </div>
-                </div>
-
-                {/* Source */}
-                <div>
-                  <label className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 block">Source</label>
-                  <a
-                    href={viewDetailsItem.webUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-white/5 rounded-xl text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors group"
-                  >
-                    <ExternalLink className="h-4 w-4 text-gray-400" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{new URL(viewDetailsItem.webUrl).hostname}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{viewDetailsItem.pathname}</p>
+                {/* Header Section */}
+                <div className="px-6 pt-4 pb-4 border-b border-gray-100 dark:border-white/[0.06]">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <h2 className="text-[17px] font-bold text-gray-900 dark:text-white leading-snug flex-1 min-w-0">
+                      {viewDetailsItem.title}
+                    </h2>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {/* Status Pill */}
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${viewDetailsItem.status
+                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
+                          : 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20'
+                        }`}>
+                        {viewDetailsItem.status
+                          ? <CheckCircle2 className="h-3 w-3" />
+                          : <AlertCircle className="h-3 w-3" />
+                        }
+                        {viewDetailsItem.status ? 'Resolved' : 'Open'}
+                      </span>
                     </div>
-                  </a>
-                </div>
-
-                {/* Timestamps */}
-                <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 pt-4 border-t border-gray-100 dark:border-white/10">
-                  <span>Created: {format(new Date(viewDetailsItem.createdOn), "MMM dd, yyyy")}</span>
-                  <span>Updated: {format(new Date(viewDetailsItem.updatedOn), "MMM dd, yyyy")}</span>
-                </div>
-
-                {/* Image Attachment */}
-                {viewDetailsItem.image && (
-                  <div>
-                    <label className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 block">Attachment</label>
-                    <img
-                      src={viewDetailsItem.image}
-                      alt="Feedback attachment"
-                      className="w-full max-h-[250px] object-contain rounded-xl border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5"
-                    />
                   </div>
-                )}
-              </div>
-            </>
-          )}
+
+                  {/* Reporter Info */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 px-2.5 py-1.5 bg-gray-50 dark:bg-white/[0.04] rounded-lg flex-1 min-w-0">
+                      <Mail className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                      <span className="text-sm text-gray-600 dark:text-gray-400 truncate">{viewDetailsItem.email}</span>
+                    </div>
+                    <button
+                      onClick={() => handleCopy(viewDetailsItem.email, 'email')}
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-all flex-shrink-0"
+                      title="Copy email"
+                    >
+                      {copiedField === 'email'
+                        ? <Check className="h-3.5 w-3.5 text-emerald-500" />
+                        : <Copy className="h-3.5 w-3.5" />
+                      }
+                    </button>
+                  </div>
+                </div>
+
+                {/* Body */}
+                <div className="px-6 py-4 space-y-4">
+
+                  {/* Description */}
+                  <div>
+                    <label className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5 block">Description</label>
+                    <div className="text-[13px] text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-white/[0.03] rounded-xl p-4 max-h-[160px] overflow-y-auto border border-gray-100 dark:border-white/[0.04] scrollbar-hide">
+                      <p className="whitespace-pre-wrap break-words">{viewDetailsItem.description || 'No description provided.'}</p>
+                    </div>
+                  </div>
+
+                  {/* Metrics — Severity + Rating */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Severity Card */}
+                    <div className="p-3.5 bg-gray-50 dark:bg-white/[0.03] rounded-xl border border-gray-100 dark:border-white/[0.04]">
+                      <div className="flex items-center justify-between mb-2.5">
+                        <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Severity</span>
+                        <SeverityBadge severity={viewDetailsItem.severity} />
+                      </div>
+                      {/* Severity Bar */}
+                      <div className="w-full h-1.5 bg-gray-200 dark:bg-white/[0.06] rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${accent.bar}`}
+                          style={{ width: `${Math.min(Number(viewDetailsItem.severity) * 10, 100)}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between mt-1">
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500">0</span>
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500">10</span>
+                      </div>
+                    </div>
+
+                    {/* Rating Card */}
+                    <div className="p-3.5 bg-gray-50 dark:bg-white/[0.03] rounded-xl border border-gray-100 dark:border-white/[0.04]">
+                      <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-2.5">Rating</span>
+                      <div className="flex items-center gap-2">
+                        <RatingStar value={viewDetailsItem.rating} />
+                        <span className="text-lg font-bold text-gray-900 dark:text-white">
+                          {viewDetailsItem.rating}<span className="text-xs text-gray-400 dark:text-gray-500 font-normal">/5</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Source */}
+                  <div>
+                    <label className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5 block">Source</label>
+                    <div className="bg-gray-50 dark:bg-white/[0.03] rounded-xl border border-gray-100 dark:border-white/[0.04] overflow-hidden">
+                      <a
+                        href={viewDetailsItem.webUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 px-3.5 py-3 hover:bg-gray-100 dark:hover:bg-white/[0.04] transition-colors group"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] flex items-center justify-center flex-shrink-0 shadow-sm">
+                          <img
+                            src={`https://www.google.com/s2/favicons?domain=${new URL(viewDetailsItem.webUrl).hostname}&sz=32`}
+                            alt=""
+                            className="w-4 h-4 rounded-sm"
+                            onError={(e) => { e.target.style.display = 'none' }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:underline">
+                            {new URL(viewDetailsItem.webUrl).hostname.replace('www.', '')}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleCopy(viewDetailsItem.webUrl, 'url') }}
+                            className="p-1 rounded text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
+                            title="Copy URL"
+                          >
+                            {copiedField === 'url'
+                              ? <Check className="h-3.5 w-3.5 text-emerald-500" />
+                              : <Copy className="h-3.5 w-3.5" />
+                            }
+                          </button>
+                          <ExternalLink className="h-3.5 w-3.5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+                        </div>
+                      </a>
+                      {/* Pathname chip */}
+                      {viewDetailsItem.pathname && (
+                        <div className="px-3.5 pb-3 pt-0">
+                          <div className="flex items-center gap-1.5">
+                            <MapPin className="h-3 w-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                            <code className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/[0.06] px-2 py-0.5 rounded font-mono truncate">
+                              {viewDetailsItem.pathname}
+                            </code>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Image Attachment */}
+                  {viewDetailsItem.image && (
+                    <div>
+                      <label className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5 block">Attachment</label>
+                      <img
+                        src={viewDetailsItem.image}
+                        alt="Feedback attachment"
+                        className="w-full max-h-[220px] object-contain rounded-xl border border-gray-100 dark:border-white/[0.04] bg-gray-50 dark:bg-white/[0.03]"
+                      />
+                    </div>
+                  )}
+
+                  {/* Timestamps Footer */}
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-white/[0.06]">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                      <span className="text-[11px] text-gray-400 dark:text-gray-500">
+                        Created {format(new Date(viewDetailsItem.createdOn), "MMM dd, yyyy")}
+                      </span>
+                      <span className="text-[10px] text-gray-300 dark:text-gray-600 font-medium ml-0.5">
+                        ({getRelativeTime(viewDetailsItem.createdOn)})
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                      <span className="text-[11px] text-gray-400 dark:text-gray-500">
+                        Updated {format(new Date(viewDetailsItem.updatedOn), "MMM dd, yyyy")}
+                      </span>
+                      <span className="text-[10px] text-gray-300 dark:text-gray-600 font-medium ml-0.5">
+                        ({getRelativeTime(viewDetailsItem.updatedOn)})
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )
+          })()}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirm.open} onOpenChange={(open) => { if (!isDeleting) setDeleteConfirm({ open, type: null, id: null, count: 0 }) }}>
+        <DialogContent className="max-w-sm font-sans bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
+              {deleteConfirm.type === 'bulk' ? 'Delete Selected Feedback' : 'Delete Feedback'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl mb-4">
+              <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-lg">
+                <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+              <p className="text-sm text-red-800 dark:text-red-300">
+                {deleteConfirm.type === 'bulk'
+                  ? `You are about to permanently delete ${deleteConfirm.count} feedback(s). This action cannot be undone.`
+                  : 'This feedback will be permanently deleted. This action cannot be undone.'
+                }
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteConfirm({ open: false, type: null, id: null, count: 0 })}
+              disabled={isDeleting}
+              className="bg-white dark:bg-dark-bg-secondary border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={executeDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white border-none shadow-lg shadow-red-500/20 transition-all hover:-translate-y-0.5 min-w-[80px]"
+            >
+              {isDeleting ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+              ) : (
+                'Delete'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.95 }}
+            className={`fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border backdrop-blur-sm ${toast.type === 'error'
+              ? 'bg-red-50 dark:bg-red-900/90 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
+              : 'bg-green-50 dark:bg-green-900/90 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
+              }`}
+          >
+            {toast.type === 'error' ? (
+              <X className="h-4 w-4 flex-shrink-0" />
+            ) : (
+              <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            )}
+            <span className="text-sm font-medium">{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 })

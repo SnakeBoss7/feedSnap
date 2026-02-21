@@ -118,12 +118,12 @@ const TextInput = memo(({ value, onChange }) => (
       <label htmlFor="text" className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors">
         Widget Text
       </label>
-      <div className="relative group/tooltip">
+      <div className="relative group/tooltip overflow-visible">
         <LucideInfo size={14} className="text-gray-400 dark:text-gray-500 cursor-help hover:text-blue-500 dark:hover:text-blue-400 transition-colors" />
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover/tooltip:block z-50 w-64">
+        <div className="absolute left-0 bottom-full mb-2 hidden group-hover/tooltip:block z-50 w-64">
           <div className="bg-gray-900 dark:bg-dark-bg-tertiary text-white dark:text-dark-text-primary text-xs rounded-lg py-2 px-3 shadow-xl border border-transparent dark:border-dark-border-subtle">
             Default Feedback text will be shown. If empty, a message icon will be shown.
-            <div className="absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-gray-900 dark:border-t-dark-bg-tertiary"></div>
+            <div className="absolute left-3 top-full border-4 border-transparent border-t-gray-900 dark:border-t-dark-bg-tertiary"></div>
           </div>
         </div>
       </div>

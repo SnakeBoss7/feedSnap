@@ -5,7 +5,7 @@ export const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message,
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[1010] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white dark:bg-dark-bg-secondary w-full max-w-md rounded-xl shadow-2xl overflow-hidden">
         <div className="p-6 text-center">
           <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-4 ${isDestructive ? 'bg-red-500/10' : 'bg-primary2/10'}`}>
@@ -15,7 +15,7 @@ export const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message,
           <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-6">
             {message}
           </p>
-          
+
           <div className="flex gap-3">
             <button
               onClick={onClose}
@@ -27,11 +27,10 @@ export const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message,
             <button
               onClick={onConfirm}
               disabled={isLoading}
-              className={`flex-1 px-4 py-2.5 text-sm font-medium text-white rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                isDestructive 
-                  ? 'bg-red-500 hover:bg-red-600' 
+              className={`flex-1 px-4 py-2.5 text-sm font-medium text-white rounded-lg transition-colors flex items-center justify-center gap-2 ${isDestructive
+                  ? 'bg-red-500 hover:bg-red-600'
                   : 'bg-primary2 hover:bg-green-600'
-              }`}
+                }`}
             >
               {isLoading && <LucideLoader2 size={16} className="animate-spin" />}
               {confirmText}

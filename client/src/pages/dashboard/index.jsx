@@ -13,7 +13,7 @@ export const Dashboard = () => {
   useEffect(() => {
     const handleSidebar = () => {
       const isMobile = window.innerWidth < 1024;
-      
+
       if (isMobile) {
         setShowSidebar(false);
         setSidebarSize(false);
@@ -28,7 +28,7 @@ export const Dashboard = () => {
 
     // Listen for window resize events
     window.addEventListener("resize", handleSidebar);
-    
+
     // Cleanup event listener on component unmount
     return () => {
       window.removeEventListener("resize", handleSidebar);
@@ -38,7 +38,7 @@ export const Dashboard = () => {
   return (
     <div className="flex relative overflow-hidden h-full">
       <Sidebar />
-      <div className="flex flex-col min-h-screen lg:flex-1 w-full bg-white relative z-10">
+      <div className="flex flex-col min-h-screen lg:flex-1 w-full bg-white relative">
 
         <Outlet />
       </div>
