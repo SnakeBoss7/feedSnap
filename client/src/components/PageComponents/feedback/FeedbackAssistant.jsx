@@ -405,7 +405,7 @@ export const FeedbackAssistant = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed lg:absolute inset-0 sm:inset-auto sm:bottom-0 sm:right-0 lg:bottom-4 lg:right-4 z-50 w-full sm:w-[400px] h-full sm:h-[600px] lg:h-[calc(100%-2rem)] max-h-[750px] bg-white dark:bg-black border-0 sm:border border-gray-200 dark:border-white/10 sm:rounded-2xl lg:rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed lg:absolute inset-0 lg:inset-auto lg:bottom-4 lg:right-4 z-50 w-full lg:w-[400px] h-full lg:h-[calc(100%-2rem)] lg:max-h-[750px] bg-white dark:bg-black border-0 lg:border border-gray-200 dark:border-white/10 lg:rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Chat Header */}
             <div className="flex-shrink-0 h-14 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-white dark:bg-black px-5">

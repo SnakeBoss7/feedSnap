@@ -71,7 +71,7 @@ const SeverityBadge = ({ severity }) => {
   const config = getSeverityConfig(severity);
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.bgColor} ${config.textColor} border ${config.borderColor}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full md:text-xs text-[10px] font-medium ${config.bgColor} ${config.textColor} border ${config.borderColor}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`}></span>
       {config.label}
       {severity !== null && severity !== undefined && severity !== '' && !isNaN(Number(severity)) && (
