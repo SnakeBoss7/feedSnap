@@ -19,7 +19,6 @@ import {
   Share2,
   Mail,
   Clock,
-  Globe,
   Copy,
   Check,
   AlertCircle,
@@ -605,8 +604,8 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRo
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {/* Status Pill */}
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${viewDetailsItem.status
-                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
-                          : 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20'
+                        ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
+                        : 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20'
                         }`}>
                         {viewDetailsItem.status
                           ? <CheckCircle2 className="h-3 w-3" />
