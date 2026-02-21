@@ -260,113 +260,112 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRo
 
       {/* Filter Bar - Clean Minimal Design */}
       <div className="bg-white dark:bg-dark-bg-secondary rounded-xl border border-gray-200 dark:border-dark-border-subtle mb-6 overflow-hidden">
-        <div className="flex flex-wrap items-center">
-          {/* Search Input */}
-          <div className="flex-1 min-w-[200px] flex items-center px-4 py-3 border-r border-gray-100 dark:border-dark-border-subtle">
-            <Search className="h-4 w-4 text-gray-400 mr-3 flex-shrink-0" />
-            <input
-              type="text"
-              placeholder="Search feedback..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-transparent text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none border-none focus:ring-0 focus:outline-none"
-              style={{ boxShadow: 'none' }}
-            />
-          </div>
+        {/* Search Row */}
+        <div className="flex items-center px-4 py-3 border-b border-gray-100 dark:border-dark-border-subtle">
+          <Search className="h-4 w-4 text-gray-400 mr-3 flex-shrink-0" />
+          <input
+            type="text"
+            placeholder="Search feedback..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-transparent text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none border-none focus:ring-0 focus:outline-none"
+            style={{ boxShadow: 'none' }}
+          />
+        </div>
 
-          {/* Filters Container */}
-          <div className="flex items-center gap-1 px-2 py-2">
-            {/* Severity Filter */}
-            <Select value={severityFilter} onValueChange={setSeverityFilter}>
-              <SelectTrigger className="h-9 min-w-[120px] bg-gray-50 dark:bg-white/5 border-0 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg px-3 focus:ring-0 focus:outline-none focus:bg-gray-100 dark:focus:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors [&>svg]:text-gray-400" style={{ boxShadow: 'none', outline: 'none' }}>
-                <SelectValue placeholder="Severity" />
-              </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border-subtle rounded-xl shadow-lg z-[100] overflow-hidden" style={{ outline: 'none' }}>
-                <SelectItem value="all" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">All Severities</SelectItem>
-                <SelectItem value="9-10" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">Critical (9-10)</SelectItem>
-                <SelectItem value="7-8" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">High (7-8)</SelectItem>
-                <SelectItem value="4-6" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">Medium (4-6)</SelectItem>
-                <SelectItem value="1-3" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">Low (1-3)</SelectItem>
-              </SelectContent>
-            </Select>
+        {/* Filters Row - horizontally scrollable on mobile */}
+        <div className="flex items-center gap-1 px-2 py-2 overflow-x-auto scrollbar-hide">
+          {/* Severity Filter */}
+          <Select value={severityFilter} onValueChange={setSeverityFilter}>
+            <SelectTrigger className="h-9 min-w-[120px] flex-shrink-0 bg-gray-50 dark:bg-white/5 border-0 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg px-3 focus:ring-0 focus:outline-none focus:bg-gray-100 dark:focus:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors [&>svg]:text-gray-400" style={{ boxShadow: 'none', outline: 'none' }}>
+              <SelectValue placeholder="Severity" />
+            </SelectTrigger>
+            <SelectContent className="bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border-subtle rounded-xl shadow-lg z-[100] overflow-hidden" style={{ outline: 'none' }}>
+              <SelectItem value="all" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">All Severities</SelectItem>
+              <SelectItem value="9-10" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">Critical (9-10)</SelectItem>
+              <SelectItem value="7-8" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">High (7-8)</SelectItem>
+              <SelectItem value="4-6" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">Medium (4-6)</SelectItem>
+              <SelectItem value="1-3" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">Low (1-3)</SelectItem>
+            </SelectContent>
+          </Select>
 
-            {/* Website Filter */}
-            <Select value={webUrlFilter} onValueChange={setWebUrlFilter}>
-              <SelectTrigger className="h-9 min-w-[120px] bg-gray-50 dark:bg-white/5 border-0 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg px-3 focus:ring-0 focus:outline-none focus:bg-gray-100 dark:focus:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors [&>svg]:text-gray-400" style={{ boxShadow: 'none', outline: 'none' }}>
-                <SelectValue placeholder="Website" />
-              </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border-subtle rounded-xl shadow-lg z-[100] max-h-[280px] overflow-hidden" style={{ outline: 'none' }}>
-                <SelectItem value="all" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">All Websites</SelectItem>
-                {uniqueWebUrls.map((url) => (
-                  <SelectItem key={url} value={url} className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">
-                    {new URL(url).hostname}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Website Filter */}
+          <Select value={webUrlFilter} onValueChange={setWebUrlFilter}>
+            <SelectTrigger className="h-9 min-w-[120px] flex-shrink-0 bg-gray-50 dark:bg-white/5 border-0 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg px-3 focus:ring-0 focus:outline-none focus:bg-gray-100 dark:focus:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors [&>svg]:text-gray-400" style={{ boxShadow: 'none', outline: 'none' }}>
+              <SelectValue placeholder="Website" />
+            </SelectTrigger>
+            <SelectContent className="bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border-subtle rounded-xl shadow-lg z-[100] max-h-[280px] overflow-hidden" style={{ outline: 'none' }}>
+              <SelectItem value="all" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">All Websites</SelectItem>
+              {uniqueWebUrls.map((url) => (
+                <SelectItem key={url} value={url} className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">
+                  {new URL(url).hostname}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-            {/* Date Picker */}
-            <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  className="h-9 flex items-center gap-2 px-3 bg-gray-50 dark:bg-white/5 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors outline-none focus:outline-none whitespace-nowrap"
-                  style={{ boxShadow: 'none' }}
-                >
-                  <Calendar className="h-4 w-4 text-gray-400" />
-                  {dateRange.from ? (
-                    dateRange.to ? (
-                      <span>{format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd")}</span>
-                    ) : (
-                      <span>{format(dateRange.from, "MMM dd")}</span>
-                    )
-                  ) : (
-                    <span className="text-gray-400">Date range</span>
-                  )}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-auto p-0 bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border-subtle rounded-xl shadow-lg z-[100]"
-                align="end"
-                style={{ outline: 'none' }}
+          {/* Date Picker */}
+          <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className="h-9 flex-shrink-0 flex items-center gap-2 px-3 bg-gray-50 dark:bg-white/5 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors outline-none focus:outline-none whitespace-nowrap"
+                style={{ boxShadow: 'none' }}
               >
-                <CalendarComponent
-                  initialFocus
-                  mode="range"
-                  defaultMonth={dateRange.from}
-                  selected={{ from: dateRange.from, to: dateRange.to }}
-                  onSelect={(range) => {
-                    // Only update if we have a valid selection
-                    if (range) {
-                      // If clicking same date twice, treat as single day range
-                      if (range.from && range.to && range.from.getTime() === range.to.getTime()) {
-                        // User clicked the same date - keep it as just 'from'
-                        setDateRange({ from: range.from, to: undefined })
-                      } else {
-                        setDateRange({ from: range.from, to: range.to })
-                        // Only close when both dates are different (proper range selected)
-                        if (range.from && range.to && range.from.getTime() !== range.to.getTime()) {
-                          setIsDatePickerOpen(false)
-                        }
+                <Calendar className="h-4 w-4 text-gray-400" />
+                {dateRange.from ? (
+                  dateRange.to ? (
+                    <span>{format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd")}</span>
+                  ) : (
+                    <span>{format(dateRange.from, "MMM dd")}</span>
+                  )
+                ) : (
+                  <span className="text-gray-400">Date range</span>
+                )}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto p-0 bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border-subtle rounded-xl shadow-lg z-[100]"
+              align="end"
+              style={{ outline: 'none' }}
+            >
+              <CalendarComponent
+                initialFocus
+                mode="range"
+                defaultMonth={dateRange.from}
+                selected={{ from: dateRange.from, to: dateRange.to }}
+                onSelect={(range) => {
+                  // Only update if we have a valid selection
+                  if (range) {
+                    // If clicking same date twice, treat as single day range
+                    if (range.from && range.to && range.from.getTime() === range.to.getTime()) {
+                      // User clicked the same date - keep it as just 'from'
+                      setDateRange({ from: range.from, to: undefined })
+                    } else {
+                      setDateRange({ from: range.from, to: range.to })
+                      // Only close when both dates are different (proper range selected)
+                      if (range.from && range.to && range.from.getTime() !== range.to.getTime()) {
+                        setIsDatePickerOpen(false)
                       }
                     }
-                  }}
-                  numberOfMonths={2}
-                  className="p-3"
-                />
-              </PopoverContent>
-            </Popover>
+                  }
+                }}
+                numberOfMonths={2}
+                className="p-3"
+              />
+            </PopoverContent>
+          </Popover>
 
-            {/* Clear Filters */}
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors outline-none"
-                title="Clear filters"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+          {/* Clear Filters */}
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="h-9 flex-shrink-0 flex items-center gap-1.5 px-3 text-xs font-medium text-red-500 hover:text-red-600 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors outline-none whitespace-nowrap"
+              title="Clear filters"
+            >
+              <X className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Clear</span>
+            </button>
+          )}
         </div>
       </div>
 

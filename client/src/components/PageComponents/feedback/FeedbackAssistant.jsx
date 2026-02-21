@@ -381,9 +381,9 @@ export const FeedbackAssistant = ({
       <AnimatePresence>
         {!isChatExpanded && (
           <motion.button
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
             onClick={() => {
               setIsSidebarOpen(true);
@@ -401,11 +401,11 @@ export const FeedbackAssistant = ({
       <AnimatePresence>
         {isChatExpanded && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="fixed lg:absolute bottom-0 right-0 lg:bottom-4 lg:right-4 z-50 w-full h-[85vh] sm:w-[400px] sm:h-[600px] lg:h-[calc(100%-2rem)] max-h-750px] bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed lg:absolute inset-0 sm:inset-auto sm:bottom-0 sm:right-0 lg:bottom-4 lg:right-4 z-50 w-full sm:w-[400px] h-full sm:h-[600px] lg:h-[calc(100%-2rem)] max-h-[750px] bg-white dark:bg-black border-0 sm:border border-gray-200 dark:border-white/10 sm:rounded-2xl lg:rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Chat Header */}
             <div className="flex-shrink-0 h-14 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-white dark:bg-black px-5">

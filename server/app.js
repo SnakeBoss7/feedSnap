@@ -27,7 +27,8 @@ const DEV_WHITELIST = [
   "http://localhost:3000",
   "http://localhost:5173",
   "http://127.0.0.1:3000",
-  "http://127.0.0.1:5173"
+  "http://127.0.0.1:5173",
+  "http://10.153.64.228:3000"
 ];
 
 app.use(async (req, res, next) => {
