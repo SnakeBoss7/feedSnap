@@ -64,6 +64,11 @@ const dashboardReducer = (state, action) => {
         ...state,
         data: state.data.filter(item => !action.payload.ids.includes(item._id)),
       };
+    case 'FORCE_RELOAD':
+      return {
+        ...state,
+        isLoading: true,
+      };
     default:
       return state;
   }
@@ -132,12 +137,7 @@ export const Feedback = () => {
       }
       return { success: false, message: res.data.message || 'Delete failed' };
     } catch (err) {
-      // If item not found (404), treat as success to remove ghost item from UI
-      if (err.response && err.response.status === 404) {
-        dispatch({ type: 'DELETE_ITEMS', payload: { ids: [id] } });
-        invalidateCache();
-        return { success: true, message: 'Feedback already deleted' };
-      }
+      console.error('[handleDeleteFeedback] Error:', err.response?.status, err.response?.data);
       const msg = err.response?.data?.message || 'Failed to delete feedback';
       return { success: false, message: msg };
     }
@@ -146,6 +146,7 @@ export const Feedback = () => {
   // Bulk delete handler
   const handleBulkDeleteFeedback = useCallback(async (ids) => {
     try {
+      console.log('[handleBulkDeleteFeedback] Sending IDs:', ids);
       const res = await axios.post(`${apiUrl}/api/feedback/bulk-delete`, { ids }, {
         withCredentials: true
       });
@@ -156,17 +157,7 @@ export const Feedback = () => {
       }
       return { success: false, message: res.data.message || 'Bulk delete failed' };
     } catch (err) {
-      // If items not found (404) or none accessible (403 with specific message), remove them
-      // Note: 403 might catch "No accessible feedback", which could mean they are all ghosts.
-      // But strictly speaking we only want to auto-remove if we are sure they don't exist.
-      // For bulk, let's just handle 404 if API returns it, or if we want to be aggressive, 403 too.
-      // Currently backend returns 403 if validIds.length === 0.
-      if (err.response && (err.response.status === 404 || (err.response.status === 403 && err.response.data.message === 'No accessible feedback found to delete'))) {
-        dispatch({ type: 'DELETE_ITEMS', payload: { ids } });
-        invalidateCache();
-        return { success: true, message: 'Selected feedback already deleted' };
-      }
-
+      console.error('[handleBulkDeleteFeedback] Error:', err.response?.status, err.response?.data);
       const msg = err.response?.data?.message || 'Failed to delete feedback';
       return { success: false, message: msg };
     }

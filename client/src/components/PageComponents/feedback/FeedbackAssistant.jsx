@@ -294,7 +294,7 @@ export const FeedbackAssistant = ({
         userPrompt,
         feedbackData: selectedData
       }, { withCredentials: true });
-
+      console.log(aiRes.data)
       setAiResponse((prev) => [
         ...prev,
         { role: "assistant", content: aiRes.data?.response.response },

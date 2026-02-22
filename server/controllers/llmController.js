@@ -105,7 +105,7 @@ async function optimizeFeedbackForAI(webUrl) {
       "Feature Request",
       "Improvement",
       "General Feedback",
-      "complaint",
+      "Complaint",
     ];
 
     if (!feedbacks || feedbacks.length === 0) {
@@ -264,7 +264,7 @@ const askAI = async (req, res) => {
         }
       }
     }
-
+    console.log(optimizedData)
     const data = JSON.stringify(optimizedData)
       .replace(/`/g, "\\`")
       .replace(/\$/g, "\\$");
@@ -355,7 +355,7 @@ CRITICAL RULES:
     // Validate the parsed result
     const validatedResult = validateAIResponse(cleanResult);
 
-    return res.status(200).json({ response: validatedResult });
+    return res.status(200).json({ response: validatedResult, data: optimizedData });
   } catch (error) {
     // Determine appropriate error response
     if (error.message === "API timeout") {

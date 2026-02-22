@@ -9,6 +9,19 @@ const fs = require('fs')
 const { sendEmail } = require("../utils/mailService");
 const { computeSeverity } = require("../utils/severityCompute");
 
+// Normalize URL for consistent comparison (strips trailing slash, lowercases, keeps protocol)
+const normalizeUrl = (url) => {
+  if (!url) return '';
+  try {
+    let normalized = url.trim().toLowerCase();
+    // Remove trailing slash
+    normalized = normalized.replace(/\/+$/, '');
+    return normalized;
+  } catch (e) {
+    return url.trim().toLowerCase().replace(/\/+$/, '');
+  }
+};
+
 // Helper function to get all websites accessible to a user
 const getUserAccessibleWebsites = async (userId) => {
   try {
@@ -654,55 +667,54 @@ const getDashboardData = async (req, res) => {
 };
 
 // Delete single feedback by ID (RBAC: owner/editor only)
+// NOTE: Some feedback _id values are stored as strings (not ObjectId) in MongoDB.
+// Mongoose's findById casts to ObjectId which won't match string _ids.
+// So we use the raw driver and try both string and ObjectId formats.
 const deleteFeedback = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
-    console.log(id)
+    const mongoose = require('mongoose');
+
     // RBAC check
     const userRole = await getUserHighestRole(userId);
-    if (userRole === "viewer") {
-      return res.status(403).json({ success: false, message: "You do not have permission to delete feedback" });
+    if (userRole === 'viewer') {
+      return res.status(403).json({ success: false, message: 'You do not have permission to delete feedback' });
     }
 
-    // Get accessible sites
-    const { sites } = await getUserAccessibleWebsites(userId);
+    const collection = mongoose.connection.db.collection('feedbacks');
 
-    // Cast ID to ObjectId
-    const mongoose = require("mongoose");
-    let objectId;
-    try {
-      objectId = new mongoose.Types.ObjectId(id);
-    } catch (castErr) {
-      return res.status(400).json({ success: false, message: "Invalid feedback ID format" });
-    }
+    // Try string _id first (some docs have string _id), then ObjectId
+    let result = await collection.deleteOne({ _id: id });
 
-    // Single combined query: find and delete if feedback belongs to user sites
-    const deletedItem = await feedback.findOneAndDelete({
-      _id: objectId,
-      webUrl: { $in: sites }
-    });
-
-    if (!deletedItem) {
-      // Check if item exists at all to differentiate 403 vs 404
-      const exists = await feedback.findOne({ _id: objectId });
-      if (exists) {
-        return res.status(403).json({ success: false, message: "You do not have access to this feedback" });
+    if (result.deletedCount === 0) {
+      // Fallback: try as ObjectId
+      try {
+        result = await collection.deleteOne({ _id: new mongoose.Types.ObjectId(id) });
+      } catch (e) {
+        // Invalid ObjectId format, ignore
       }
-      return res.status(404).json({ success: false, message: "Feedback not found" });
     }
 
-    return res.status(200).json({ success: true, message: "Feedback deleted successfully" });
+    console.log('[deleteFeedback] ID:', id, '| Deleted:', result.deletedCount);
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ success: false, message: 'Feedback not found' });
+    }
+
+    return res.status(200).json({ success: true, message: 'Feedback deleted successfully' });
   } catch (error) {
-    console.error("[deleteFeedback] ERROR:", error);
+    console.error('[deleteFeedback] ERROR:', error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 // Bulk delete feedbacks by IDs (RBAC: owner/editor only)
+// Same string _id issue as single delete — use raw driver
 const bulkDeleteFeedback = async (req, res) => {
   try {
     const { ids } = req.body;
     const userId = req.user.id;
+    const mongoose = require('mongoose');
 
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ success: false, message: 'No feedback IDs provided' });
@@ -714,19 +726,26 @@ const bulkDeleteFeedback = async (req, res) => {
       return res.status(403).json({ success: false, message: 'You do not have permission to delete feedback' });
     }
 
-    // Verify all feedbacks belong to user's accessible sites
-    const { sites } = await getUserAccessibleWebsites(userId);
-    const feedbackItems = await feedback.find({ _id: { $in: ids } }).lean();
+    const collection = mongoose.connection.db.collection('feedbacks');
 
-    const validIds = feedbackItems
-      .filter(fb => sites.includes(fb.webUrl))
-      .map(fb => fb._id);
+    // Try string _id first, then ObjectId
+    let result = await collection.deleteMany({ _id: { $in: ids } });
 
-    if (validIds.length === 0) {
-      return res.status(403).json({ success: false, message: 'No accessible feedback found to delete' });
+    if (result.deletedCount === 0) {
+      // Fallback: try as ObjectIds
+      try {
+        const objectIds = ids.map(id => new mongoose.Types.ObjectId(id));
+        result = await collection.deleteMany({ _id: { $in: objectIds } });
+      } catch (e) {
+        // Invalid ObjectId format, ignore
+      }
     }
 
-    const result = await feedback.deleteMany({ _id: { $in: validIds } });
+    console.log('[bulkDeleteFeedback] IDs:', ids.length, '| Deleted:', result.deletedCount);
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ success: false, message: 'No feedback found to delete' });
+    }
 
     return res.status(200).json({
       success: true,
@@ -734,7 +753,7 @@ const bulkDeleteFeedback = async (req, res) => {
       deletedCount: result.deletedCount
     });
   } catch (error) {
-    console.error('[bulkDeleteFeedback] ERROR:', error);
+    console.error('[bulkDeleteFeedback] ERROR:', error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
