@@ -15,7 +15,6 @@ import {
   RefreshCcw,
   Download,
   Trash2,
-  Share2,
   Mail,
   Clock,
   Copy,
