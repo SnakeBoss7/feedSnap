@@ -377,23 +377,27 @@ export const FeedbackAssistant = ({
 
   return (
     <>
-      {/* Collapsed State - Floating Toggle Button */}
+      {/* Collapsed State - Floating Toggle Button (right edge, vertically centered) */}
       <AnimatePresence>
         {!isChatExpanded && (
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
+          <motion.div
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
             transition={{ duration: 0.2 }}
-            onClick={() => {
-              setIsSidebarOpen(true);
-              setIsChatExpanded(true);
-            }}
-            className="fixed lg:absolute bottom-20 right-6 p-4 bg-black text-white dark:bg-white dark:text-black rounded-full shadow-xl hover:shadow-2xl transition-all ease-in-out duration-300 z-50 flex items-center gap-0 hover:gap-2 group overflow-hidden"
+            className="fixed right-0 top-1/2 -translate-y-1/2 z-30 pointer-events-none"
           >
-            <LucideBot size={24} className="group-hover:rotate-12 transition-all ease-in-out duration-300" />
-            <span className="font-medium whitespace-nowrap max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 transition-all ease-in-out duration-300">Ask AI</span>
-          </motion.button>
+            <button
+              onClick={() => {
+                setIsSidebarOpen(true);
+                setIsChatExpanded(true);
+              }}
+              className="pointer-events-auto flex items-center gap-2 pl-3 pr-2.5 py-2.5 bg-gray-900/90 text-white dark:bg-white/90 dark:text-gray-900 rounded-l-2xl shadow-lg shadow-black/10 dark:shadow-white/10 hover:shadow-xl hover:pl-4 transition-all ease-out duration-300 active:scale-95 backdrop-blur-sm border border-r-0 border-white/10 dark:border-black/10"
+            >
+              <LucideBot size={18} className="flex-shrink-0" />
+              <span className="text-xs font-semibold tracking-wide">AI</span>
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
 

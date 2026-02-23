@@ -64,6 +64,15 @@ const dashboardReducer = (state, action) => {
         ...state,
         data: state.data.filter(item => !action.payload.ids.includes(item._id)),
       };
+    case 'UPDATE_STATUS':
+      return {
+        ...state,
+        data: state.data.map(item =>
+          action.payload.ids.includes(item._id)
+            ? { ...item, status: action.payload.status, updatedOn: new Date().toISOString() }
+            : item
+        ),
+      };
     case 'FORCE_RELOAD':
       return {
         ...state,
@@ -163,6 +172,42 @@ export const Feedback = () => {
     }
   }, [invalidateCache]);
 
+  // Single resolve handler
+  const handleResolveFeedback = useCallback(async (id, status) => {
+    try {
+      const res = await axios.patch(`${apiUrl}/api/feedback/resolve/${id}`, { status }, {
+        withCredentials: true
+      });
+      if (res.data.success) {
+        dispatch({ type: 'UPDATE_STATUS', payload: { ids: [id], status } });
+        invalidateCache();
+        return { success: true, message: res.data.message };
+      }
+      return { success: false, message: res.data.message || 'Update failed' };
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to update feedback';
+      return { success: false, message: msg };
+    }
+  }, [invalidateCache]);
+
+  // Bulk resolve handler
+  const handleBulkResolveFeedback = useCallback(async (ids, status) => {
+    try {
+      const res = await axios.post(`${apiUrl}/api/feedback/bulk-resolve`, { ids, status }, {
+        withCredentials: true
+      });
+      if (res.data.success) {
+        dispatch({ type: 'UPDATE_STATUS', payload: { ids, status } });
+        invalidateCache();
+        return { success: true, message: res.data.message, modifiedCount: res.data.modifiedCount };
+      }
+      return { success: false, message: res.data.message || 'Bulk update failed' };
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to update feedback';
+      return { success: false, message: msg };
+    }
+  }, [invalidateCache]);
+
   // Empty state — no feedback entries
   if (!state.isLoading && state.data.length === 0) {
     return (
@@ -226,6 +271,8 @@ export const Feedback = () => {
             userRole={state.userRole}
             onDeleteFeedback={handleDeleteFeedback}
             onBulkDeleteFeedback={handleBulkDeleteFeedback}
+            onResolveFeedback={handleResolveFeedback}
+            onBulkResolveFeedback={handleBulkResolveFeedback}
           />
         </div>
 

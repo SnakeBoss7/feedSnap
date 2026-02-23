@@ -1,0 +1,222 @@
+[
+    {
+        "_id": {
+            "$oid": "699c791b8d24aef9e5377bc5"
+        },
+        "title": "Bug Report",
+        "description": "found input overflow vuln in the bot content field of this page /scriptGen",
+        "severity": 7,
+        "rating": 2,
+        "status": false,
+        "webUrl": "http://localhost:3000",
+        "pathname": "/dashboard/scriptGen",
+        "email": "rahuldharwal12005@gmail.com",
+        "createdOn": {
+            "$date": "2026-02-23T15:58:19.527Z"
+        },
+        "updatedOn": {
+            "$date": "2026-02-23T15:58:19.527Z"
+        },
+        "__v": 0
+    },
+    {
+        "_id": {
+            "$oid": "65d8a1b2c3d4e5f6a9b8c7d1"
+        },
+        "title": "Feature Request Improvement",
+        "description": "The search bar in the dashboard should support auto-suggestions for faster navigation between different feedback categories.",
+        "severity": 3,
+        "rating": 4,
+        "status": true,
+        "webUrl": "http://localhost:3000",
+        "pathname": "/dashboard",
+        "email": "john.doe66@gmail.com",
+        "createdOn": {
+            "$date": "2026-02-15T10:30:00.000Z"
+        },
+        "updatedOn": {
+            "$date": "2026-02-15T10:30:00.000Z"
+        },
+        "__v": 0
+    },
+    {
+        "_id": {
+            "$oid": "65d8a1b2c3d4e5f6a9b8c7d2"
+        },
+        "title": "Bug Report",
+        "description": "Encountered a 404 error when trying to delete a feedback entry from the main table view under heavy load.",
+        "severity": 8,
+        "rating": 1,
+        "status": false,
+        "webUrl": "http://localhost:3000",
+        "pathname": "/dashboard/feedback",
+        "email": "samuel_smith@yahoo.com",
+        "createdOn": {
+            "$date": "2026-02-18T14:45:12.000Z"
+        },
+        "updatedOn": {
+            "$date": "2026-02-18T14:45:12.000Z"
+        },
+        "__v": 0
+    },
+    {
+        "_id": {
+            "$oid": "65d8a1b2c3d4e5f6a9b8c7d3"
+        },
+        "title": "General Feedback",
+        "description": "The overall UI is very clean and easy to use. Great job on the dark mode transition, it's very easy on the eyes!",
+        "severity": 1,
+        "rating": 5,
+        "status": true,
+        "webUrl": "http://localhost:3000",
+        "pathname": "/home",
+        "email": "amanda.p@outlook.com",
+        "createdOn": {
+            "$date": "2026-02-21T09:15:45.000Z"
+        },
+        "updatedOn": {
+            "$date": "2026-02-21T09:15:45.000Z"
+        },
+        "__v": 0
+    },
+    {
+        "_id": {
+            "$oid": "65d8a1b2c3d4e5f6a9b8c7d4"
+        },
+        "title": "Complaint",
+        "description": "The widget loading time on mobile devices is significantly slower compared to desktop. It often lags on initial page load.",
+        "severity": 6,
+        "rating": 2,
+        "status": false,
+        "webUrl": "http://localhost:3000",
+        "pathname": "/integration",
+        "email": "tech_wizard@company.io",
+        "createdOn": {
+            "$date": "2026-01-28T16:20:00.000Z"
+        },
+        "updatedOn": {
+            "$date": "2026-01-28T16:20:00.000Z"
+        },
+        "__v": 0
+    },
+    {
+        "_id": {
+            "$oid": "65d8a1b2c3d4e5f6a9b8c7d5"
+        },
+        "title": "Feature Request Improvement",
+        "description": "Can we add an option to export feedback data as CSV or PDF? It's currently hard to share reports with the team.",
+        "severity": 4,
+        "rating": 4,
+        "status": false,
+        "webUrl": "http://localhost:3000",
+        "pathname": "/dashboard/reports",
+        "email": "Sarah_Jones_99@test.com",
+        "createdOn": {
+            "$date": "2026-02-05T11:00:30.000Z"
+        },
+        "updatedOn": {
+            "$date": "2026-02-05T11:00:30.000Z"
+        },
+        "__v": 0
+    },
+    {
+        "_id": {
+            "$oid": "65d8a1b2c3d4e5f6a9b8c7d6"
+        },
+        "title": "Bug Report",
+        "description": "The login page sometimes fails to redirect after a successful Google OAuth login, requiring a manual page refresh.",
+        "severity": 7,
+        "rating": 2,
+        "status": false,
+        "webUrl": "http://localhost:3000",
+        "pathname": "/login",
+        "email": "dev_mike@code.net",
+        "createdOn": {
+            "$date": "2026-02-10T08:22:19.000Z"
+        },
+        "updatedOn": {
+            "$date": "2026-02-10T08:22:19.000Z"
+        },
+        "__v": 0
+    },
+    {
+        "_id": {
+            "$oid": "65d8a1b2c3d4e5f6a9b8c7d7"
+        },
+        "title": "General Feedback",
+        "description": "Really love the new analytics dashboard! The graphs are much more informative than the previous version.",
+        "severity": 1,
+        "rating": 5,
+        "status": true,
+        "webUrl": "http://localhost:3000",
+        "pathname": "/dashboard/analytics",
+        "email": "user_alpha@example.org",
+        "createdOn": {
+            "$date": "2026-02-22T12:00:00.000Z"
+        },
+        "updatedOn": {
+            "$date": "2026-02-22T12:00:00.000Z"
+        },
+        "__v": 0
+    },
+    {
+        "_id": {
+            "$oid": "65d8a1b2c3d4e5f6a9b8c7d8"
+        },
+        "title": "Bug Report",
+        "description": "The date filter in the feedback table doesn't seem to fetch results correctly for dates older than 30 days.",
+        "severity": 5,
+        "rating": 3,
+        "status": false,
+        "webUrl": "http://localhost:3000",
+        "pathname": "/dashboard/feedback",
+        "email": "beta_tester@protonmail.com",
+        "createdOn": {
+            "$date": "2026-01-20T15:45:00.000Z"
+        },
+        "updatedOn": {
+            "$date": "2026-01-20T15:45:00.000Z"
+        },
+        "__v": 0
+    },
+    {
+        "_id": {
+            "$oid": "65d8a1b2c3d4e5f6a9b8c7d9"
+        },
+        "title": "Feature Request Improvement",
+        "description": "It would be great if we could customize the widget color and floating position directly from the user settings panel.",
+        "severity": 2,
+        "rating": 4,
+        "status": false,
+        "webUrl": "http://localhost:3000",
+        "pathname": "/settings",
+        "email": "feedback_guru@web.com",
+        "createdOn": {
+            "$date": "2026-02-12T17:10:00.000Z"
+        },
+        "updatedOn": {
+            "$date": "2026-02-12T17:10:00.000Z"
+        },
+        "__v": 0
+    },
+    {
+        "_id": {
+            "$oid": "65d8a1b2c3d4e5f6a9b8c7e0"
+        },
+        "title": "Complaint",
+        "description": "The documentation for integrating the script is a bit confusing for beginners. More code examples would be helpful.",
+        "severity": 4,
+        "rating": 3,
+        "status": true,
+        "webUrl": "http://localhost:3000",
+        "pathname": "/docs",
+        "email": "rahul_dev@gmail.com",
+        "createdOn": {
+            "$date": "2026-01-25T13:30:45.000Z"
+        },
+        "updatedOn": {
+            "$date": "2026-01-25T13:30:45.000Z"
+        },
+        "__v": 0
+    }
+]

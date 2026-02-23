@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createFeed, getFeed, display, allFeedback, exportFeedback, getDashboardData, deleteFeedback, bulkDeleteFeedback } = require('../controllers/feebackController');
+const { createFeed, getFeed, display, allFeedback, exportFeedback, getDashboardData, deleteFeedback, bulkDeleteFeedback, resolveFeedback, bulkResolveFeedback } = require('../controllers/feebackController');
 const upload = require('../middleware/multer');
 const verifyUser = require('../middleware/jwtverify');
 router.post('/addfeedback', createFeed)
@@ -12,4 +12,6 @@ router.get('/allFeedback', verifyUser, allFeedback);
 router.get('/dashboard-data', verifyUser, getDashboardData);
 router.delete('/delete/:id', verifyUser, deleteFeedback);
 router.post('/bulk-delete', verifyUser, bulkDeleteFeedback);
+router.patch('/resolve/:id', verifyUser, resolveFeedback);
+router.post('/bulk-resolve', verifyUser, bulkResolveFeedback);
 module.exports = router;

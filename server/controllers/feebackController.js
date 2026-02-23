@@ -758,6 +758,113 @@ const bulkDeleteFeedback = async (req, res) => {
   }
 };
 
+// Resolve/Unresolve single feedback by ID (RBAC: owner/editor only)
+const resolveFeedback = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // true = resolved, false = unresolved
+    const userId = req.user.id;
+    const mongoose = require('mongoose');
+
+    if (typeof status !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'Status must be a boolean' });
+    }
+
+    // RBAC check
+    const userRole = await getUserHighestRole(userId);
+    if (userRole === 'viewer') {
+      return res.status(403).json({ success: false, message: 'You do not have permission to update feedback' });
+    }
+
+    const collection = mongoose.connection.db.collection('feedbacks');
+
+    // Try string _id first, then ObjectId
+    let result = await collection.updateOne({ _id: id }, { $set: { status, updatedOn: new Date() } });
+
+    if (result.matchedCount === 0) {
+      try {
+        result = await collection.updateOne(
+          { _id: new mongoose.Types.ObjectId(id) },
+          { $set: { status, updatedOn: new Date() } }
+        );
+      } catch (e) {
+        // Invalid ObjectId format, ignore
+      }
+    }
+
+    console.log('[resolveFeedback] ID:', id, '| Status:', status, '| Matched:', result.matchedCount);
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: 'Feedback not found' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Feedback ${status ? 'resolved' : 'unresolved'} successfully`
+    });
+  } catch (error) {
+    console.error('[resolveFeedback] ERROR:', error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Bulk resolve/unresolve feedbacks by IDs (RBAC: owner/editor only)
+const bulkResolveFeedback = async (req, res) => {
+  try {
+    const { ids, status } = req.body;
+    const userId = req.user.id;
+    const mongoose = require('mongoose');
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: 'No feedback IDs provided' });
+    }
+    if (typeof status !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'Status must be a boolean' });
+    }
+
+    // RBAC check
+    const userRole = await getUserHighestRole(userId);
+    if (userRole === 'viewer') {
+      return res.status(403).json({ success: false, message: 'You do not have permission to update feedback' });
+    }
+
+    const collection = mongoose.connection.db.collection('feedbacks');
+
+    // Try string _id first, then ObjectId
+    let result = await collection.updateMany(
+      { _id: { $in: ids } },
+      { $set: { status, updatedOn: new Date() } }
+    );
+
+    if (result.matchedCount === 0) {
+      try {
+        const objectIds = ids.map(id => new mongoose.Types.ObjectId(id));
+        result = await collection.updateMany(
+          { _id: { $in: objectIds } },
+          { $set: { status, updatedOn: new Date() } }
+        );
+      } catch (e) {
+        // Invalid ObjectId format, ignore
+      }
+    }
+
+    console.log('[bulkResolveFeedback] IDs:', ids.length, '| Status:', status, '| Matched:', result.matchedCount);
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: 'No feedback found to update' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `${result.modifiedCount} feedback(s) ${status ? 'resolved' : 'unresolved'} successfully`,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('[bulkResolveFeedback] ERROR:', error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createFeed,
   getFeed,
@@ -767,5 +874,7 @@ module.exports = {
   getUserAccessibleWebsites,
   getDashboardData,
   deleteFeedback,
-  bulkDeleteFeedback
+  bulkDeleteFeedback,
+  resolveFeedback,
+  bulkResolveFeedback
 };
