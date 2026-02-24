@@ -1,26 +1,6 @@
 [
     {
         "_id": {
-            "$oid": "699c791b8d24aef9e5377bc5"
-        },
-        "title": "Bug Report",
-        "description": "found input overflow vuln in the bot content field of this page /scriptGen",
-        "severity": 7,
-        "rating": 2,
-        "status": false,
-        "webUrl": "http://localhost:3000",
-        "pathname": "/dashboard/scriptGen",
-        "email": "rahuldharwal12005@gmail.com",
-        "createdOn": {
-            "$date": "2026-02-23T15:58:19.527Z"
-        },
-        "updatedOn": {
-            "$date": "2026-02-23T15:58:19.527Z"
-        },
-        "__v": 0
-    },
-    {
-        "_id": {
             "$oid": "65d8a1b2c3d4e5f6a9b8c7d1"
         },
         "title": "Feature Request Improvement",
