@@ -39,7 +39,6 @@ export const MemberRow = ({ member, currentUserRole, onRoleChange, onRemove }) =
             <RoleSelector
               value={member.role}
               onChange={(newRole) => onRoleChange(member.userId, newRole)}
-              isOwner={currentUserRole === 'owner'}
             />
           ) : (
             <span className="text-sm text-gray-500 dark:text-dark-text-muted px-3 capitalize">

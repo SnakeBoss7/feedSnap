@@ -59,13 +59,6 @@ export const TeamsOverview = () => {
     setTeams(prevTeams => prevTeams.map(team => {
       if (team.teamId === teamId) {
         const updatedMembers = team.members.map(member => {
-          // If changing someone to owner, current owner becomes admin
-          if (newRole === 'owner' && member.userId === memberId) {
-            return { ...member, role: 'owner' };
-          }
-          if (newRole === 'owner' && member.role === 'owner') {
-            return { ...member, role: 'admin' };
-          }
           if (member.userId === memberId) {
             return { ...member, role: newRole };
           }
@@ -81,18 +74,11 @@ export const TeamsOverview = () => {
       setManageTeam(prev => ({
         ...prev,
         members: prev.members.map(member => {
-          if (newRole === 'owner' && member.userId === memberId) {
-            return { ...member, role: 'owner' };
-          }
-          if (newRole === 'owner' && member.role === 'owner') {
-            return { ...member, role: 'admin' };
-          }
           if (member.userId === memberId) {
             return { ...member, role: newRole };
           }
           return member;
         }),
-        yourRole: newRole === 'owner' && manageTeam.yourRole === 'owner' ? 'admin' : manageTeam.yourRole
       }));
     }
 
