@@ -205,13 +205,13 @@ export const DashboardHome = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Analytics Chart (DayBreakdown) */}
           <div className="lg:col-span-2 bg-white dark:bg-dark-bg-secondary rounded-2xl p-8 shadow-[0_20px_50px_rgb(0,0,0,0.06)] dark:shadow-none border border-gray-100/50 dark:border-dark-border hover:shadow-[0_20px_50px_rgb(0,0,0,0.10)] transition-all duration-300">
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex justify-between items-center lg:mb-8 mb-12">
               <h2 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">Feedback Analytics</h2>
               <div className="px-3 py-1 bg-gray-100 dark:bg-dark-bg-tertiary rounded-full text-xs font-bold text-gray-600 dark:text-dark-text-tertiary">
                 Weekly
               </div>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="lg:h-[300px] h-[150px] w-full">
               <DayBreakdown data={dayBreakdownData} />
             </div>
           </div>
@@ -317,7 +317,7 @@ export const DashboardHome = () => {
               </table>
             </div>
           </div>
-          <div className="h-24 w-full" ></div>
+          <div className="h-24 lg:h-0 w-full" ></div>
         </div>
       </div>
     </div>
