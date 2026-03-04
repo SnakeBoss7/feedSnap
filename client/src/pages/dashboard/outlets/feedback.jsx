@@ -24,6 +24,7 @@ const getCachedData = () => {
           sites: parsed.data.sites || [],
           userTeams: parsed.data.userTeams || [],
           userRole: parsed.data.userRole || 'viewer',
+          siteRoles: parsed.data.siteRoles || {},
           success: parsed.data.success || false,
           isLoading: false
         };
@@ -37,6 +38,7 @@ const getCachedData = () => {
     sites: [],
     userTeams: [],
     userRole: 'viewer',
+    siteRoles: {},
     success: false,
     isLoading: true,
   };
@@ -51,6 +53,7 @@ const dashboardReducer = (state, action) => {
         sites: action.payload.sites || [],
         userTeams: action.payload.userTeams || [],
         userRole: action.payload.userRole || 'viewer',
+        siteRoles: action.payload.siteRoles || {},
         success: action.payload.success || false,
         isLoading: false
       };
@@ -269,6 +272,7 @@ export const Feedback = () => {
             setSelectedData={setSelectedData}
             data={state?.data}
             userRole={state.userRole}
+            siteRoles={state.siteRoles}
             onDeleteFeedback={handleDeleteFeedback}
             onBulkDeleteFeedback={handleBulkDeleteFeedback}
             onResolveFeedback={handleResolveFeedback}

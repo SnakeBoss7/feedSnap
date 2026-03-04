@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Loader = () => {
+const Loader = ({ color = 'currentColor' }) => {
   return (
-    <StyledWrapper>
+    <StyledWrapper $color={color}>
       <svg viewBox="25 25 50 50" className="container">
         <circle cx={50} cy={50} r={20} className="loader" />
       </svg>
@@ -20,7 +20,7 @@ const StyledWrapper = styled.div`
 
   .loader {
     fill: none;
-    stroke: #000000ff;
+    stroke: ${({ $color }) => $color};
     stroke-width: 10;
     stroke-dasharray: 2, 200;
     stroke-dashoffset: 0;

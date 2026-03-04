@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import DOMPurify from 'dompurify';
 import {
   LucideArrowUp,
@@ -11,7 +11,8 @@ import {
   LucideEye,
   LucideMinimize2,
   LucideChevronDown,
-  LucideUser
+  LucideUser,
+  LucideTrash2
 } from "lucide-react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
@@ -199,6 +200,35 @@ const EmailCard = ({ chat, index, teams, copiedIndex, onCopy, onSend }) => {
   );
 };
 
+const CHAT_STORAGE_KEY = 'feedsnap_chat_history';
+const SUGGESTIONS_STORAGE_KEY = 'feedsnap_chat_suggestions';
+
+const DEFAULT_MESSAGE = {
+  role: "assistant",
+  content: "Hello! I'm your Feedback Assistant. How can I help you analyze your data today?"
+};
+
+const loadFromStorage = (key, fallback) => {
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed;
+    }
+  } catch (err) {
+    console.warn(`Failed to load ${key} from localStorage:`, err);
+  }
+  return fallback;
+};
+
+const saveToStorage = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (err) {
+    console.warn(`Failed to save ${key} to localStorage:`, err);
+  }
+};
+
 export const FeedbackAssistant = ({
   userTeams,
   selectedData,
@@ -207,23 +237,38 @@ export const FeedbackAssistant = ({
   isChatExpanded,
   setIsChatExpanded
 }) => {
-  const [aiResponse, setAiResponse] = useState([
-    {
-      role: "assistant",
-      content: "Hello! I'm your Feedback Assistant. How can I help you analyze your data today?"
-    },
-  ]);
+  const [aiResponse, setAiResponse] = useState(() =>
+    loadFromStorage(CHAT_STORAGE_KEY, [DEFAULT_MESSAGE])
+  );
 
   const [userPrompt, setUserPrompt] = useState("");
-  const [promptSuggestion, setPromptSuggestion] = useState({
-    sug1: '',
-    sug2: ''
-  });
+  const [promptSuggestion, setPromptSuggestion] = useState(() =>
+    loadFromStorage(SUGGESTIONS_STORAGE_KEY, { sug1: '', sug2: '' })
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [displayedMessages, setDisplayedMessages] = useState([]);
   const [copiedIndex, setCopiedIndex] = useState(null);
   const chatRefContainer = useRef(null);
   const messagesEndRef = useRef(null);
+
+  // Persist chat history to localStorage whenever it changes
+  useEffect(() => {
+    saveToStorage(CHAT_STORAGE_KEY, aiResponse);
+  }, [aiResponse]);
+
+  // Persist prompt suggestions to localStorage whenever they change
+  useEffect(() => {
+    saveToStorage(SUGGESTIONS_STORAGE_KEY, promptSuggestion);
+  }, [promptSuggestion]);
+
+  // Clear chat handler
+  const handleClearChat = useCallback(() => {
+    setAiResponse([DEFAULT_MESSAGE]);
+    setDisplayedMessages([DEFAULT_MESSAGE]);
+    setPromptSuggestion({ sug1: '', sug2: '' });
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+    localStorage.removeItem(SUGGESTIONS_STORAGE_KEY);
+  }, []);
 
   // Scroll functions
   const scrollToBottomContainer = () => {
@@ -422,15 +467,24 @@ export const FeedbackAssistant = ({
                   <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Assistant</p>
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  setIsSidebarOpen(false);
-                  setIsChatExpanded(false);
-                }}
-                className="p-2 hover:bg-gray-100 hover:text-black dark:hover:bg-white/10 dark:hover:text-white rounded-xl text-gray-500 dark:text-gray-400 transition-colors"
-              >
-                <LucideMinimize2 size={18} />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={handleClearChat}
+                  title="Clear chat"
+                  className="p-2 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400 rounded-xl text-gray-400 dark:text-gray-500 transition-colors"
+                >
+                  <LucideTrash2 size={16} />
+                </button>
+                <button
+                  onClick={() => {
+                    setIsSidebarOpen(false);
+                    setIsChatExpanded(false);
+                  }}
+                  className="p-2 hover:bg-gray-100 hover:text-black dark:hover:bg-white/10 dark:hover:text-white rounded-xl text-gray-500 dark:text-gray-400 transition-colors"
+                >
+                  <LucideMinimize2 size={18} />
+                </button>
+              </div>
             </div>
 
             {/* Chat Messages */}

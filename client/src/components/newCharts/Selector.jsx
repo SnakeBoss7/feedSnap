@@ -37,9 +37,9 @@ export const Selectors = ({ websites, selectedWebsite, onWebsiteChange, selected
           <span className="text-gray-900 dark:text-dark-text-primary font-medium truncate">
             {selectedWebsite === "all" ? "All Websites" : selectedWebsite}
           </span>
-          <ChevronDown 
-            size={16} 
-            className={`text-gray-400 dark:text-gray-500 transition-transform duration-200 group-hover:text-purple-500 ${isOpen ? "rotate-180" : ""}`} 
+          <ChevronDown
+            size={16}
+            className={`text-gray-400 dark:text-gray-500 transition-transform duration-200 group-hover:text-[#E94057] ${isOpen ? "rotate-180" : ""}`}
           />
         </button>
 
@@ -50,11 +50,10 @@ export const Selectors = ({ websites, selectedWebsite, onWebsiteChange, selected
                 onWebsiteChange("all")
                 setIsOpen(false)
               }}
-              className={`w-full px-4 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-dark-bg-hover transition-colors ${
-                selectedWebsite === "all" 
-                  ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 font-medium" 
-                  : "text-gray-700 dark:text-dark-text-secondary"
-              }`}
+              className={`w-full px-4 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-dark-bg-hover transition-colors ${selectedWebsite === "all"
+                ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 font-medium"
+                : "text-gray-700 dark:text-dark-text-secondary"
+                }`}
             >
               All Websites
             </button>
@@ -65,11 +64,10 @@ export const Selectors = ({ websites, selectedWebsite, onWebsiteChange, selected
                   onWebsiteChange(website)
                   setIsOpen(false)
                 }}
-                className={`w-full px-4 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-dark-bg-hover transition-colors border-t border-gray-50 dark:border-dark-border-subtle ${
-                  selectedWebsite === website 
-                    ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 font-medium" 
-                    : "text-gray-700 dark:text-dark-text-secondary"
-                }`}
+                className={`w-full px-4 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-dark-bg-hover transition-colors border-t border-gray-50 dark:border-dark-border-subtle ${selectedWebsite === website
+                  ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 font-medium"
+                  : "text-gray-700 dark:text-dark-text-secondary"
+                  }`}
               >
                 {website}
               </button>
@@ -88,11 +86,10 @@ export const Selectors = ({ websites, selectedWebsite, onWebsiteChange, selected
             <button
               key={tf.value}
               onClick={() => onTimeframeChange(tf.value)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                selectedTimeframe === tf.value
-                  ? "bg-white dark:bg-dark-bg-secondary text-purple-700 dark:text-purple-300 shadow-sm ring-1 ring-black/5 dark:ring-white/10"
-                  : "text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-dark-text-primary hover:bg-gray-200/50 dark:hover:bg-dark-bg-hover"
-              }`}
+              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${selectedTimeframe === tf.value
+                ? "bg-white dark:bg-dark-bg-secondary text-[#E94057] dark:text-[#E94057] shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+                : "text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-dark-text-primary hover:bg-gray-200/50 dark:hover:bg-dark-bg-hover"
+                }`}
             >
               {tf.label}
             </button>

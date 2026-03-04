@@ -56,9 +56,9 @@ const StyledWrapper = styled.div`
     background: rgba(65, 146, 223, 1);
     background: linear-gradient(
       90deg,
-      rgba(46, 87, 223, 1) 0%,
-      rgba(252, 103, 190, 1) 49%,
-      rgba(51, 135, 231, 1) 100%
+      rgba(233, 64, 87,1) 0%,
+      rgba(238, 0, 0, 0.72) 49%,
+      rgba(221, 35, 10, 1) 100%
     );
     border-radius: 40rem;
     width: 10rem;

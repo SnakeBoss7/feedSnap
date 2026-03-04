@@ -36,7 +36,7 @@ import { format } from "date-fns"
 import { RatingStar } from "../../../star/star"
 import { exportData } from "../../../../services/exportData"
 
-export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRole, onDeleteFeedback, onBulkDeleteFeedback, onResolveFeedback, onBulkResolveFeedback }) => {
+export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRole, siteRoles, onDeleteFeedback, onBulkDeleteFeedback, onResolveFeedback, onBulkResolveFeedback }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [formatType] = useState('csv')
   const [severityFilter, setSeverityFilter] = useState("all")
@@ -55,6 +55,17 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRo
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
   const [isResolving, setIsResolving] = useState(false)
 
+  // Per-site permission check: returns true if user can modify (delete/resolve) feedback for a given webUrl
+  const canModify = (webUrl) => {
+    if (!siteRoles || Object.keys(siteRoles).length === 0) {
+      // Fallback to global userRole if siteRoles not available (e.g. from old cached data)
+      return userRole === 'owner' || userRole === 'editor'
+    }
+    const role = siteRoles[webUrl]
+    return role === 'owner' || role === 'editor'
+  }
+
+  // Legacy global check (for UI elements not tied to a specific site)
   const canDelete = userRole === 'owner' || userRole === 'editor'
 
   // Show toast helper
@@ -243,7 +254,11 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRo
           <Button
             variant="outline"
             className="bg-white dark:bg-dark-bg-secondary border-gray-300  text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-bg-hover shadow-sm"
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              localStorage.removeItem('feedbackData')
+              localStorage.removeItem('type')
+              window.location.reload()
+            }}
           >
             <RefreshCcw className="mr-2 h-4 w-4" />
             Refresh
@@ -426,7 +441,7 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRo
                       <td className="px-4 py-4 max-w-[200px]">
                         <div className="group/desc relative">
                           <p className="text-sm text-gray-600 dark:text-gray-400 truncate cursor-default">
-                            {item.description?.slice(0, 40)}{item.description?.length > 40 ? '...' : ''}
+                            {!item.description ? 'N/A' : item.description?.slice(0, 40)}{item.description?.length > 40 ? '...' : ''}
                           </p>
                           {/* Tooltip - shows for all descriptions */}
                           {item.description && (
@@ -480,7 +495,7 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRo
                             <DropdownMenuItem onClick={() => handleViewDetails(item)} className="cursor-pointer text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-white/10 rounded-lg m-0.5">
                               <Eye className="mr-2 h-4 w-4" /> View Details
                             </DropdownMenuItem>
-                            {canDelete && (
+                            {canModify(item.webUrl) && (
                               <DropdownMenuItem
                                 onClick={async (e) => {
                                   e.stopPropagation();
@@ -505,7 +520,7 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRo
                                 )}
                               </DropdownMenuItem>
                             )}
-                            {canDelete && (
+                            {canModify(item.webUrl) && (
                               <>
                                 <DropdownMenuSeparator className="bg-gray-200 dark:bg-white/10" />
                                 <DropdownMenuItem
@@ -593,66 +608,73 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRo
 
               {/* Action Buttons */}
               <div className="flex items-center gap-1">
-                {canDelete && (
-                  <>
-                    <button
-                      onClick={async () => {
-                        if (onBulkResolveFeedback) {
-                          setIsResolving(true);
-                          const ids = [...selectedItems];
-                          const result = await onBulkResolveFeedback(ids, true);
-                          setIsResolving(false);
-                          if (result.success) {
-                            setSelectedItems(new Set());
-                            showToast(result.message);
-                          } else {
-                            showToast(result.message || 'Failed to resolve', 'error');
+                {(() => {
+                  // Check if ALL selected items are from sites the user can modify
+                  const selectedFeedback = data.filter(item => selectedItems.has(item._id))
+                  const allModifiable = selectedFeedback.every(item => canModify(item.webUrl))
+                  return allModifiable ? (
+                    <>
+                      <button
+                        onClick={async () => {
+                          if (onBulkResolveFeedback) {
+                            setIsResolving(true);
+                            const ids = [...selectedItems];
+                            const result = await onBulkResolveFeedback(ids, true);
+                            setIsResolving(false);
+                            if (result.success) {
+                              setSelectedItems(new Set());
+                              showToast(result.message);
+                            } else {
+                              showToast(result.message || 'Failed to resolve', 'error');
+                            }
                           }
-                        }
-                      }}
-                      disabled={isResolving}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-emerald-400 dark:text-emerald-600 hover:bg-emerald-500/15 dark:hover:bg-emerald-500/10 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
-                      title="Mark as Resolved"
-                    >
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Resolve</span>
-                    </button>
+                        }}
+                        disabled={isResolving}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-emerald-400 dark:text-emerald-600 hover:bg-emerald-500/15 dark:hover:bg-emerald-500/10 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                        title="Mark as Resolved"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Resolve</span>
+                      </button>
 
-                    <button
-                      onClick={async () => {
-                        if (onBulkResolveFeedback) {
-                          setIsResolving(true);
-                          const ids = [...selectedItems];
-                          const result = await onBulkResolveFeedback(ids, false);
-                          setIsResolving(false);
-                          if (result.success) {
-                            setSelectedItems(new Set());
-                            showToast(result.message);
-                          } else {
-                            showToast(result.message || 'Failed to unresolve', 'error');
+                      <button
+                        onClick={async () => {
+                          if (onBulkResolveFeedback) {
+                            setIsResolving(true);
+                            const ids = [...selectedItems];
+                            const result = await onBulkResolveFeedback(ids, false);
+                            setIsResolving(false);
+                            if (result.success) {
+                              setSelectedItems(new Set());
+                              showToast(result.message);
+                            } else {
+                              showToast(result.message || 'Failed to unresolve', 'error');
+                            }
                           }
-                        }
-                      }}
-                      disabled={isResolving}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-orange-400 dark:text-orange-600 hover:bg-orange-500/15 dark:hover:bg-orange-500/10 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
-                      title="Mark as Unresolved"
-                    >
-                      <XCircle className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Unresolve</span>
-                    </button>
+                        }}
+                        disabled={isResolving}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-orange-400 dark:text-orange-600 hover:bg-orange-500/15 dark:hover:bg-orange-500/10 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                        title="Mark as Unresolved"
+                      >
+                        <XCircle className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Unresolve</span>
+                      </button>
 
-                    <div className="w-px h-5 bg-white/15 dark:bg-black/15 mx-1" />
+                      <div className="w-px h-5 bg-white/15 dark:bg-black/15 mx-1" />
 
-                    <button
-                      onClick={handleBulkDeleteClick}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-red-400 dark:text-red-500 hover:bg-red-500/15 dark:hover:bg-red-500/10 transition-all duration-200 hover:scale-105"
-                      title="Delete Selected"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Delete</span>
-                    </button>
-                  </>
-                )}
+                      <button
+                        onClick={handleBulkDeleteClick}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-red-400 dark:text-red-500 hover:bg-red-500/15 dark:hover:bg-red-500/10 transition-all duration-200 hover:scale-105"
+                        title="Delete Selected"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Delete</span>
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-xs text-white/40 dark:text-black/40 px-2">No edit access for some selected items</span>
+                  )
+                })()}
               </div>
 
               {/* Close */}

@@ -271,6 +271,68 @@ const getUserHighestRole = async (userId) => {
   return highest;
 };
 
+// Helper: determine user's role for a SPECIFIC site (webUrl)
+const getUserRoleForSite = async (userId, feedbackWebUrl) => {
+  const normalizedUrl = normalizeUrl(feedbackWebUrl);
+
+  // 1. Check direct ownership — if the user owns the WebData for this URL, they're 'owner'
+  const directOwned = await webData.findOne({ owner: userId });
+  if (directOwned && normalizeUrl(directOwned.webUrl) === normalizedUrl) {
+    return 'owner';
+  }
+
+  // Also check all owned sites (owner is an array)
+  const allOwned = await webData.find({ owner: userId });
+  for (const wd of allOwned) {
+    if (normalizeUrl(wd.webUrl) === normalizedUrl) return 'owner';
+  }
+
+  // 2. Check team memberships for this specific site
+  const userTeams = await Team.find({ 'members.user': userId }).populate('webData');
+  const rolePriority = { owner: 3, editor: 2, viewer: 1 };
+  let bestRole = 'viewer';
+
+  for (const team of userTeams) {
+    if (!team.webData) continue;
+    if (normalizeUrl(team.webData.webUrl) !== normalizedUrl) continue;
+    const member = team.members.find(m => m.user.toString() === userId);
+    if (member && (rolePriority[member.role] || 0) > (rolePriority[bestRole] || 0)) {
+      bestRole = member.role;
+    }
+  }
+
+  return bestRole;
+};
+
+// Helper: build a map of { webUrl: role } for all sites the user has access to
+const getUserSiteRolesMap = async (userId) => {
+  const siteRoles = {};
+
+  // 1. Direct ownership → 'owner'
+  const ownedSites = await webData.find({ owner: userId });
+  for (const wd of ownedSites) {
+    siteRoles[wd.webUrl] = 'owner';
+  }
+
+  // 2. Team memberships → member's specific role (keep highest if overlapping)
+  const userTeams = await Team.find({ 'members.user': userId }).populate('webData');
+  const rolePriority = { owner: 3, editor: 2, viewer: 1 };
+
+  for (const team of userTeams) {
+    if (!team.webData) continue;
+    const siteUrl = team.webData.webUrl;
+    const member = team.members.find(m => m.user.toString() === userId);
+    if (!member) continue;
+
+    const currentRole = siteRoles[siteUrl];
+    if (!currentRole || (rolePriority[member.role] || 0) > (rolePriority[currentRole] || 0)) {
+      siteRoles[siteUrl] = member.role;
+    }
+  }
+
+  return siteRoles;
+};
+
 const allFeedback = async (req, res) => {
   try {
     console.log("[allFeedback] START");
@@ -279,8 +341,9 @@ const allFeedback = async (req, res) => {
     const { sites } = await getUserAccessibleWebsites(user.id);
     console.log("[allFeedback] User sites:", sites);
 
-    // Get user's highest RBAC role for frontend permission checks
+    // Get user's per-site role map + highest role for frontend permission checks
     const userRole = await getUserHighestRole(user.id);
+    const siteRoles = await getUserSiteRolesMap(user.id);
 
     if (!sites || sites.length === 0) {
       return res.status(200).json({
@@ -288,6 +351,7 @@ const allFeedback = async (req, res) => {
         data: [],
         sites: [],
         userRole,
+        siteRoles: {},
         count: 0
       });
     }
@@ -320,6 +384,7 @@ const allFeedback = async (req, res) => {
       data: feedbacks,
       userTeams: teamOptions,
       userRole,
+      siteRoles,
       sites: sites,
       count: feedbacks.length
     });
@@ -666,41 +731,35 @@ const getDashboardData = async (req, res) => {
   }
 };
 
-// Delete single feedback by ID (RBAC: owner/editor only)
-// NOTE: Some feedback _id values are stored as strings (not ObjectId) in MongoDB.
-// Mongoose's findById casts to ObjectId which won't match string _ids.
-// So we use the raw driver and try both string and ObjectId formats.
+// Delete single feedback by ID (RBAC: owner/editor only, PER-SITE)
 const deleteFeedback = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
     const mongoose = require('mongoose');
-
-    // RBAC check
-    const userRole = await getUserHighestRole(userId);
-    if (userRole === 'viewer') {
-      return res.status(403).json({ success: false, message: 'You do not have permission to delete feedback' });
-    }
-
     const collection = mongoose.connection.db.collection('feedbacks');
 
-    // Try string _id first (some docs have string _id), then ObjectId
-    let result = await collection.deleteOne({ _id: id });
-
-    if (result.deletedCount === 0) {
-      // Fallback: try as ObjectId
+    // Find the feedback first to get its webUrl for per-site RBAC
+    let feedbackDoc = await collection.findOne({ _id: id });
+    if (!feedbackDoc) {
       try {
-        result = await collection.deleteOne({ _id: new mongoose.Types.ObjectId(id) });
-      } catch (e) {
-        // Invalid ObjectId format, ignore
-      }
+        feedbackDoc = await collection.findOne({ _id: new mongoose.Types.ObjectId(id) });
+      } catch (e) { /* invalid ObjectId */ }
     }
-
-    console.log('[deleteFeedback] ID:', id, '| Deleted:', result.deletedCount);
-
-    if (result.deletedCount === 0) {
+    if (!feedbackDoc) {
       return res.status(404).json({ success: false, message: 'Feedback not found' });
     }
+
+    // Per-site RBAC check
+    const userRole = await getUserRoleForSite(userId, feedbackDoc.webUrl);
+    if (userRole === 'viewer') {
+      return res.status(403).json({ success: false, message: 'You do not have permission to delete feedback for this site' });
+    }
+
+    // Delete
+    let result = await collection.deleteOne({ _id: feedbackDoc._id });
+
+    console.log('[deleteFeedback] ID:', id, '| Site:', feedbackDoc.webUrl, '| Role:', userRole, '| Deleted:', result.deletedCount);
 
     return res.status(200).json({ success: true, message: 'Feedback deleted successfully' });
   } catch (error) {
@@ -708,8 +767,7 @@ const deleteFeedback = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
-// Bulk delete feedbacks by IDs (RBAC: owner/editor only)
-// Same string _id issue as single delete — use raw driver
+// Bulk delete feedbacks by IDs (RBAC: owner/editor only, PER-SITE)
 const bulkDeleteFeedback = async (req, res) => {
   try {
     const { ids } = req.body;
@@ -720,32 +778,43 @@ const bulkDeleteFeedback = async (req, res) => {
       return res.status(400).json({ success: false, message: 'No feedback IDs provided' });
     }
 
-    // RBAC check
-    const userRole = await getUserHighestRole(userId);
-    if (userRole === 'viewer') {
-      return res.status(403).json({ success: false, message: 'You do not have permission to delete feedback' });
-    }
-
     const collection = mongoose.connection.db.collection('feedbacks');
 
-    // Try string _id first, then ObjectId
-    let result = await collection.deleteMany({ _id: { $in: ids } });
-
-    if (result.deletedCount === 0) {
-      // Fallback: try as ObjectIds
+    // Fetch all feedback docs to check per-site roles
+    let feedbackDocs = await collection.find({ _id: { $in: ids } }).toArray();
+    if (feedbackDocs.length === 0) {
       try {
         const objectIds = ids.map(id => new mongoose.Types.ObjectId(id));
-        result = await collection.deleteMany({ _id: { $in: objectIds } });
-      } catch (e) {
-        // Invalid ObjectId format, ignore
-      }
+        feedbackDocs = await collection.find({ _id: { $in: objectIds } }).toArray();
+      } catch (e) { /* invalid ObjectId */ }
     }
 
-    console.log('[bulkDeleteFeedback] IDs:', ids.length, '| Deleted:', result.deletedCount);
-
-    if (result.deletedCount === 0) {
+    if (feedbackDocs.length === 0) {
       return res.status(404).json({ success: false, message: 'No feedback found to delete' });
     }
+
+    // Per-site RBAC: check user has edit/owner role for EVERY feedback's site
+    const siteRoles = await getUserSiteRolesMap(userId);
+    const unauthorizedSites = [];
+    for (const doc of feedbackDocs) {
+      const role = siteRoles[doc.webUrl] || 'viewer';
+      if (role === 'viewer') {
+        unauthorizedSites.push(doc.webUrl);
+      }
+    }
+    if (unauthorizedSites.length > 0) {
+      const uniqueSites = [...new Set(unauthorizedSites)];
+      return res.status(403).json({
+        success: false,
+        message: `You do not have permission to delete feedback for: ${uniqueSites.join(', ')}`
+      });
+    }
+
+    // Delete all
+    const docIds = feedbackDocs.map(d => d._id);
+    const result = await collection.deleteMany({ _id: { $in: docIds } });
+
+    console.log('[bulkDeleteFeedback] IDs:', ids.length, '| Deleted:', result.deletedCount);
 
     return res.status(200).json({
       success: true,
@@ -758,7 +827,7 @@ const bulkDeleteFeedback = async (req, res) => {
   }
 };
 
-// Resolve/Unresolve single feedback by ID (RBAC: owner/editor only)
+// Resolve/Unresolve single feedback by ID (RBAC: owner/editor only, PER-SITE)
 const resolveFeedback = async (req, res) => {
   try {
     const { id } = req.params;
@@ -770,33 +839,32 @@ const resolveFeedback = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Status must be a boolean' });
     }
 
-    // RBAC check
-    const userRole = await getUserHighestRole(userId);
-    if (userRole === 'viewer') {
-      return res.status(403).json({ success: false, message: 'You do not have permission to update feedback' });
-    }
-
     const collection = mongoose.connection.db.collection('feedbacks');
 
-    // Try string _id first, then ObjectId
-    let result = await collection.updateOne({ _id: id }, { $set: { status, updatedOn: new Date() } });
-
-    if (result.matchedCount === 0) {
+    // Find the feedback first for per-site RBAC
+    let feedbackDoc = await collection.findOne({ _id: id });
+    if (!feedbackDoc) {
       try {
-        result = await collection.updateOne(
-          { _id: new mongoose.Types.ObjectId(id) },
-          { $set: { status, updatedOn: new Date() } }
-        );
-      } catch (e) {
-        // Invalid ObjectId format, ignore
-      }
+        feedbackDoc = await collection.findOne({ _id: new mongoose.Types.ObjectId(id) });
+      } catch (e) { /* invalid ObjectId */ }
     }
-
-    console.log('[resolveFeedback] ID:', id, '| Status:', status, '| Matched:', result.matchedCount);
-
-    if (result.matchedCount === 0) {
+    if (!feedbackDoc) {
       return res.status(404).json({ success: false, message: 'Feedback not found' });
     }
+
+    // Per-site RBAC check
+    const userRole = await getUserRoleForSite(userId, feedbackDoc.webUrl);
+    if (userRole === 'viewer') {
+      return res.status(403).json({ success: false, message: 'You do not have permission to update feedback for this site' });
+    }
+
+    // Update
+    const result = await collection.updateOne(
+      { _id: feedbackDoc._id },
+      { $set: { status, updatedOn: new Date() } }
+    );
+
+    console.log('[resolveFeedback] ID:', id, '| Site:', feedbackDoc.webUrl, '| Role:', userRole, '| Status:', status);
 
     return res.status(200).json({
       success: true,
@@ -808,7 +876,7 @@ const resolveFeedback = async (req, res) => {
   }
 };
 
-// Bulk resolve/unresolve feedbacks by IDs (RBAC: owner/editor only)
+// Bulk resolve/unresolve feedbacks by IDs (RBAC: owner/editor only, PER-SITE)
 const bulkResolveFeedback = async (req, res) => {
   try {
     const { ids, status } = req.body;
@@ -822,37 +890,46 @@ const bulkResolveFeedback = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Status must be a boolean' });
     }
 
-    // RBAC check
-    const userRole = await getUserHighestRole(userId);
-    if (userRole === 'viewer') {
-      return res.status(403).json({ success: false, message: 'You do not have permission to update feedback' });
-    }
-
     const collection = mongoose.connection.db.collection('feedbacks');
 
-    // Try string _id first, then ObjectId
-    let result = await collection.updateMany(
-      { _id: { $in: ids } },
+    // Fetch all feedback docs to check per-site roles
+    let feedbackDocs = await collection.find({ _id: { $in: ids } }).toArray();
+    if (feedbackDocs.length === 0) {
+      try {
+        const objectIds = ids.map(id => new mongoose.Types.ObjectId(id));
+        feedbackDocs = await collection.find({ _id: { $in: objectIds } }).toArray();
+      } catch (e) { /* invalid ObjectId */ }
+    }
+
+    if (feedbackDocs.length === 0) {
+      return res.status(404).json({ success: false, message: 'No feedback found to update' });
+    }
+
+    // Per-site RBAC: check user has edit/owner role for EVERY feedback's site
+    const siteRoles = await getUserSiteRolesMap(userId);
+    const unauthorizedSites = [];
+    for (const doc of feedbackDocs) {
+      const role = siteRoles[doc.webUrl] || 'viewer';
+      if (role === 'viewer') {
+        unauthorizedSites.push(doc.webUrl);
+      }
+    }
+    if (unauthorizedSites.length > 0) {
+      const uniqueSites = [...new Set(unauthorizedSites)];
+      return res.status(403).json({
+        success: false,
+        message: `You do not have permission to update feedback for: ${uniqueSites.join(', ')}`
+      });
+    }
+
+    // Update all
+    const docIds = feedbackDocs.map(d => d._id);
+    const result = await collection.updateMany(
+      { _id: { $in: docIds } },
       { $set: { status, updatedOn: new Date() } }
     );
 
-    if (result.matchedCount === 0) {
-      try {
-        const objectIds = ids.map(id => new mongoose.Types.ObjectId(id));
-        result = await collection.updateMany(
-          { _id: { $in: objectIds } },
-          { $set: { status, updatedOn: new Date() } }
-        );
-      } catch (e) {
-        // Invalid ObjectId format, ignore
-      }
-    }
-
     console.log('[bulkResolveFeedback] IDs:', ids.length, '| Status:', status, '| Matched:', result.matchedCount);
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ success: false, message: 'No feedback found to update' });
-    }
 
     return res.status(200).json({
       success: true,

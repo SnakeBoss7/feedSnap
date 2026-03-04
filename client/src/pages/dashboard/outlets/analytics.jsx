@@ -209,8 +209,8 @@ export const Analytics = () => {
 
   return (
     <div className="min-h-screen overflow-y-scroll scrollbar-hide font-sans bg-gray-100 dark:bg-dark-bg-primary transition-colors duration-300">
-      <Background color={"#b3a2ebff"} />
-      <SimpleHeader color={'#c5b5ff'} />
+      <Background color={"#E94057"} />
+      <SimpleHeader color={'#E94057'} />
 
       <div className="relative h-full max-w-[1600px] mx-auto md:px-10 px-5 py-8 ">
         {/* Header Section */}
