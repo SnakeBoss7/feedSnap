@@ -36,7 +36,7 @@ import { format } from "date-fns"
 import { RatingStar } from "../../../star/star"
 import { exportData } from "../../../../services/exportData"
 
-export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRole, siteRoles, onDeleteFeedback, onBulkDeleteFeedback, onResolveFeedback, onBulkResolveFeedback }) => {
+export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRoles, onDeleteFeedback, onBulkDeleteFeedback, onResolveFeedback, onBulkResolveFeedback }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [formatType] = useState('csv')
   const [severityFilter, setSeverityFilter] = useState("all")
@@ -66,7 +66,7 @@ export const FilterTable = React.memo(({ setSelectedData, data, onAction, userRo
   }
 
   // Legacy global check (for UI elements not tied to a specific site)
-  const canDelete = userRole === 'owner' || userRole === 'editor'
+  // const canDelete = userRole === 'owner' || userRole === 'editor'
 
   // Show toast helper
   const showToast = (message, type = 'success') => {
