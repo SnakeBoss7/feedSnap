@@ -211,7 +211,7 @@ export const DashboardHome = () => {
                 Weekly
               </div>
             </div>
-            <div className="lg:h-[300px] h-[150px] w-full">
+            <div className="lg:h-[300px] h-[200px] w-full">
               <DayBreakdown data={dayBreakdownData} />
             </div>
           </div>

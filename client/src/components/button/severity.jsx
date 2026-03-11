@@ -15,7 +15,7 @@ const SeverityBadge = ({ severity }) => {
 
     const severityNum = Number(level);
 
-    if (isNaN(severityNum) || severityNum < 0 || severityNum > 10) {
+    if (isNaN(severityNum) || severityNum < 0 || severityNum > 5) {
       return {
         label: 'Invalid',
         bgColor: 'bg-gray-100 dark:bg-gray-500/10',
@@ -33,7 +33,7 @@ const SeverityBadge = ({ severity }) => {
         borderColor: 'border-green-200 dark:border-green-500/20',
         dotColor: 'bg-green-500'
       };
-    } else if (severityNum <= 3) {
+    } else if (severityNum <= 1) {
       return {
         label: 'Low',
         bgColor: 'bg-green-100 dark:bg-green-500/10',
@@ -41,7 +41,7 @@ const SeverityBadge = ({ severity }) => {
         borderColor: 'border-green-200 dark:border-green-500/20',
         dotColor: 'bg-green-500'
       };
-    } else if (severityNum <= 6) {
+    } else if (severityNum <= 3) {
       return {
         label: 'Medium',
         bgColor: 'bg-amber-100 dark:bg-amber-500/10',
@@ -49,7 +49,7 @@ const SeverityBadge = ({ severity }) => {
         borderColor: 'border-amber-200 dark:border-amber-500/20',
         dotColor: 'bg-amber-500'
       };
-    } else if (severityNum <= 8) {
+    } else if (severityNum <= 4) {
       return {
         label: 'High',
         bgColor: 'bg-red-100 dark:bg-red-500/10',

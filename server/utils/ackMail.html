@@ -2,64 +2,300 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Feedback Received</title>
   <style>
+    /* Reset and Base Styles */
+    *, *::before, *::after { box-sizing: border-box; }
+    body, table, td, p, a, li { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     body {
-      font-family: "Segoe UI", sans-serif;
-      background-color: #f9fafb;
-      color: #111827;
       margin: 0;
       padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f8fafc; /* Very light, cool grey */
+      color: #334155; /* Slate 700 */
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
     }
+
+    /* Layout */
+    .wrapper {
+      width: 100%;
+      background-color: #f8fafc;
+      padding: 40px 16px;
+    }
+    
     .container {
       max-width: 600px;
-      margin: 2rem auto;
-      background-color: #fff;
-      border-radius: 10px;
-      padding: 1.5rem 2rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
     }
-    h1 {
-      color: #2563eb;
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
+
+    /* ── Header ── */
+    .header {
+      background-color: #ffffff;
+      padding: 32px 32px 24px;
+      text-align: center;
+      border-bottom: 1px solid #f1f5f9;
     }
-    .footer {
-      margin-top: 2rem;
-      font-size: 0.85rem;
-      color: #6b7280;
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: inline-block;
+      color: #0f172a; /* Slate 900 */
+    }
+    .logo-feed { color: #0f172a; }
+    .logo-snap {
+      color: #6366f1; /* Indigo 500 */
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 32px 32px 16px;
+    }
+    .icon-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: #ecfdf5; /* Emerald 50 */
+      margin-bottom: 20px;
+    }
+    .icon-wrapper svg {
+      width: 24px;
+      height: 24px;
+      color: #10b981; /* Emerald 500 */
+    }
+    .hero h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a; /* Slate 900 */
+      margin: 0 0 8px;
+      letter-spacing: -0.01em;
+    }
+    .hero p {
+      font-size: 15px;
+      color: #64748b; /* Slate 500 */
+      margin: 0;
+    }
+
+    /* ── Feedback Details ── */
+    .content-section {
+      padding: 0 32px 32px;
+    }
+    
+    .details-box {
+      background-color: #f8fafc; /* Slate 50 */
+      border: 1px solid #e2e8f0; /* Slate 200 */
+      border-radius: 8px;
+      padding: 24px;
+    }
+
+    /* Rating Display */
+    .rating-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .rating-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #475569; /* Slate 600 */
+      margin-right: 12px;
+      width: 100px;
+    }
+    .stars {
+      display: inline-flex;
+      gap: 2px;
+    }
+    .star-filled { color: #f59e0b; font-size: 18px; line-height: 1; }
+    .star-empty { color: #cbd5e1; font-size: 18px; line-height: 1; }
+    .rating-number {
+      font-size: 14px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-left: 8px;
+    }
+
+    /* Data Rows */
+    .data-row {
+      display: flex;
+      margin-bottom: 16px;
+    }
+    .data-row:last-child {
+      margin-bottom: 0;
+    }
+    .data-label {
+      width: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748b; /* Slate 500 */
+      flex-shrink: 0;
+      padding-top: 2px;
+    }
+    .data-value {
+      font-size: 15px;
+      color: #1e293b; /* Slate 800 */
+      flex-grow: 1;
+      word-break: break-word; /* Prevent overflow */
+    }
+    
+    /* Meta Information (Origin, Date) */
+    .meta-table {
+      width: 100%;
+      margin-top: 32px;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 24px;
+    }
+    .meta-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8; /* Slate 400 */
+      margin-bottom: 4px;
+      display: block;
+    }
+    .meta-value {
+      font-size: 14px;
+      color: #475569; /* Slate 600 */
+      word-break: break-all; /* Ensure URLs wrap */
+    }
+
+    /* ── Next Steps Message ── */
+    .message-box {
+      margin: 0 32px 32px;
+      padding: 20px;
+      background-color: #ffffff;
+      border-top: 2px solid #6366f1; /* Indigo 500 accent */
+      border-right: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
+      border-left: 1px solid #e2e8f0;
+      border-radius: 4px;
+    }
+    .message-box p {
+      margin: 0;
+      font-size: 14px;
+      color: #334155;
       text-align: center;
     }
-    .feedback-box {
-      background-color: #f3f4f6;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-top: 1rem;
-      font-size: 0.95rem;
+
+    /* ── Footer ── */
+    .footer {
+      background-color: #f8fafc;
+      padding: 32px;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
     }
-    .feedback-box strong {
-      color: #111827;
+    .footer-team {
+      font-size: 14px;
+      font-weight: 600;
+      color: #475569;
+      margin: 0 0 8px;
+    }
+    .footer-sub {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+    }
+    .footer-brand {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .footer-brand p {
+      font-size: 12px;
+      color: #94a3b8;
+      margin: 0;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Thank You for Your Feedback!</h1>
-    <p>Hi {{email}},</p>
-    <p>We truly appreciate you taking the time to share your thoughts about <strong>{{webUrl}}</strong>.</p>
+  <div class="wrapper">
+    <div class="container">
+      
+      <!-- Header -->
+      <div class="header">
+        <div class="logo">
+          <span class="logo-feed">Feed</span><span class="logo-snap">Snap</span>
+        </div>
+      </div>
 
-    <div class="feedback-box">
-      <p><strong>Title:</strong> {{title}}</p>
-      <p><strong>Rating:</strong> {{rating}} / 5</p>
-      <p><strong>Description:</strong> {{description}}</p>
-      <p><strong>Page:</strong> {{pathname}}</p>
-      <p><strong>Date:</strong> {{currentDate}}</p>
-    </div>
+      <!-- Hero -->
+      <div class="hero">
+        <div class="icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h1>Feedback Received</h1>
+        <p>Thank you for taking the time to share your thoughts, {{email}}</p>
+      </div>
 
-    <p>Our team will review your feedback shortly. Your input helps us improve!</p>
+      <!-- Feedback Details -->
+      <div class="content-section">
+        <div class="details-box">
+          
+          <div class="rating-container">
+            <span class="rating-label">Rating</span>
+            <span class="stars">{{ratingStars}}</span>
+            <span class="rating-number">{{rating}} / 5</span>
+          </div>
 
-    <div class="footer">
-      <p>— The {{webUrl}} Team</p>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 16px;">
+            <tr>
+              <td width="100" valign="top" style="font-size: 13px; font-weight: 600; color: #64748b; padding-top: 2px;">Subject</td>
+              <td valign="top" style="font-size: 15px; color: #0f172a; font-weight: 500;">{{title}}</td>
+            </tr>
+          </table>
+          
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td width="100" valign="top" style="font-size: 13px; font-weight: 600; color: #64748b; padding-top: 2px;">Message</td>
+              <td valign="top" style="font-size: 15px; color: #334155; line-height: 1.6;">{{description}}</td>
+            </tr>
+          </table>
+          
+          <table class="meta-table" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td width="50%" valign="top">
+                <span class="meta-label">Origin Path</span>
+                <span class="meta-value">{{pathname}}</span>
+              </td>
+              <td width="50%" valign="top">
+                <span class="meta-label">Date Submitted</span>
+                <span class="meta-value">{{currentDate}}</span>
+              </td>
+            </tr>
+          </table>
+
+        </div>
+      </div>
+
+      <!-- Next Steps -->
+      <div class="message-box">
+        <p>The team at <strong>{{webUrl}}</strong> will review your feedback shortly.<br>Your input helps us continuously improve the experience.</p>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p class="footer-team">&mdash; The {{webUrl}} Team</p>
+        <p class="footer-sub">This is an automated confirmation. No reply is necessary.</p>
+        <div class="footer-brand">
+          <p>Feedback gathered via <strong>FeedSnap</strong></p>
+        </div>
+      </div>
+
     </div>
   </div>
 </body>

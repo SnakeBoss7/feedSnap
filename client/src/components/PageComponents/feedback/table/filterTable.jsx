@@ -128,20 +128,18 @@ export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRo
         item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.email?.toLowerCase().includes(searchTerm.toLowerCase())
 
-      // Severity filter - Updated for 0-10 scale with ranges
+      // Severity filter - Updated for 1-5 scale
       let matchesSeverity = true
       if (severityFilter !== "all") {
         const itemSeverity = Number(item?.severity)
-        if (severityFilter === "0") {
-          matchesSeverity = itemSeverity === 0
-        } else if (severityFilter === "1-3") {
-          matchesSeverity = itemSeverity >= 1 && itemSeverity <= 3
-        } else if (severityFilter === "4-6") {
-          matchesSeverity = itemSeverity >= 4 && itemSeverity <= 6
-        } else if (severityFilter === "7-8") {
-          matchesSeverity = itemSeverity >= 7 && itemSeverity <= 8
-        } else if (severityFilter === "9-10") {
-          matchesSeverity = itemSeverity >= 9 && itemSeverity <= 10
+        if (severityFilter === "5") {
+          matchesSeverity = itemSeverity === 5
+        } else if (severityFilter === "4") {
+          matchesSeverity = itemSeverity === 4
+        } else if (severityFilter === "2-3") {
+          matchesSeverity = itemSeverity >= 2 && itemSeverity <= 3
+        } else if (severityFilter === "1") {
+          matchesSeverity = itemSeverity <= 1
         }
       }
 
@@ -216,9 +214,9 @@ export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRo
 
   const getSeverityAccentColor = (severity) => {
     const s = Number(severity)
-    if (s >= 9) return { bar: 'bg-red-600', glow: 'shadow-red-500/20' }
-    if (s >= 7) return { bar: 'bg-red-500', glow: 'shadow-red-500/15' }
-    if (s >= 4) return { bar: 'bg-amber-500', glow: 'shadow-amber-500/15' }
+    if (s >= 5) return { bar: 'bg-red-600', glow: 'shadow-red-500/20' }
+    if (s >= 4) return { bar: 'bg-red-500', glow: 'shadow-red-500/15' }
+    if (s >= 2) return { bar: 'bg-amber-500', glow: 'shadow-amber-500/15' }
     if (s >= 1) return { bar: 'bg-emerald-500', glow: 'shadow-emerald-500/15' }
     return { bar: 'bg-gray-400', glow: 'shadow-gray-400/10' }
   }
@@ -298,10 +296,10 @@ export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRo
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border-subtle rounded-xl shadow-lg z-[100] overflow-hidden" style={{ outline: 'none' }}>
                 <SelectItem value="all" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">All Severities</SelectItem>
-                <SelectItem value="9-10" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">Critical (9-10)</SelectItem>
-                <SelectItem value="7-8" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">High (7-8)</SelectItem>
-                <SelectItem value="4-6" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">Medium (4-6)</SelectItem>
-                <SelectItem value="1-3" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">Low (1-3)</SelectItem>
+                <SelectItem value="5" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">Critical (5)</SelectItem>
+                <SelectItem value="4" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">High (4)</SelectItem>
+                <SelectItem value="2-3" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">Medium (2-3)</SelectItem>
+                <SelectItem value="1" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">Low (1)</SelectItem>
               </SelectContent>
             </Select>
 
@@ -769,12 +767,12 @@ export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRo
                       <div className="w-full h-1.5 bg-gray-200 dark:bg-white/[0.06] rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${accent.bar}`}
-                          style={{ width: `${Math.min(Number(viewDetailsItem.severity) * 10, 100)}%` }}
+                          style={{ width: `${Math.min(Number(viewDetailsItem.severity) * 20, 100)}%` }}
                         />
                       </div>
                       <div className="flex justify-between mt-1">
                         <span className="text-[10px] text-gray-400 dark:text-gray-500">0</span>
-                        <span className="text-[10px] text-gray-400 dark:text-gray-500">10</span>
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500">5</span>
                       </div>
                     </div>
 

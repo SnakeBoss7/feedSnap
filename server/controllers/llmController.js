@@ -155,15 +155,13 @@ async function optimizeFeedbackForAI(webUrl) {
       }
     });
 
-    // Severity breakdown for 0-10 scale
-    // Assuming severity is 1-5 based on previous context, but code said 0-10?
-    // keeping existing logic of 2, 4, 6, 8 thresholds
+    // Severity breakdown for 1-5 scale
     const severityBreakdown = {
-      critical: feedbacks.filter((f) => f.severity >= 8).length,
-      high: feedbacks.filter((f) => f.severity >= 6 && f.severity < 8).length,
-      medium: feedbacks.filter((f) => f.severity >= 4 && f.severity < 6).length,
-      low: feedbacks.filter((f) => f.severity >= 2 && f.severity < 4).length,
-      veryLow: feedbacks.filter((f) => f.severity < 2).length,
+      critical: feedbacks.filter((f) => f.severity >= 5).length,
+      high: feedbacks.filter((f) => f.severity === 4).length,
+      medium: feedbacks.filter((f) => f.severity === 3).length,
+      low: feedbacks.filter((f) => f.severity === 2).length,
+      veryLow: feedbacks.filter((f) => f.severity <= 1).length,
     };
     // console.log({ stats, titleCounts, severityBreakdown, descByTitle })
     return {

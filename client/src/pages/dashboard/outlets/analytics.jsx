@@ -323,14 +323,14 @@ export const Analytics = () => {
 
         {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ChartCard title="Rating Distribution by Severity">
-            <div className="h-[400px]">
+          <ChartCard title="How Severity Affects Ratings">
+            <div className="h-[300px] md:h-[400px]">
               <AvgRatingBySeverityChart data={displayChartData.avgRatingBySeverity} />
             </div>
           </ChartCard>
 
           <ChartCard title="Weekly Breakdown">
-            <div className="h-[400px] p-4">
+            <div className="h-[250px] md:h-[400px] p-2 md:p-4">
               <DayBreakdown data={dayBreakdownData} />
             </div>
           </ChartCard>

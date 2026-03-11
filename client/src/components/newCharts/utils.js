@@ -152,10 +152,10 @@ export const getChartData = (data, website) => {
   // Average Rating by Severity Level
   const avgRatingBySeverity = []
   const severityLevels = [
-    { name: "Low", min: 1, max: 3 },
-    { name: "Medium", min: 4, max: 6 },
-    { name: "High", min: 7, max: 8 },
-    { name: "Critical", min: 9, max: 10 },
+    { name: "Low", min: 1, max: 1 },
+    { name: "Medium", min: 2, max: 3 },
+    { name: "High", min: 4, max: 4 },
+    { name: "Critical", min: 5, max: 5 },
   ]
 
   severityLevels.forEach((level) => {

@@ -2,10 +2,8 @@ const user = require("../models/user");
 const webData = require("../models/WebData");
 const feedback = require("../models/feedback");
 const Team = require("../models/teamSchema");
-const path = require('path')
 const { Parser } = require("json2csv");
 const PDFDocument = require("pdfkit");
-const fs = require('fs')
 const { sendEmail } = require("../utils/mailService");
 const { computeSeverity } = require("../utils/severityCompute");
 
@@ -122,7 +120,7 @@ const createFeed = async (req, res) => {
   res.status(200).json({ mess: "cooked" });
   let data = await feedback.create({ ...req.body, severity, status: false });
 
-  if (req.body.config?.ackMail) {
+  if (req.body.config?.ackMail && email && email.trim() !== "") {
     const currentDate = new Date().toLocaleString("en-IN", {
       timeZone: "Asia/Kolkata",
       weekday: "short",
@@ -132,21 +130,38 @@ const createFeed = async (req, res) => {
       hour: "2-digit",
       minute: "2-digit",
     });
-    let filepath = path.join(process.cwd(), "utils", "ackMail.html")
-    let mailContent = fs.readFileSync(filepath, "utf-8")
-    console.log({ filepath, mailContent })
-    mailContent = mailContent
-      .replace(/{{email}}/g, email)
-      .replace(/{{title}}/g, title)
-      .replace(/{{webUrl}}/g, webUrl)
-      .replace(/{{rating}}/g, rating)
-      .replace(/{{description}}/g, description)
-      .replace(/{{pathname}}/g, pathname)
-      .replace(/{{currentDate}}/g, currentDate);
-    // const templatePath = path.join(process.cwd(), "templates", "ackMail.html");
-    // console.log({filepath});
-    console.log({ mailContent })
-    sendEmail(email, `Your feedback has been received — ${webUrl} Team`, mailContent);
+
+    // Generate star rating HTML
+    const numRating = parseInt(rating) || 0;
+    let ratingStars = "";
+    for (let i = 1; i <= 5; i++) {
+      ratingStars += i <= numRating
+        ? '<span class="star-filled">&#9733;</span>'
+        : '<span class="star-empty">&#9733;</span>';
+    }
+
+    const { loadTemplate } = require("../utils/mailService");
+    const mailContent = loadTemplate("ackMail.html", {
+      email: email.trim(),
+      title,
+      webUrl,
+      rating: String(rating),
+      ratingStars,
+      description,
+      pathname,
+      currentDate,
+    });
+    
+    // Send email without blocking response
+    sendEmail(email.trim(), `Your feedback has been received — ${webUrl} Team`, mailContent)
+      .then(res => {
+        if (!res.success) {
+          console.error("[AckMail] Failed to send email:", res.error);
+        } else {
+          console.log("[AckMail] Email sent successfully to:", email.trim());
+        }
+      })
+      .catch(err => console.error("[AckMail] Error:", err));
   }
 };
 

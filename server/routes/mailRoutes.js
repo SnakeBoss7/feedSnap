@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const verifyUser = require('../middleware/jwtverify');
-const { sendEmail } = require('../utils/mailService');
+const { sendEmail, loadTemplate } = require('../utils/mailService');
 
 router.post('/send', verifyUser, async (req, res) => {
     try {
@@ -15,7 +15,13 @@ router.post('/send', verifyUser, async (req, res) => {
             });
         }
 
-        const result = await sendEmail(to, subject, body);
+        // Wrap AI-generated content in the branded template
+        const styledHtml = loadTemplate("brandedMail.html", {
+            content: body,
+            year: new Date().getFullYear().toString(),
+        });
+
+        const result = await sendEmail(to, subject, styledHtml);
 
         if (result.success) {
             res.status(200).json({

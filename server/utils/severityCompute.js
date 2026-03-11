@@ -57,10 +57,10 @@ function computeSeverity(feedback = {}) {
   let raw = base + rating + keywords + len + pres; // raw approx 0-120
   raw = Math.max(0, Math.min(raw, 100)); // clamp 0-100
 
-  // map to 1-10
-  const severity = Math.ceil(raw / 10);
+  // map to 1-5
+  const severity = Math.ceil(raw / 20);
   // console.log({severity});
-  return Math.max(1, Math.min(severity, 10));
+  return Math.max(1, Math.min(severity, 5));
 };
 module.exports = {computeSeverity};
 // let num = computeSeverity({"title":"complaint","status":"true","rating":5,"description":"There is a that causes a crash. adn There is a that causes a crash. adn i can probably say that its thatThere is a that causes a crash. adn i can probably say that its thatThere is a that causes a crash. adn i can probably say that its that i can probably say that its that","email":"rahuldharwal12005@gamil.com"})
