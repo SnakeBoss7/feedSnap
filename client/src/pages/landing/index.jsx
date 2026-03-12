@@ -18,7 +18,7 @@ import showacase2 from "../../img/Landing/showcase_2.jpeg"
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-white font-sans selection:bg-purple-500/30 transition-colors duration-300">
+    <div className="scrollbar-hide h-screen overflow-y-auto bg-gray-50 dark:bg-black text-gray-900 dark:text-white font-sans selection:bg-purple-500/30 transition-colors duration-300">
       <Header />
 
       {/* Hero Section */}

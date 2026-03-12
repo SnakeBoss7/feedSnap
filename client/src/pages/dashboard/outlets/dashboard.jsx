@@ -42,7 +42,7 @@ export const DashboardHome = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen overflow-scroll  scrollbar-hide bg-gradient-to-br  dark:from-dark-bg-primary dark:to-dark-bg-primary font-sans text-gray-900 dark:text-dark-text-primary">
+      <div className="min-h-screen overflow-scroll scrollbar-hide bg-gray-100 dark:bg-dark-bg-primary font-sans text-gray-900 dark:text-dark-text-primary transition-colors duration-300">
         <SimpleHeader color={'#c5b5ff'} />
         <div className="">
           <SkeletonTheme
