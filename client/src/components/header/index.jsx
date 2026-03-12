@@ -13,12 +13,18 @@ export default function Header() {
   const [isScrolling, setIsScrolling] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolling(window.scrollY > 10);
+    const handleScroll = (e) => {
+      const target = e.target === document ? window : e.target;
+      const scrollY = target === window ? window.scrollY : target.scrollTop;
+      setIsScrolling(scrollY > 10);
     };
-    window.addEventListener("scroll", handleScroll);
+    
+    // Find the scroll container (it might be the document or a div with overflow-y-auto)
+    const scrollContainer = document.querySelector('.scrollbar-hide') || window;
+    scrollContainer.addEventListener("scroll", handleScroll);
+    
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      scrollContainer.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
