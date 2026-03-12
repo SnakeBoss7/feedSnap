@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react"
 import {
   BarChart,
   Bar,
@@ -48,14 +49,14 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export const ChartCard = ({ title, children }) => {
   return (
-    <div className="bg-white dark:bg-dark-bg-secondary rounded-3xl p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none border border-gray-100 dark:border-dark-border hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 h-full flex flex-col relative overflow-hidden group">
+    <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none border border-gray-100 dark:border-dark-border hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 h-full flex flex-col relative overflow-hidden group">
       {/* Decorative Blob */}
       <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-purple-500/5 to-pink-500/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700 ease-in-out" />
-      
+
       <div className="flex items-center justify-between mb-6 relative z-10">
         <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 bg-clip-text text-transparent">{title}</h3>
       </div>
-      
+
       <div className="flex-1 min-h-[300px] w-full relative z-10">
         {children}
       </div>
@@ -84,8 +85,8 @@ export const ReportsByTypeChart = ({ data }) => {
     <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#334155" : "#f3f4f6"} horizontal={false} />
-        <XAxis 
-          type="number" 
+        <XAxis
+          type="number"
           stroke={darkMode ? "#64748b" : "#9ca3af"}
           tick={{ fontSize: 12, fontWeight: 500 }}
           tickLine={false}
@@ -108,10 +109,10 @@ export const ReportsByTypeChart = ({ data }) => {
           animationDuration={1500}
         >
           {data.map((entry, index) => (
-            <Cell 
-              key={`cell-${index}`} 
-              fill={getColor(entry.name, index)} 
-              className="hover:opacity-80 transition-all duration-300 cursor-pointer drop-shadow-sm" 
+            <Cell
+              key={`cell-${index}`}
+              fill={getColor(entry.name, index)}
+              className="hover:opacity-80 transition-all duration-300 cursor-pointer drop-shadow-sm"
             />
           ))}
           <LabelList
@@ -131,11 +132,11 @@ export const ReportsOverTimeChart = ({ data }) => {
   const { darkMode } = useThemeContext()
 
   const colors = {
-    "Bug Report": "#8B5CF6", 
-    "Feature Request": "#10B981", 
-    "Complaint": "#EF4444", 
-    "General Feedback": "#3B82F6", 
-    "Improvement": "#F59E0B", 
+    "Bug Report": "#8B5CF6",
+    "Feature Request": "#10B981",
+    "Complaint": "#EF4444",
+    "General Feedback": "#3B82F6",
+    "Improvement": "#F59E0B",
   }
 
   return (
@@ -172,8 +173,8 @@ export const ReportsOverTimeChart = ({ data }) => {
           dx={-15}
         />
         <Tooltip content={<CustomTooltip />} />
-        <Legend 
-          wrapperStyle={{ paddingTop: '20px', fontSize: '13px', fontWeight: 600 }} 
+        <Legend
+          wrapperStyle={{ paddingTop: '20px', fontSize: '13px', fontWeight: 600 }}
           iconType="circle"
           iconSize={10}
         />
@@ -245,9 +246,9 @@ export const ActiveVsResolvedChart = ({ data }) => {
           animationDuration={1500}
         >
           {data.map((entry, index) => (
-            <Cell 
-              key={`cell-${index}`} 
-              fill={entry.fill} 
+            <Cell
+              key={`cell-${index}`}
+              fill={entry.fill}
               className="hover:opacity-80 transition-opacity duration-300 outline-none drop-shadow-md"
             />
           ))}
@@ -259,6 +260,46 @@ export const ActiveVsResolvedChart = ({ data }) => {
   )
 }
 
+// Minimal arc gauge component
+const ArcGauge = ({ value, maxValue, color, size }) => {
+  const radius = (size - 8) / 2
+  const cx = size / 2
+  const cy = size / 2
+  const strokeWidth = size < 100 ? 5 : 6
+  const circumference = 2 * Math.PI * radius
+  const progress = Math.min(value / maxValue, 1)
+  const dashOffset = circumference * (1 - progress)
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
+      {/* Track */}
+      <circle
+        cx={cx}
+        cy={cy}
+        r={radius}
+        fill="none"
+        stroke="currentColor"
+        className="text-gray-100 dark:text-gray-800/50"
+        strokeWidth={strokeWidth}
+      />
+      {/* Progress */}
+      <circle
+        cx={cx}
+        cy={cy}
+        r={radius}
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={dashOffset}
+        className="transition-all duration-1000 ease-out"
+        style={{ filter: `drop-shadow(0 0 4px ${color}40)` }}
+      />
+    </svg>
+  )
+}
+
 export const SeverityRatingChart = ({ avgSeverity, avgRating }) => {
   const severityColor = getSeverityColor(avgSeverity)
   const ratingColor = getRatingColor(avgRating)
@@ -267,38 +308,41 @@ export const SeverityRatingChart = ({ avgSeverity, avgRating }) => {
   const formattedRating = avgRating > 0 ? Number(avgRating).toFixed(1) : "0.0"
 
   return (
-    <div className="flex lg:flex-col gap-4 md:gap-6 flex-row items-center justify-around h-full p-2 md:p-4">
-      <div className="text-center group w-full flex flex-col items-center">
-        <div
-          className="w-24 h-24 md:w-36 md:h-36 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 group-hover:scale-105 group-hover:shadow-2xl mb-2 md:mb-4 relative overflow-hidden bg-white dark:bg-dark-bg-tertiary"
-          style={{ border: `4px solid ${severityColor}30`, borderWidth: 'var(--border-width, 4px)' }}
-        >
-          <div className="absolute inset-1 md:inset-2 rounded-full border-[3px] md:border-4" style={{ borderColor: severityColor }}></div>
-          <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-500" style={{ backgroundColor: severityColor }}></div>
-          <div className="text-center z-10 flex flex-col items-center justify-center h-full">
-            <p className="text-2xl md:text-4xl font-extrabold" style={{ color: severityColor }}>{formattedSeverity}</p>
-            <span className="text-[8px] md:text-[10px] uppercase tracking-wider font-bold text-gray-400 mt-1">/ 5.0</span>
+    <div className="flex lg:flex-col gap-6 md:gap-8 flex-row items-center justify-around h-full p-3 md:p-6">
+      {/* Severity Gauge */}
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative">
+          <div className="w-[88px] h-[88px] md:w-[120px] md:h-[120px]">
+            <ArcGauge value={Number(avgSeverity) || 0} maxValue={5} color={severityColor} size={120} />
+          </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-xl md:text-3xl font-bold tracking-tight" style={{ color: severityColor }}>
+              {formattedSeverity}
+            </span>
+            <span className="text-[9px] md:text-[10px] text-gray-400 dark:text-gray-500 font-medium">/5</span>
           </div>
         </div>
-        <p className="text-gray-600 dark:text-gray-300 font-semibold tracking-wide uppercase text-xs md:text-sm">Avg Severity</p>
+        <span className="text-[11px] md:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Severity</span>
       </div>
 
-      <div className="hidden lg:block w-3/4 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-dark-border to-transparent"></div>
-      <div className="block lg:hidden h-16 md:h-24 w-px bg-gradient-to-b from-transparent via-gray-200 dark:via-dark-border to-transparent"></div>
+      {/* Divider */}
+      <div className="hidden lg:block w-2/3 h-px bg-gray-100 dark:bg-gray-800"></div>
+      <div className="block lg:hidden h-14 md:h-20 w-px bg-gray-100 dark:bg-gray-800"></div>
 
-      <div className="text-center group w-full flex flex-col items-center">
-        <div
-          className="w-24 h-24 md:w-36 md:h-36 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 group-hover:scale-105 group-hover:shadow-2xl mb-2 md:mb-4 relative overflow-hidden bg-white dark:bg-dark-bg-tertiary"
-          style={{ border: `4px solid ${ratingColor}30`, borderWidth: 'var(--border-width, 4px)' }}
-        >
-          <div className="absolute inset-1 md:inset-2 rounded-full border-[3px] md:border-4" style={{ borderColor: ratingColor }}></div>
-          <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-500" style={{ backgroundColor: ratingColor }}></div>
-          <div className="text-center z-10 flex flex-col items-center justify-center h-full">
-            <p className="text-2xl md:text-4xl font-extrabold" style={{ color: ratingColor }}>{formattedRating}</p>
-            <span className="text-[8px] md:text-[10px] uppercase tracking-wider font-bold text-gray-400 mt-1">/ 5.0</span>
+      {/* Rating Gauge */}
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative">
+          <div className="w-[88px] h-[88px] md:w-[120px] md:h-[120px]">
+            <ArcGauge value={Number(avgRating) || 0} maxValue={5} color={ratingColor} size={120} />
+          </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-xl md:text-3xl font-bold tracking-tight" style={{ color: ratingColor }}>
+              {formattedRating}
+            </span>
+            <span className="text-[9px] md:text-[10px] text-gray-400 dark:text-gray-500 font-medium">/5</span>
           </div>
         </div>
-        <p className="text-gray-600 dark:text-gray-300 font-semibold tracking-wide uppercase text-xs md:text-sm">Avg Rating</p>
+        <span className="text-[11px] md:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Rating</span>
       </div>
     </div>
   )
@@ -306,20 +350,20 @@ export const SeverityRatingChart = ({ avgSeverity, avgRating }) => {
 
 const getSeverityColor = (value) => {
   const val = Number.parseFloat(value)
-  if (val <= 1.5) return "#10B981" 
-  if (val <= 2.5) return "#3B82F6" 
-  if (val <= 3.5) return "#F59E0B" 
-  if (val <= 4.5) return "#F97316" 
-  return "#EF4444" 
+  if (val <= 1.5) return "#10B981"
+  if (val <= 2.5) return "#3B82F6"
+  if (val <= 3.5) return "#F59E0B"
+  if (val <= 4.5) return "#F97316"
+  return "#EF4444"
 }
 
 const getRatingColor = (value) => {
   const val = Number.parseFloat(value)
-  if (val <= 1.5) return "#EF4444" 
-  if (val <= 2.5) return "#F97316" 
-  if (val <= 3.5) return "#F59E0B" 
-  if (val <= 4.5) return "#3B82F6" 
-  return "#10B981" 
+  if (val <= 1.5) return "#EF4444"
+  if (val <= 2.5) return "#F97316"
+  if (val <= 3.5) return "#F59E0B"
+  if (val <= 4.5) return "#3B82F6"
+  return "#10B981"
 }
 
 export const SeverityVsRatingChart = ({ data }) => {
@@ -354,9 +398,9 @@ export const SeverityVsRatingChart = ({ data }) => {
         <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3', stroke: darkMode ? '#475569' : '#cbd5e1' }} />
         <Scatter name="Reports" data={data} animationDuration={1500}>
           {data.map((entry, index) => (
-            <Cell 
-              key={`cell-${index}`} 
-              fill={entry.severity > 3 ? "#EF4444" : "#3B82F6"} 
+            <Cell
+              key={`cell-${index}`}
+              fill={entry.severity > 3 ? "#EF4444" : "#3B82F6"}
               fillOpacity={0.7}
               className="hover:fill-opacity-100 transition-all duration-300 drop-shadow-sm"
             />
@@ -369,70 +413,75 @@ export const SeverityVsRatingChart = ({ data }) => {
 
 export const AvgRatingBySeverityChart = ({ data }) => {
   const { darkMode } = useThemeContext()
+  const [isMobile, setIsMobile] = useState(false)
 
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)')
+    const handler = (e) => setIsMobile(e.matches)
+    setIsMobile(mq.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  // Muted, sophisticated palette
   const colorMap = {
-    'low': '#10B981',
-    'medium': '#3B82F6',
-    'high': '#F59E0B',
-    'critical': '#EF4444',
+    'Low': '#34D399',
+    'Medium': '#60A5FA',
+    'High': '#FBBF24',
+    'Critical': '#F87171',
   }
 
-  const getColor = (level) => colorMap[String(level).toLowerCase()] || '#8B5CF6'
+  const getColor = (level) => colorMap[level] || '#A78BFA'
 
-  // Clean custom label — no overlapping dots, compact layout
-  const CustomAngleLabel = ({ payload, x, y, cx, cy }) => {
+  // Responsive label — larger, rotated 45°
+  const SimpleLabel = ({ payload, x, y, cx, cy }) => {
     const level = payload.value
-    const color = getColor(level)
-    const entry = data.find(d => d.level === level)
-    const rating = entry ? Number(entry.avgRating) || 0 : 0
 
-    // Push labels significantly further from center
     const dx = x - cx
     const dy = y - cy
-    const dist = Math.sqrt(dx * dx + dy * dy)
-    const nudge = 28
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1
+
+    const nudge = isMobile ? 16 : 24
+    const fontSize = isMobile ? 11 : 14
     const nx = x + (dx / dist) * nudge
     const ny = y + (dy / dist) * nudge
 
-    // Determine text anchor based on horizontal position
-    const anchor = Math.abs(dx) < 8 ? 'middle' : dx > 0 ? 'start' : 'end'
-
-    // Vertical alignment tweak — top labels go up, bottom go down
-    const verticalShift = dy < -10 ? -4 : dy > 10 ? 8 : 0
+    const anchor = Math.abs(dx) < 10 ? 'middle' : dx > 0 ? 'start' : 'end'
 
     return (
-      <g>
-        {/* Severity name with inline colored dot */}
-        <text
-          x={nx}
-          y={ny + verticalShift - 2}
-          textAnchor={anchor}
-          dominantBaseline="central"
-          fill={darkMode ? '#cbd5e1' : '#475569'}
-          fontSize={11}
-          fontWeight="700"
-          style={{ textTransform: 'uppercase', letterSpacing: '0.06em' }}
-        >
-          {level}
-        </text>
-        {/* Rating value — compact, below the label */}
-        <text
-          x={nx}
-          y={ny + verticalShift + 14}
-          textAnchor={anchor}
-          dominantBaseline="central"
-          fill={color}
-          fontSize={13}
-          fontWeight="800"
-        >
-          {rating > 0 ? rating.toFixed(1) : '—'}
-          <tspan fill={darkMode ? '#475569' : '#b0b8c4'} fontSize={9} fontWeight="500"> /5</tspan>
-        </text>
-      </g>
+      <text
+        x={nx}
+        y={ny}
+        textAnchor={anchor}
+        dominantBaseline="central"
+        fill={darkMode ? '#cbd5e1' : '#374151'}
+        fontSize={fontSize}
+        fontWeight="700"
+        style={{ letterSpacing: '0.02em' }}
+      >
+        {level}
+      </text>
     )
   }
 
-  // Premium tooltip
+  // Minimal dot — no glow, just clean circle
+  const CustomDot = (props) => {
+    const { cx, cy, payload } = props
+    const color = getColor(payload.level)
+    const dotR = isMobile ? 3.5 : 4.5
+    return (
+      <circle
+        cx={cx}
+        cy={cy}
+        r={dotR}
+        fill={color}
+        stroke={darkMode ? '#1e293b' : '#ffffff'}
+        strokeWidth={2}
+      />
+    )
+  }
+
+  // Minimal tooltip
   const RadarTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const entry = payload[0].payload
@@ -440,32 +489,26 @@ export const AvgRatingBySeverityChart = ({ data }) => {
       const rating = Number(entry.avgRating) || 0
       return (
         <div
-          className="backdrop-blur-xl p-4 rounded-2xl shadow-2xl border"
+          className="px-4 py-3 rounded-xl shadow-lg border"
           style={{
-            background: darkMode ? 'rgba(30,41,59,0.95)' : 'rgba(255,255,255,0.95)',
-            borderColor: darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+            background: darkMode ? '#1e293b' : '#ffffff',
+            borderColor: darkMode ? '#334155' : '#e2e8f0',
           }}
         >
-          <div className="flex items-center gap-2 mb-3 pb-2 border-b" style={{ borderColor: darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
-            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-            <span className="font-extrabold text-sm" style={{ color: darkMode ? '#f1f5f9' : '#1e293b' }}>
-              {entry.level} Severity
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+            <span className="font-semibold text-[13px]" style={{ color: darkMode ? '#e2e8f0' : '#1e293b' }}>
+              {entry.level}
             </span>
           </div>
-          <div className="space-y-1.5">
-            <div className="flex justify-between gap-8 text-sm">
-              <span style={{ color: darkMode ? '#94a3b8' : '#64748b' }}>Avg Rating</span>
-              <span className="font-bold" style={{ color }}>
-                {rating > 0 ? rating.toFixed(1) : 'N/A'}
-                <span className="font-normal" style={{ color: darkMode ? '#475569' : '#9ca3af' }}> / 5.0</span>
-              </span>
-            </div>
-            <div className="flex justify-between gap-8 text-sm">
-              <span style={{ color: darkMode ? '#94a3b8' : '#64748b' }}>Reports</span>
-              <span className="font-bold" style={{ color: darkMode ? '#e2e8f0' : '#374151' }}>
-                {entry.count || 0}
-              </span>
-            </div>
+          <div className="flex items-baseline gap-1">
+            <span className="text-lg font-bold" style={{ color }}>
+              {rating > 0 ? rating.toFixed(1) : '—'}
+            </span>
+            <span className="text-xs" style={{ color: darkMode ? '#475569' : '#94a3b8' }}>/ 5</span>
+            <span className="text-xs ml-2" style={{ color: darkMode ? '#64748b' : '#94a3b8' }}>
+              {entry.count || 0} reports
+            </span>
           </div>
         </div>
       )
@@ -473,36 +516,62 @@ export const AvgRatingBySeverityChart = ({ data }) => {
     return null
   }
 
+  const outerRadius = isMobile ? '60%' : '70%'
+
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <RadarChart cx="50%" cy="50%" outerRadius="52%" data={data}>
+      <RadarChart
+        cx="50%"
+        cy="50%"
+        outerRadius={outerRadius}
+        data={data}
+        margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
+      >
         <defs>
-          {/* Gradient fill for the radar polygon */}
-          <radialGradient id="radarGradientFill" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.4} />
-            <stop offset="100%" stopColor="#EC4899" stopOpacity={0.06} />
-          </radialGradient>
-          {/* Stroke gradient */}
-          <linearGradient id="radarStrokeGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#8B5CF6" />
-            <stop offset="100%" stopColor="#A78BFA" />
+          <linearGradient id="severityRadarFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={darkMode ? '#60A5FA' : '#3B82F6'} stopOpacity={0.15} />
+            <stop offset="100%" stopColor={darkMode ? '#A78BFA' : '#8B5CF6'} stopOpacity={0.03} />
           </linearGradient>
         </defs>
 
         <PolarGrid
-          stroke={darkMode ? 'rgba(148,163,184,0.1)' : 'rgba(0,0,0,0.06)'}
+          stroke={darkMode ? 'rgba(148,163,184,0.25)' : 'rgba(0,0,0,0.12)'}
           strokeWidth={1}
           gridType="polygon"
         />
         <PolarAngleAxis
           dataKey="level"
-          tick={<CustomAngleLabel />}
+          tick={<SimpleLabel />}
           stroke="transparent"
         />
         <PolarRadiusAxis
           domain={[0, 5]}
+          angle={45}
           tickCount={6}
-          tick={false}
+          tick={({ x, y, payload, cx, cy }) => {
+            if (payload.value === 0) return null
+            
+            // PolarRadiusAxis calculates coordinates for a circle.
+            // Since we use a polygon grid (diamond), the line at 45 degrees
+            // is closer to the center by a factor of cos(45deg) ≈ 0.7071.
+            const scale = 0.7071
+            const nx = cx + (x - cx) * scale
+            const ny = cy + (y - cy) * scale
+
+            return (
+              <text
+                x={nx + 3}
+                y={ny - 3}
+                fill={darkMode ? '#94a3b8' : '#6b7280'}
+                fontSize={isMobile ? 10 : 11}
+                fontWeight="600"
+                textAnchor="start"
+                dominantBaseline="auto"
+              >
+                {payload.value}
+              </text>
+            )
+          }}
           axisLine={false}
           stroke="transparent"
         />
@@ -510,23 +579,18 @@ export const AvgRatingBySeverityChart = ({ data }) => {
         <Radar
           name="Avg Rating"
           dataKey="avgRating"
-          stroke="#8B5CF6"
-          strokeWidth={2}
-          fill="url(#radarGradientFill)"
-          dot={{
-            r: 4.5,
-            fill: '#8B5CF6',
+          stroke={darkMode ? '#60A5FA' : '#3B82F6'}
+          strokeWidth={1.5}
+          fill="url(#severityRadarFill)"
+          dot={<CustomDot />}
+          activeDot={{
+            r: 6,
+            fill: darkMode ? '#60A5FA' : '#3B82F6',
             stroke: darkMode ? '#1e293b' : '#ffffff',
             strokeWidth: 2,
           }}
-          activeDot={{
-            r: 6.5,
-            fill: '#A78BFA',
-            stroke: darkMode ? '#1e293b' : '#ffffff',
-            strokeWidth: 3,
-          }}
-          animationDuration={1500}
-          animationEasing="ease-in-out"
+          animationDuration={1200}
+          animationEasing="ease-out"
         />
       </RadarChart>
     </ResponsiveContainer>

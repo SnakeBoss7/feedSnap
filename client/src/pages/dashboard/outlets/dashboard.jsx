@@ -42,7 +42,7 @@ export const DashboardHome = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen overflow-scroll  scrollbar-hide bg-gradient-to-br from-purple-400 to-gray-100 dark:from-dark-bg-primary dark:to-dark-bg-primary font-sans text-gray-900 dark:text-dark-text-primary">
+      <div className="min-h-screen overflow-scroll  scrollbar-hide bg-gradient-to-br  dark:from-dark-bg-primary dark:to-dark-bg-primary font-sans text-gray-900 dark:text-dark-text-primary">
         <SimpleHeader color={'#c5b5ff'} />
         <div className="">
           <SkeletonTheme
@@ -130,14 +130,13 @@ export const DashboardHome = () => {
   const totalCount = stats.totalFeedbacks || 0;
 
   return (
-    <div className="min-h-screen overflow-scroll  scrollbar-hide bg-gradient-to-br from-purple-400 to-gray-100 dark:from-dark-bg-primary dark:to-dark-bg-primary font-sans text-gray-900 dark:text-dark-text-primary transition-colors duration-300">
+    <div className="min-h-screen overflow-scroll  scrollbar-hide bg-gray-100 dark:bg-dark-bg-primary  font-sans text-gray-900 dark:text-dark-text-primary transition-colors duration-300">
       {/* Header */}
-      {/* <Background color={"#c5b5ff"} /> */}
       <SimpleHeader color={'#c5b5ff'} />
       <div className="p-6 md:p-10">
         <div className="flex flex-col md:flex-row mt-5 md:mt-0 justify-between items-start md:items-center mb-5 md:mb-12">
           <div>
-            <h1 className="text-5xl font-extrabold tracking-tight text-white dark:text-dark-text-primary mb-1 drop-shadow-sm">
+            <h1 className="text-5xl font-extrabold tracking-tight text-purple-600 dark:text-dark-text-primary mb-1 drop-shadow-sm">
               Dashboard
             </h1>
             <p className="text-purple-900 dark:text-dark-purple-light font-medium">

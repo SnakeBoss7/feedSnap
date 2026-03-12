@@ -19,8 +19,8 @@ body,
 
 /*  skeleton colors */
 :root {
-  --skeleton-base: #e6e6e6;
-  --skeleton-highlight: #f2f2f2;
+  --skeleton-base: #f2f2f2;
+  --skeleton-highlight: #e6e6e6;
 }
 
 .dark {

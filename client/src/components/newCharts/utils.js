@@ -5,7 +5,7 @@ export const filterDataByTimeframe = (data, days) => {
     console.error("[v0] filterDataByTimeframe: Invalid data", data)
     return []
   }
-  
+
   if (days === "all") {
     console.log(`[v0] Returning all ${data.length} records`)
     return data
@@ -14,7 +14,7 @@ export const filterDataByTimeframe = (data, days) => {
   // Get today's date at end of day
   const today = new Date()
   today.setHours(23, 59, 59, 999)
-  
+
   // Calculate cutoff date (days ago from today)
   const cutoffDate = new Date(today)
   cutoffDate.setDate(cutoffDate.getDate() - days)
@@ -29,10 +29,10 @@ export const filterDataByTimeframe = (data, days) => {
 
   const cutoffStr = cutoffDate.toISOString().split('T')[0]
   const todayStr = today.toISOString().split('T')[0]
-  
+
   console.log(`[v0] Timeframe: ${days} days | From: ${cutoffStr} To: ${todayStr}`)
   console.log(`[v0] Filtered: ${filtered.length} / ${data.length} records`)
-  
+
   return filtered
 }
 
@@ -45,7 +45,7 @@ export const getChartData = (data, website) => {
   const filtered = website === "all" ? data : data.filter((item) => item.website === website)
 
   console.log(`[v0] Processing chart data for ${website}: ${filtered.length} records`)
-  
+
   // Log website filtering for debugging
   if (website !== "all") {
     console.log(`[v0] Filtering for website: ${website}`)
@@ -67,7 +67,7 @@ export const getChartData = (data, website) => {
   const reportsByDateAndType = {}
   filtered.forEach((item) => {
     if (!item.date) return;
-    
+
     if (!reportsByDateAndType[item.date]) {
       reportsByDateAndType[item.date] = {
         "Bug Report": 0,
@@ -115,19 +115,19 @@ export const getChartData = (data, website) => {
   console.log(`[v0] Active: ${activeCount}, Resolved: ${resolvedCount}`)
 
   // Average Severity & Rating (only from items that have these values)
-  const itemsWithSeverity = filtered.filter((item) => 
+  const itemsWithSeverity = filtered.filter((item) =>
     item.severity != null && item.severity > 0 && !isNaN(item.severity)
   )
-  const itemsWithRating = filtered.filter((item) => 
+  const itemsWithRating = filtered.filter((item) =>
     item.rating != null && item.rating > 0 && !isNaN(item.rating)
   )
-  
-  const avgSeverity = itemsWithSeverity.length > 0 
-    ? itemsWithSeverity.reduce((sum, item) => sum + Number(item.severity), 0) / itemsWithSeverity.length 
+
+  const avgSeverity = itemsWithSeverity.length > 0
+    ? itemsWithSeverity.reduce((sum, item) => sum + Number(item.severity), 0) / itemsWithSeverity.length
     : 0
-  
-  const avgRating = itemsWithRating.length > 0 
-    ? itemsWithRating.reduce((sum, item) => sum + Number(item.rating), 0) / itemsWithRating.length 
+
+  const avgRating = itemsWithRating.length > 0
+    ? itemsWithRating.reduce((sum, item) => sum + Number(item.rating), 0) / itemsWithRating.length
     : 0
 
   console.log(`[v0] Website: ${website}`)
@@ -138,7 +138,7 @@ export const getChartData = (data, website) => {
 
   // Severity vs Rating scatter (only items with both values)
   const severityVsRating = filtered
-    .filter((item) => 
+    .filter((item) =>
       item.severity != null && item.severity > 0 && !isNaN(item.severity) &&
       item.rating != null && item.rating > 0 && !isNaN(item.rating)
     )

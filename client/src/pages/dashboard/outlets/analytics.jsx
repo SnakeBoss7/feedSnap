@@ -324,7 +324,7 @@ export const Analytics = () => {
         {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ChartCard title="How Severity Affects Ratings">
-            <div className="h-[300px] md:h-[400px]">
+            <div className="h-[350px] md:h-[450px]">
               <AvgRatingBySeverityChart data={displayChartData.avgRatingBySeverity} />
             </div>
           </ChartCard>
