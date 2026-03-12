@@ -83,8 +83,8 @@ export const ReportsByTypeChart = ({ data }) => {
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#334155" : "#f3f4f6"} horizontal={false} />
+      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, left: 10, bottom: 10 }} className="focus:outline-none">
+        <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#334155" : "#e2e8f0"} horizontal={false} />
         <XAxis
           type="number"
           stroke={darkMode ? "#64748b" : "#9ca3af"}
@@ -155,7 +155,7 @@ export const ReportsOverTimeChart = ({ data }) => {
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#334155" : "#f3f4f6"} vertical={false} opacity={0.6} />
+        <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#334155" : "#e2e8f0"} vertical={false} opacity={0.6} />
         <XAxis
           dataKey="date"
           stroke={darkMode ? "#64748b" : "#9ca3af"}
@@ -261,17 +261,18 @@ export const ActiveVsResolvedChart = ({ data }) => {
 }
 
 // Minimal arc gauge component
-const ArcGauge = ({ value, maxValue, color, size }) => {
+const ArcGauge = ({ value, maxValue, color }) => {
+  const size = 120
   const radius = (size - 8) / 2
   const cx = size / 2
   const cy = size / 2
-  const strokeWidth = size < 100 ? 5 : 6
+  const strokeWidth = 8
   const circumference = 2 * Math.PI * radius
   const progress = Math.min(value / maxValue, 1)
   const dashOffset = circumference * (1 - progress)
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
+    <svg width="100%" height="100%" viewBox={`0 0 ${size} ${size}`} className="-rotate-90 focus:outline-none">
       {/* Track */}
       <circle
         cx={cx}
@@ -279,7 +280,7 @@ const ArcGauge = ({ value, maxValue, color, size }) => {
         r={radius}
         fill="none"
         stroke="currentColor"
-        className="text-gray-100 dark:text-gray-800/50"
+        className="text-gray-200 dark:text-gray-800/50"
         strokeWidth={strokeWidth}
       />
       {/* Progress */}
@@ -308,41 +309,41 @@ export const SeverityRatingChart = ({ avgSeverity, avgRating }) => {
   const formattedRating = avgRating > 0 ? Number(avgRating).toFixed(1) : "0.0"
 
   return (
-    <div className="flex lg:flex-col gap-6 md:gap-8 flex-row items-center justify-around h-full p-3 md:p-6">
+    <div className="flex lg:flex-col gap-6 md:gap-8 flex-row items-center justify-around h-full p-3 md:p-6 focus:outline-none">
       {/* Severity Gauge */}
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-3 w-1/2 lg:w-full">
         <div className="relative">
-          <div className="w-[88px] h-[88px] md:w-[120px] md:h-[120px]">
-            <ArcGauge value={Number(avgSeverity) || 0} maxValue={5} color={severityColor} size={120} />
+          <div className="w-[85px] h-[85px] md:w-[130px] md:h-[130px] flex items-center justify-center">
+            <ArcGauge value={Number(avgSeverity) || 0} maxValue={5} color={severityColor} />
           </div>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-xl md:text-3xl font-bold tracking-tight" style={{ color: severityColor }}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span className="text-2xl md:text-3xl font-bold tracking-tight" style={{ color: severityColor }}>
               {formattedSeverity}
             </span>
-            <span className="text-[9px] md:text-[10px] text-gray-400 dark:text-gray-500 font-medium">/5</span>
+            <span className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-medium">/ 5</span>
           </div>
         </div>
-        <span className="text-[11px] md:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Severity</span>
+        <span className="text-[10px] md:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Avg Severity</span>
       </div>
 
       {/* Divider */}
-      <div className="hidden lg:block w-2/3 h-px bg-gray-100 dark:bg-gray-800"></div>
-      <div className="block lg:hidden h-14 md:h-20 w-px bg-gray-100 dark:bg-gray-800"></div>
+      <div className="hidden lg:block w-3/4 h-px bg-gray-200 dark:bg-gray-800"></div>
+      <div className="block lg:hidden h-20 md:h-24 w-px bg-gray-200 dark:bg-gray-800"></div>
 
       {/* Rating Gauge */}
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-3 w-1/2 lg:w-full">
         <div className="relative">
-          <div className="w-[88px] h-[88px] md:w-[120px] md:h-[120px]">
-            <ArcGauge value={Number(avgRating) || 0} maxValue={5} color={ratingColor} size={120} />
+          <div className="w-[85px] h-[85px] md:w-[130px] md:h-[130px] flex items-center justify-center">
+            <ArcGauge value={Number(avgRating) || 0} maxValue={5} color={ratingColor} />
           </div>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-xl md:text-3xl font-bold tracking-tight" style={{ color: ratingColor }}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span className="text-2xl md:text-3xl font-bold tracking-tight" style={{ color: ratingColor }}>
               {formattedRating}
             </span>
-            <span className="text-[9px] md:text-[10px] text-gray-400 dark:text-gray-500 font-medium">/5</span>
+            <span className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-medium">/ 5</span>
           </div>
         </div>
-        <span className="text-[11px] md:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Rating</span>
+        <span className="text-[10px] md:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Avg Rating</span>
       </div>
     </div>
   )
@@ -371,8 +372,8 @@ export const SeverityVsRatingChart = ({ data }) => {
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: -10 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#334155" : "#f3f4f6"} />
+      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: -10 }} className="focus:outline-none">
+        <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#334155" : "#e2e8f0"} />
         <XAxis
           dataKey="severity"
           name="Severity"
@@ -423,12 +424,12 @@ export const AvgRatingBySeverityChart = ({ data }) => {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
-  // Muted, sophisticated palette
+  // Distinct but clean modern palette for the severity radar
   const colorMap = {
-    'Low': '#34D399',
-    'Medium': '#60A5FA',
-    'High': '#FBBF24',
-    'Critical': '#F87171',
+    'Low': '#10B981',      // Emerald green
+    'Medium': '#3B82F6',   // Blue
+    'High': '#F59E0B',     // Amber
+    'Critical': '#EF4444', // Red
   }
 
   const getColor = (level) => colorMap[level] || '#A78BFA'

@@ -366,3 +366,10 @@ body,
     --cell-size: 1.75rem;
   }
 }
+
+/* Remove default focus outlines from recharts SVG elements */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-wrapper * {
+  outline: none !important;
+}
