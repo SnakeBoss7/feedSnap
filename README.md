@@ -83,7 +83,7 @@ FeedSnap is a comprehensive feedback collection and analysis platform that enabl
 | Database | MongoDB (Mongoose) | Data persistence for users, websites, feedback |
 | Authentication | Firebase Auth + JWT | Secure user authentication and session management |
 | AI Services | NVIDIA API | AI chat assistant and content generation |
-| Email Service | MailerSend | Transactional emails and acknowledgment messages |
+| Email Service | Maileroo | Transactional emails and acknowledgment messages |
 | Charts | Chart.js / Recharts | Analytics visualization |
 | Deployment | Vercel (frontend) + Render (backend) | Production hosting |
 
@@ -353,15 +353,15 @@ The algorithm analyzes for critical keywords including: vulnerability, crash, ex
 
 | Feature | Preview |
 |---------|---------|
-| Landing Page | ![Landing](https://res.cloudinary.com/dnlea05ys/image/upload/v1762328001/Screenshot_from_2025-11-05_10-58-38_tctkns.png) |
-| Dashboard | ![Dashboard](https://res.cloudinary.com/dnlea05ys/image/upload/v1762327999/Screenshot_from_2025-11-05_10-56-54_dgkjeo.png) |
-| Feedback Table | ![Feedback](https://res.cloudinary.com/dnlea05ys/image/upload/v1762327996/Screenshot_from_2025-11-05_10-50-48_uwwgux.png) |
-| Email Generation | ![Mail Gen](https://res.cloudinary.com/dnlea05ys/image/upload/v1762327997/Screenshot_from_2025-11-05_10-55-40_nja52r.png) |
-| Analytics | ![Analytics](https://res.cloudinary.com/dnlea05ys/image/upload/v1762327996/Screenshot_from_2025-11-05_10-56-37_wawgjw.png) |
-| Script Generator | ![Generator](https://res.cloudinary.com/dnlea05ys/image/upload/v1762327997/Screenshot_from_2025-11-05_10-56-59_dvhwlx.png) |
-| Widget - Feedback Form | ![Feedback Form](https://res.cloudinary.com/dnlea05ys/image/upload/v1762327998/Screenshot_from_2025-11-05_10-57-08_azxmkx.png) |
-| Widget - AI Chatbot | ![Chatbot](https://res.cloudinary.com/dnlea05ys/image/upload/v1762328001/Screenshot_from_2025-11-05_10-57-41_fm3jd3.png) |
-| Generated Email Preview | ![Email Preview](https://res.cloudinary.com/dnlea05ys/image/upload/v1762327994/Screenshot_from_2025-11-05_10-56-08_vbivcy.png) |
+| Landing Page | ![Landing](https://res.cloudinary.com/dnlea05ys/image/upload/v1775039323/Screenshot_2026-04-01_155500_bmfbrb.png) |
+| Dashboard | ![Dashboard](https://res.cloudinary.com/dnlea05ys/image/upload/v1775039323/Screenshot_2026-04-01_155359_yobc25.png) |
+| Feedback Table | ![Feedback](https://res.cloudinary.com/dnlea05ys/image/upload/v1775039317/Screenshot_2026-04-01_155521_dzb4wp.png) |
+| Email Generation | ![Mail Gen](https://res.cloudinary.com/dnlea05ys/image/upload/v1775039317/Screenshot_2026-04-01_155441_nphsaq.png) |
+| Analytics | ![Analytics](https://res.cloudinary.com/dnlea05ys/image/upload/v1775039317/Screenshot_2026-04-01_155424_of84mn.png) |
+| Script Generator | ![Generator](https://res.cloudinary.com/dnlea05ys/image/upload/v1775039316/Screenshot_2026-04-01_155413_t1eeey.png) |
+| Widget - Feedback Form | ![Feedback Form](https://res.cloudinary.com/dnlea05ys/image/upload/v1775039317/Screenshot_2026-04-01_155605_rgynif.png) |
+| Widget - AI Chatbot | ![Chatbot](https://res.cloudinary.com/dnlea05ys/image/upload/v1775039320/Screenshot_2026-04-01_155628_rytjyh.png) |
+| Generated Email Preview | ![Email Preview](https://res.cloudinary.com/dnlea05ys/image/upload/v1775039606/Screenshot_2026-04-01_160316_kiwfk5.png) |
 
 ---
 
