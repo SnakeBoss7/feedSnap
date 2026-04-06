@@ -40,6 +40,7 @@ export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRo
   const [searchTerm, setSearchTerm] = useState("")
   const [formatType] = useState('csv')
   const [severityFilter, setSeverityFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("all")
   const [webUrlFilter, setWebUrlFilter] = useState("all")
   const [dateRange, setDateRange] = useState({})
   const [selectedItems, setSelectedItems] = useState(new Set())
@@ -146,14 +147,22 @@ export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRo
       // Web URL filter
       const matchesWebUrl = webUrlFilter === "all" || item.webUrl === webUrlFilter
 
+      // Status filter
+      let matchesStatus = true
+      if (statusFilter === "resolved") {
+        matchesStatus = item.status === true
+      } else if (statusFilter === "unresolved") {
+        matchesStatus = !item.status
+      }
+
       // Date range filter - only filter when BOTH dates are selected
       const itemDate = new Date(item.createdOn)
       const matchesDateRange =
         (!dateRange.from || !dateRange.to) || (itemDate >= dateRange.from && itemDate <= dateRange.to)
 
-      return matchesSearch && matchesSeverity && matchesWebUrl && matchesDateRange
+      return matchesSearch && matchesSeverity && matchesWebUrl && matchesStatus && matchesDateRange
     })
-  }, [data, searchTerm, severityFilter, webUrlFilter, dateRange])
+  }, [data, searchTerm, severityFilter, webUrlFilter, statusFilter, dateRange])
 
   // Update setSelectedData whenever filteredData changes
   useEffect(() => {
@@ -170,7 +179,7 @@ export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRo
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchTerm, severityFilter, webUrlFilter, dateRange])
+  }, [searchTerm, severityFilter, webUrlFilter, statusFilter, dateRange])
 
   const handleSelectAll = (checked) => {
     if (checked) {
@@ -193,13 +202,14 @@ export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRo
   const clearFilters = () => {
     setSearchTerm("")
     setSeverityFilter("all")
+    setStatusFilter("all")
     setWebUrlFilter("all")
     setDateRange({})
     setCurrentPage(1)
   }
 
   const hasActiveFilters =
-    searchTerm || severityFilter !== "all" || webUrlFilter !== "all" || dateRange.from || dateRange.to
+    searchTerm || severityFilter !== "all" || statusFilter !== "all" || webUrlFilter !== "all" || dateRange.from || dateRange.to
 
   const handleViewDetails = (item) => {
     setViewDetailsItem(item)
@@ -318,6 +328,22 @@ export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRo
               </SelectContent>
             </Select>
 
+            {/* Status Filter */}
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-9 w-full md:w-auto md:min-w-[120px] bg-gray-50 dark:bg-white/5 border-0 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg px-3 focus:ring-0 focus:outline-none focus:bg-gray-100 dark:focus:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors [&>svg]:text-gray-400" style={{ boxShadow: 'none', outline: 'none' }}>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent className="bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border-subtle rounded-xl shadow-lg z-[100] overflow-hidden" style={{ outline: 'none' }}>
+                <SelectItem value="all" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">All Status</SelectItem>
+                <SelectItem value="resolved" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">
+                  <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Resolved</span>
+                </SelectItem>
+                <SelectItem value="unresolved" className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 focus:bg-gray-50 dark:focus:bg-white/5 rounded-lg mx-1 my-0.5">
+                  <span className="flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5 text-orange-500" /> Unresolved</span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
             {/* Date Picker */}
             <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
               <PopoverTrigger asChild>
@@ -404,6 +430,7 @@ export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRo
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Severity</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rating</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Source</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                 <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
                 <th className="px-4 py-3 w-[60px]"></th>
               </tr>
@@ -477,6 +504,18 @@ export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRo
                           </span>
                         </div>
                       </td>
+                      <td className="px-4 py-4 text-center">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${
+                          item.status
+                            ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
+                            : 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20'
+                        }`}>
+                          {item.status
+                            ? <><CheckCircle2 className="h-3 w-3" /> Resolved</>
+                            : <><AlertCircle className="h-3 w-3" /> Open</>
+                          }
+                        </span>
+                      </td>
                       <td className="px-4 py-4 text-right">
                         <span className="text-sm text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap">
                           {format(new Date(item.createdOn), "MMM dd, yyyy")}
@@ -536,7 +575,7 @@ export const FilterTable = React.memo(({ setSelectedData, data, userRole, siteRo
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={8} className="p-12 text-center">
+                    <td colSpan={9} className="p-12 text-center">
                       <div className="flex flex-col items-center justify-center text-gray-400 dark:text-dark-text-muted">
                         <div className="p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-full mb-4">
                           <Filter className="h-8 w-8" />

@@ -12,7 +12,10 @@ import {
   LucideMinimize2,
   LucideChevronDown,
   LucideUser,
-  LucideTrash2
+  LucideTrash2,
+  LucideFilter,
+  LucideDatabase,
+  LucideClock
 } from "lucide-react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
@@ -248,6 +251,11 @@ export const FeedbackAssistant = ({
   const [isLoading, setIsLoading] = useState(false);
   const [displayedMessages, setDisplayedMessages] = useState([]);
   const [copiedIndex, setCopiedIndex] = useState(null);
+  // Initialize to cover all messages already loaded from storage (they've "already typed")
+  const [typingCompletedUpTo, setTypingCompletedUpTo] = useState(() => {
+    const stored = loadFromStorage(CHAT_STORAGE_KEY, [DEFAULT_MESSAGE]);
+    return stored.length - 1;
+  });
   const chatRefContainer = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -286,8 +294,12 @@ export const FeedbackAssistant = ({
     if (!aiResponse.length) return;
 
     const lastMessage = aiResponse[aiResponse.length - 1];
+    const lastIdx = aiResponse.length - 1;
+
     if (lastMessage.role !== "assistant") {
       setDisplayedMessages(aiResponse);
+      // Non-assistant message: mark all previous as done
+      setTypingCompletedUpTo(lastIdx);
       setTimeout(scrollToBottomContainer, 100);
       return;
     }
@@ -301,18 +313,20 @@ export const FeedbackAssistant = ({
         !tempMessages.length ||
         tempMessages[tempMessages.length - 1].role !== "assistant"
       ) {
-        tempMessages.push({ role: "assistant", content: "" });
+        tempMessages.push({ role: "assistant", content: "", meta: lastMessage.meta });
       }
 
       tempMessages[tempMessages.length - 1].content +=
         (i === 0 ? "" : " ") + words[i];
       setDisplayedMessages([...tempMessages]);
-
       scrollToBottomContainer();
 
       i++;
       if (i >= words.length) {
         clearInterval(interval);
+        // Typing done — sync full message and mark this index complete
+        setDisplayedMessages([...aiResponse]);
+        setTypingCompletedUpTo(lastIdx);
         setTimeout(scrollToBottomContainer, 100);
       }
     }, 30);
@@ -339,10 +353,18 @@ export const FeedbackAssistant = ({
         userPrompt,
         feedbackData: selectedData
       }, { withCredentials: true });
-      console.log(aiRes.data)
+      console.log(aiRes.data);
+
+      // Extract meta info from two-phase pipeline
+      const meta = aiRes.data?.meta || null;
+
       setAiResponse((prev) => [
         ...prev,
-        { role: "assistant", content: aiRes.data?.response.response },
+        {
+          role: "assistant",
+          content: aiRes.data?.response.response,
+          meta: meta, // { mode, filterSummary, intent }
+        },
       ]);
 
       if (aiRes.data?.response.reports_or_emails?.mail) {
@@ -497,14 +519,76 @@ export const FeedbackAssistant = ({
 
 
                   {(chat.role === "assistant" || chat.role === "user") && (
-                    <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${chat.role === "assistant"
-                      ? "bg-white dark:bg-black border border-gray-200 dark:border-white/10 text-gray-800 dark:text-gray-200 rounded-tl-none"
-                      : "bg-black dark:bg-white text-white dark:text-black rounded-tr-none shadow-md"
-                      }`}>
-                      <div
-                        className="whitespace-pre-wrap break-words"
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(chat.content) }}
-                      />
+                    <div className="max-w-[85%]">
+                      <div className={`p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${chat.role === "assistant"
+                        ? "bg-white dark:bg-black border border-gray-200 dark:border-white/10 text-gray-800 dark:text-gray-200 rounded-tl-none"
+                        : "bg-black dark:bg-white text-white dark:text-black rounded-tr-none shadow-md"
+                        }`}>
+                        <div
+                          className="whitespace-pre-wrap break-words"
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(chat.content) }}
+                        />
+                      </div>
+                      {/* AI meta: badges + time — show only after this message's typing is done */}
+                      {chat.role === "assistant" && idx > 0 && chat.meta && idx <= typingCompletedUpTo && (
+                        <div className="flex items-center gap-1.5 mt-1.5 ml-1 flex-wrap opacity-0 animate-[fadeIn_0.4s_ease-out_forwards]">
+                          {/* Data Mode Badge */}
+                          {chat.meta.mode === "filtered" ? (
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800/40 rounded-full" title={chat.meta.filterSummary}>
+                              <LucideFilter size={10} className="text-violet-500 dark:text-violet-400" />
+                              <span className="text-[10px] font-medium text-violet-600 dark:text-violet-400">Filtered</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/40 rounded-full">
+                              <LucideDatabase size={10} className="text-blue-500 dark:text-blue-400" />
+                              <span className="text-[10px] font-medium text-blue-600 dark:text-blue-400">Full Analysis</span>
+                            </div>
+                          )}
+
+                          {/* Response Time */}
+                          {chat.meta.responseTime && (
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full">
+                              <LucideClock size={9} className="text-gray-400 dark:text-gray-500" />
+                              <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                                {(chat.meta.responseTime / 1000).toFixed(1)}s
+                              </span>
+                              {chat.meta.tokens && (
+                                <span className="text-[9px] text-gray-400 dark:text-gray-500">
+                                  · {chat.meta.tokens.total} tokens
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Filter Summary */}
+                          {chat.meta.mode === "filtered" && chat.meta.filterSummary && (
+                            <span className="text-[9px] text-gray-400 dark:text-gray-500 truncate max-w-[180px]" title={chat.meta.filterSummary}>
+                              {chat.meta.filterSummary}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Copy — only for USER messages */}
+                      {chat.role === "user" && (
+                        <div className="flex justify-end mt-1 mr-1">
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(chat.content).then(() => {
+                                setCopiedIndex(idx);
+                                setTimeout(() => setCopiedIndex(null), 2000);
+                              });
+                            }}
+                            className="flex items-center gap-1 text-[10px] font-medium text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                            title="Copy prompt"
+                          >
+                            {copiedIndex === idx
+                              ? <LucideCheck size={10} className="text-green-500" />
+                              : <LucideCopy size={10} />}
+                            {copiedIndex === idx ? "Copied" : "Copy"}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 

@@ -146,6 +146,10 @@ module.exports = {
           "0%,70%,100%": { opacity: "1" },
           "20%,50%": { opacity: "0" },
         },
+        "fadeIn": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
       },
 
     },
