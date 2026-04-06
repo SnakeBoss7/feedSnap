@@ -341,6 +341,9 @@ export const FeedbackAssistant = ({
   const handleInput = async () => {
     if (userPrompt.trim() === "") return;
 
+    // Snapshot the current history BEFORE appending the new user message
+    const historySnapshot = aiResponse;
+
     setAiResponse((prev) => [...prev, { role: "user", content: userPrompt }]);
     setUserPrompt("");
     setIsLoading(true);
@@ -348,14 +351,22 @@ export const FeedbackAssistant = ({
     setTimeout(scrollToBottomContainer, 100);
 
     try {
-      let aiRes = await axios.post(`${apiUrl}/api/llm/askAI`, {
-        aiResponse,
+      // Build a clean, trimmed history for the server:
+      // - exclude emailPrep / emailSent UI-only messages
+      // - strip internal meta fields (they're large and not needed by the AI)
+      // - cap at last 10 messages to prevent token overflow
+      const MAX_HISTORY = 10;
+      const cleanHistory = historySnapshot
+        .filter((c) => c.role === "user" || c.role === "assistant")
+        .map((c) => ({ role: c.role, content: String(c.content || "") }))
+        .slice(-MAX_HISTORY);
+
+      const aiRes = await axios.post(`${apiUrl}/api/llm/askAI`, {
+        aiResponse: cleanHistory,
         userPrompt,
         feedbackData: selectedData
       }, { withCredentials: true });
-      console.log(aiRes.data);
 
-      // Extract meta info from two-phase pipeline
       const meta = aiRes.data?.meta || null;
 
       setAiResponse((prev) => [
@@ -363,7 +374,7 @@ export const FeedbackAssistant = ({
         {
           role: "assistant",
           content: aiRes.data?.response.response,
-          meta: meta, // { mode, filterSummary, intent }
+          meta,
         },
       ]);
 
@@ -384,7 +395,7 @@ export const FeedbackAssistant = ({
         sug2: aiRes.data?.response.sug2
       });
     } catch (error) {
-      console.log(error);
+      console.error("[FeedbackAssistant] askAI error:", error);
       setAiResponse((prev) => [
         ...prev,
         { role: "assistant", content: "Sorry, I encountered an error. Please try again." },
