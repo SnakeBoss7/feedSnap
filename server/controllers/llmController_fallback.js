@@ -24,7 +24,6 @@ function extractCleanJSON(text) {
   try {
     text = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
 
-    // Direct parse — devstral returns clean JSON without code fences
     if (text.startsWith("{") || text.startsWith("[")) {
       try { return JSON.parse(text); } catch { /* fall through */ }
     }
@@ -75,7 +74,7 @@ function rescueParseJSON(jsonString, originalText) {
     if (start !== -1 && end !== -1 && end > start) {
       return JSON.parse(jsonString.slice(start, end + 1));
     }
-  } catch { /* silent — fall through to default */ }
+  } catch { /* silent */ }
 
   return {
     response: originalText.includes("<") ? originalText : `<p>${originalText}</p>`,
@@ -484,25 +483,24 @@ ${isEmailRequested
       : `- reports_or_emails: OMIT this field entirely.`}
 - Output ONLY valid JSON. No code blocks, no extra text.`;
 
-    // Phase 2b: AI Analysis (streaming)
+    // Phase 2b: AI Analysis (streaming — google/gemma-2-27b-it)
     let result = "";
     let usage2 = {};
 
     const stream = await Promise.race([
       openai_NVIDIA.chat.completions.create({
-        model: "mistralai/devstral-2-123b-instruct-2512",
-        temperature: 0.15,
-        top_p: 0.95,
-        max_tokens: 8192,
+        model: "google/gemma-2-27b-it",
+        temperature: 0.2,
+        top_p: 0.7,
+        max_tokens: 1024,
         stream: true,
-        stream_options: { include_usage: true },
         messages: [{ role: "system", content: systemInstructions }, ...chat],
       }),
       new Promise((_, reject) => setTimeout(() => reject(new Error("API timeout")), 60000)),
     ]);
 
     for await (const chunk of stream) {
-      result += chunk.choices[0]?.delta?.content || "";
+      result += chunk.choices?.[0]?.delta?.content || "";
       if (chunk.usage) usage2 = chunk.usage;
     }
 
