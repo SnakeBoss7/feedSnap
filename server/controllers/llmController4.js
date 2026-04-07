@@ -37,11 +37,6 @@ function extractCleanJSON(text) {
     // Remove thinking tags if present
     text = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
 
-    // Try direct parse first — devstral-2 returns clean JSON without code fences
-    if (text.startsWith("{") || text.startsWith("[")) {
-      try { return JSON.parse(text); } catch { /* fall through to regex path */ }
-    }
-
     // If response starts with HTML tags, wrap it in JSON
     if (text.startsWith("<") && !text.includes("{")) {
       return {
@@ -615,8 +610,8 @@ const BASE_INSTRUCTIONS = `
 // ============================================
 const askAI = async (req, res) => {
   const pipelineStart = Date.now();
-  console.log("\n[v34] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("[v34] 🚀 PIPELINE START — llmController34 (v34 / devstral-2-123b)");
+  console.log("\n[v0] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  console.log("[v0] 🚀 PIPELINE START — llmController (v0)");
 
   try {
     if (!req.body || !req.body.userPrompt) {
@@ -648,14 +643,14 @@ const askAI = async (req, res) => {
     // PHASE 1: Extract intent (lightweight AI call)
     // =============================================
     const phase1Start = Date.now();
-    console.log("[v34] ── PHASE 1: Intent extraction...");
+    console.log("[v0] ── PHASE 1: Intent extraction...");
     const intent = await extractIntent(userPrompt, availableSites, req.body.aiResponse);
     const phase1Usage = intent._usage || {};
     delete intent._usage;
     const phase1Time = Date.now() - phase1Start;
     const p1IsKeyword = phase1Usage.total_tokens === 0;
-    console.log(`[v34]    ✅ Phase 1 done in ${phase1Time}ms | method: ${p1IsKeyword ? "keyword (0 tokens)" : "AI fallback"} | tokens: { prompt: ${phase1Usage.prompt_tokens || 0}, completion: ${phase1Usage.completion_tokens || 0}, total: ${phase1Usage.total_tokens || 0} }`);
-    console.log(`[v34]    intent → needsAllData: ${intent.needsAllData}, websites: ${JSON.stringify(intent.websites)}, filters: ${JSON.stringify(intent.filters)}`);
+    console.log(`[v0]    ✅ Phase 1 done in ${phase1Time}ms | method: ${p1IsKeyword ? "keyword (0 tokens)" : "AI fallback"} | tokens: { prompt: ${phase1Usage.prompt_tokens || 0}, completion: ${phase1Usage.completion_tokens || 0}, total: ${phase1Usage.total_tokens || 0} }`);
+    console.log(`[v0]    intent → needsAllData: ${intent.needsAllData}, websites: ${JSON.stringify(intent.websites)}, filters: ${JSON.stringify(intent.filters)}`);
 
     // =============================================
     // PHASE 2: Fetch data based on intent
@@ -663,7 +658,7 @@ const askAI = async (req, res) => {
     let contextData;
     let dataMode;
     let filterSummary = "";
-    console.log(`[v34] ── PHASE 2: Fetching data (mode: ${intent.needsAllData ? "FULL" : "FILTERED"})...`);
+    console.log(`[v0] ── PHASE 2: Fetching data (mode: ${intent.needsAllData ? "FULL" : "FILTERED"})...`);
     const phase2Start = Date.now();
 
     if (intent.needsAllData) {
@@ -690,7 +685,7 @@ const askAI = async (req, res) => {
     }
 
     const phase2Time = Date.now() - phase2Start;
-    console.log(`[v34]    ✅ Phase 2 done in ${phase2Time}ms | ${filterSummary}`);
+    console.log(`[v0]    ✅ Phase 2 done in ${phase2Time}ms | ${filterSummary}`);
 
     const data = JSON.stringify(contextData)
       .replace(/`/g, "\\`")
@@ -726,40 +721,30 @@ ${isEmailRequested
       { role: "system", content: systemInstructions },
       ...chat,
     ];
-    console.log("[v34] ── PHASE 2b: AI analysis call (devstral-2-123b, streaming)...");
-    console.log(`[v34]    📝 FULL PROMPT — ${phase2bMessages.length} messages, system prompt ${systemInstructions.length} chars`);
-    console.log("[v34] ════════════════════ FULL MESSAGES ARRAY (copy below) ════════════════════");
+    console.log("[v0] ── PHASE 2b: AI analysis call...");
+    console.log(`[v0]    📝 FULL PROMPT — ${phase2bMessages.length} messages, system prompt ${systemInstructions.length} chars`);
+    console.log("[v0] ════════════════════ FULL MESSAGES ARRAY (copy below) ════════════════════");
     console.log(JSON.stringify(phase2bMessages, null, 2));
-    console.log("[v34] ════════════════════════════════════════════════════════════════════════");
-
+    console.log("[v0] ════════════════════════════════════════════════════════════════════════");
     const analysisStart = Date.now();
-    let result = '';
-    let usage2 = {};
-
-    const streamReq = openai_NVIDIA.chat.completions.create({
-      model: "mistralai/devstral-2-123b-instruct-2512",
-      temperature: 0.15,
-      top_p: 0.95,
-      max_tokens: 8192,
-      stream: true,
-      stream_options: { include_usage: true },
-      messages: phase2bMessages,
-    });
-
-    const streamObj = await Promise.race([
-      streamReq,
+    const completion = await Promise.race([
+      openai_NVIDIA.chat.completions.create({
+        model: "mistralai/mistral-small-4-119b-2603",
+        temperature: 0.6,
+        top_p: 1.0,
+        max_tokens: 16384,
+        reasoning_effort: "high",
+        messages: phase2bMessages,
+      }),
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error("API timeout")), 60000)
       ),
     ]);
 
-    for await (const chunk of streamObj) {
-      result += chunk.choices[0]?.delta?.content || '';
-      if (chunk.usage) usage2 = chunk.usage;
-    }
-
     const analysisTime = Date.now() - analysisStart;
-    console.log(`[v34]    ✅ Phase 2b done in ${analysisTime}ms | tokens: { prompt: ${usage2.prompt_tokens || 0}, completion: ${usage2.completion_tokens || 0}, total: ${usage2.total_tokens || 0} }`);
+    const result = completion.choices?.[0]?.message?.content;
+    const usage2 = completion.usage || {};
+    console.log(`[v0]    ✅ Phase 2b done in ${analysisTime}ms | tokens: { prompt: ${usage2.prompt_tokens || 0}, completion: ${usage2.completion_tokens || 0}, total: ${usage2.total_tokens || 0} }`);
 
     if (!result) throw new Error("Empty response from AI");
 
@@ -770,11 +755,11 @@ ${isEmailRequested
     const totalTokens =
       (phase1Usage.prompt_tokens || 0) + (phase1Usage.completion_tokens || 0) +
       (usage2.prompt_tokens || 0) + (usage2.completion_tokens || 0);
-    console.log("[v34] ── SUMMARY ─────────────────────────────────────");
-    console.log(`[v34]    ⏱  Total time   : ${totalTime}ms (p1: ${phase1Time}ms | p2-fetch: ${phase2Time}ms | p2b-ai: ${analysisTime}ms)`);
-    console.log(`[v34]    🪙 Total tokens : ${totalTokens} (phase1: ${phase1Usage.total_tokens || 0} | phase2b: ${usage2.total_tokens || 0})`);
-    console.log(`[v34]    📊 Data mode   : ${dataMode.toUpperCase()}`);
-    console.log("[v34] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+    console.log("[v0] ── SUMMARY ─────────────────────────────────────");
+    console.log(`[v0]    ⏱  Total time   : ${totalTime}ms (p1: ${phase1Time}ms | p2-fetch: ${phase2Time}ms | p2b-ai: ${analysisTime}ms)`);
+    console.log(`[v0]    🪙 Total tokens : ${totalTokens} (phase1: ${phase1Usage.total_tokens || 0} | phase2b: ${usage2.total_tokens || 0})`);
+    console.log(`[v0]    📊 Data mode   : ${dataMode.toUpperCase()}`);
+    console.log("[v0] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     return res.status(200).json({
       response: validatedResult,

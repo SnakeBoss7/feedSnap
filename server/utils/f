@@ -1,0 +1,101 @@
+{
+    "http://localhost:3000": {
+        "stats": {
+            "total": 11,
+            "resolved": 3,
+            "unresolved": 8,
+            "avgRating": "3.0",
+            "avgSev": "2.5"
+        },
+        "bugs": {
+            "n": 3,
+            "sev": "4.3",
+            "rat": "1.7",
+            "open": 1,
+            "d_open": [
+                {
+                    "desc": "can work better",
+                    "email": "rahuldharwal12005@gmail.com"
+                }
+            ],
+            "d_resolved": [
+                {
+                    "desc": "Serious bug found, found a CRSF vuln + dos in input field",
+                    "email": "rahuldharwal12005@gmail.com"
+                },
+                {
+                    "desc": "found input overflow vuln in the bot content field of this page /scriptGen",
+                    "email": "rahuldharwal12005@gmail.com"
+                }
+            ]
+        },
+        "features": {
+            "n": 1,
+            "sev": "2.0",
+            "rat": "4.0",
+            "open": 1,
+            "d_open": [
+                {
+                    "desc": "It would be great if we could customize the widget color and floating position directly from the user settings panel.",
+                    "email": "feedback_guru@web.com"
+                }
+            ],
+            "d_resolved": []
+        },
+        "complaints": {
+            "n": 1,
+            "sev": "3.0",
+            "rat": "2.0",
+            "open": 1,
+            "d_open": [
+                {
+                    "desc": "The widget loading time on mobile devices is significantly slower compared to desktop. It often lags on initial page load.",
+                    "email": "tech_wizard@company.io"
+                }
+            ],
+            "d_resolved": []
+        },
+        "improve": {
+            "n": 3,
+            "sev": "2.0",
+            "rat": "2.7",
+            "open": 2,
+            "d_open": [
+                {
+                    "desc": "Website is quite slow",
+                    "email": "rahul.secops@gmail.com"
+                },
+                {
+                    "desc": "can you add more widget templates please",
+                    "email": "rahul.secops@gmail.com"
+                }
+            ],
+            "d_resolved": [
+                {
+                    "desc": "Design could be better",
+                    "email": "rahuldharwal12005@gmail.com"
+                }
+            ]
+        },
+        "general": {
+            "n": 3,
+            "sev": "1.0",
+            "rat": "4.7",
+            "open": 3,
+            "d_open": [
+                {
+                    "desc": "The overall UI is very clean and easy to use. Great job on the dark mode transition, it's very easy on the eyes!",
+                    "email": "amanda.p@outlook.com"
+                },
+                {
+                    "desc": "Really love the new analytics dashboard! The graphs are much more informative than the previous version.",
+                    "email": "user_alpha@example.org"
+                },
+                {
+                    "desc": "working great just need some polishing",
+                    "email": "rahul.secops@gmail.com"
+                }
+            ],
+            "d_resolved": []
+        }
+    }

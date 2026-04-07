@@ -30,7 +30,7 @@ const getUserAccessibleWebsites = async (userId) => {
     const userTeams = await Team.find({
       'members.user': userId
     }).populate('webData');
-    console.log({ userTeams })
+
 
     const directSites = directWebData.map(web => web.webUrl);
 
