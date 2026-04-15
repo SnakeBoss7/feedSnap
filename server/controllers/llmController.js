@@ -166,10 +166,10 @@ const llmQuery = async (req, res) => {
 Your job: give them a warm, structured onboarding response using ONLY the platform info provided below.
 
 ═══ STRICT RULES ═══
-1. Output HTML only (<p>, <strong>, <ul>, <li>, <em>, <br>). NEVER use Markdown.
+1. Output HTML only (<p>, <strong>, <ul>, <li>, <a>, <br>). NEVER use Markdown.
 2. Follow the EXACT structure below — do NOT skip or reorder sections.
 3. Extract ALL information from the Platform Info. Do NOT invent or hallucinate data.
-4. Navigation paths MUST be wrapped in <em> tags: e.g. <em>/courses</em>
+4. Navigation paths MUST be clickable <a> links: e.g. <a href="/courses">/courses</a>
 5. Keep it concise — no filler text, no paragraphs of fluff.
 6. Max 2-3 emojis total. Be professional yet warm.
 
@@ -182,7 +182,7 @@ SECTION 1 — GREETING
 SECTION 2 — QUICK NAVIGATION
 <p><strong>🔗 Quick Links:</strong></p>
 <ul>
-  <li><strong>[Page Name]</strong> — [what user finds there] → <em>/path</em></li>
+  <li><strong>[Page Name]</strong> — [what user finds there] → <a href="/path">/path</a></li>
   ... (list ALL nav items from context)
 </ul>
 
@@ -218,15 +218,16 @@ ${botContext}`;
 
 ═══ ABSOLUTE FORMAT RULES — VIOLATING THESE IS A FAILURE ═══
 
-1. Output HTML tags only: <p>, <strong>, <ul>, <li>, <ol>, <em>, <br>. NEVER use Markdown (no **, no ##, no -).
+1. Output HTML tags only: <p>, <strong>, <ul>, <li>, <ol>, <a>, <br>. NEVER use Markdown (no **, no ##, no -).
 2. EVERY response MUST use <ul><li> bullet points. NEVER answer in plain paragraph form.
    - Listing items (courses, people, events, prices)? → <ul><li> for EACH item.
    - Comparing options? → <ul><li> for EACH option.
    - Explaining steps? → <ol><li> numbered steps.
    - Even single-item answers → wrap in <ul><li>.
-3. ALWAYS include direct navigation paths wrapped in <em>: e.g. → <em>/courses/2</em>
-   - If the answer relates to a page, ALWAYS append the relevant path.
-   - If multiple items, EACH <li> must have its own path.
+3. ALWAYS include clickable <a> links for navigation: e.g. → <a href="/courses/2">/courses/2</a>
+   - If the answer relates to a page, ALWAYS append the relevant clickable link.
+   - If multiple items, EACH <li> must have its own <a href> link.
+   - NEVER use <em> for paths. ALWAYS use <a href="/path">.
 4. Key data in <strong>: names, prices, ratings, counts, emails.
 5. Start with a short 1-line <p> intro sentence, then immediately go to bullet points.
 6. Max 2 emojis per response. Be concise — no filler.
@@ -236,40 +237,41 @@ ${botContext}`;
 
 <p>[1-line direct answer to the question]</p>
 <ul>
-  <li><strong>[Item/Name]</strong> — [key details] → <em>/path</em></li>
+  <li><strong>[Item/Name]</strong> — [key details] → <a href="/path">/path</a></li>
   ...
 </ul>
-<p>[Optional: 1-line follow-up suggestion with a path, e.g. "Browse all courses at <em>/courses</em>"]</p>
+<p>[Optional: 1-line follow-up suggestion, e.g. "Browse all courses at <a href="/courses">/courses</a>"]</p>
 
 ═══ EXAMPLES OF CORRECT RESPONSES ═══
 
 Q: "Do you have React courses?"
 <p>Yes! Here's what we have for React:</p>
 <ul>
-  <li><strong>Adv React Patterns</strong> — Michael Chen, <strong>$79.99</strong>, ⭐4.9, 8.4k students → <em>/courses/2</em></li>
+  <li><strong>Adv React Patterns</strong> — Michael Chen, <strong>$79.99</strong>, ⭐4.9, 8.4k students → <a href="/courses/2">/courses/2</a></li>
 </ul>
-<p>See all courses at <em>/courses</em></p>
+<p>See all courses at <a href="/courses">/courses</a></p>
 
 Q: "How can I get mentored?"
 <p>We offer 1-on-1 video mentorship sessions! Here are our mentors:</p>
 <ul>
-  <li><strong>Alice Chen</strong> — Sr. Frontend @Meta, React & System Design, ⭐4.9 → <em>/mentorship</em></li>
-  <li><strong>David Kim</strong> — Staff Backend @Stripe, Node & Go, ⭐5.0 → <em>/mentorship</em></li>
+  <li><strong>Alice Chen</strong> — Sr. Frontend @Meta, React & System Design, ⭐4.9 → <a href="/mentorship">/mentorship</a></li>
+  <li><strong>David Kim</strong> — Staff Backend @Stripe, Node & Go, ⭐5.0 → <a href="/mentorship">/mentorship</a></li>
 </ul>
-<p>Book a session at <em>/mentorship</em></p>
+<p>Book a session at <a href="/mentorship">/mentorship</a></p>
 
 Q: "What's the cheapest course?"
 <p>Here's the most affordable option:</p>
 <ul>
-  <li><strong>UI/UX for Devs</strong> — Emily Davis, <strong>$69.99</strong>, ⭐4.9, 15k students → <em>/courses/4</em></li>
+  <li><strong>UI/UX for Devs</strong> — Emily Davis, <strong>$69.99</strong>, ⭐4.9, 15k students → <a href="/courses/4">/courses/4</a></li>
 </ul>
-<p>Compare all courses at <em>/courses</em></p>
+<p>Compare all courses at <a href="/courses">/courses</a></p>
 
 ═══ EXAMPLES OF WRONG RESPONSES (NEVER DO THIS) ═══
 ✗ "We have an Advanced React Patterns course by Michael Chen for $79.99 with a 4.9 rating."
 ✗ Using ** for bold instead of <strong>
 ✗ Listing items in a comma-separated sentence instead of <ul><li>
-✗ Forgetting to include the navigation path
+✗ Using <em>/path</em> instead of <a href="/path">
+✗ Forgetting to include the navigation link
 
 Platform Info:
 ${botContext}`;

@@ -865,6 +865,16 @@ const widgetGen = (config) => {
 .fw-message.bot a {
     color: var(--primary-color);
     text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    word-break: break-word;
+}
+
+.fw-message.bot a:hover {
+    text-decoration-thickness: 2px;
+    filter: brightness(1.2);
 }
 
 
@@ -1604,6 +1614,27 @@ const widgetGen = (config) => {
     // Use innerHTML instead of textContent to render HTML tags
     if (type === 'bot') {
         messageEl.innerHTML = message;
+        
+        // Make all links inside bot messages navigate the host site
+        messageEl.querySelectorAll('a[href]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const path = link.getAttribute('href');
+                if (path && path.startsWith('/')) {
+                    // Close the widget popup for seamless navigation
+                    this.closePopup();
+                    // Navigate — works for both SPAs (pushState) and traditional sites
+                    if (window.history && window.history.pushState) {
+                        window.history.pushState({}, '', path);
+                        window.dispatchEvent(new PopStateEvent('popstate'));
+                    } else {
+                        window.location.href = path;
+                    }
+                } else if (path) {
+                    window.open(path, '_blank');
+                }
+            });
+        });
     } else {
         messageEl.textContent = message;
     }
