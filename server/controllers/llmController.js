@@ -213,13 +213,11 @@ ${botContext}`
     console.log(`[llmQuery] Sending to model: mistralai/mistral-large-3-675b-instruct-2512`);
 
     const completion = await openai_NVIDIA.chat.completions.create({
-      model: "mistralai/mistral-large-3-675b-instruct-2512",
+      model: "mistralai/devstral-2-123b-instruct-2512",
       messages,
       temperature,
-      top_p: 1.00,
-      max_tokens: 2048,
-      frequency_penalty: 0.00,
-      presence_penalty: 0.00,
+      top_p: 0.95,
+      max_tokens: 8192,
       stream: false,
     });
 
