@@ -113,6 +113,7 @@ function validateAIResponse(aiResponse) {
 // ============================================
 // Simple chatbot query (llmQuery)
 // ============================================
+
 const llmQuery = async (req, res) => {
   const { userMessage, botContext } = req.body;
 
@@ -121,44 +122,114 @@ const llmQuery = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields: userMessage and botContext" });
     }
 
-    const systemPrompt = `You're a friendly AI chatbot assistant.
+    // Simple onboarding detection — no complex regex, just plain string check
+    const msg = userMessage.toLowerCase().trim();
+    const isOnboarding = msg.includes("new here") || 
+                         msg.includes("im new") || 
+                         msg.includes("i'm new") || 
+                         msg.includes("just joined") || 
+                         msg.includes("getting started") || 
+                         msg.includes("first time") ||
+                         msg.includes("what can i do");
 
-**Response Rules:**
-- Always use HTML: <p>, <strong>, <ul>, <li>, <br>
-- NEVER use Markdown (no **, ##, - or 1.)
-- Be casual & helpful 😊
-- Use emojis naturally
+    console.log(`[llmQuery] userMessage="${userMessage}" | isOnboarding=${isOnboarding}`);
 
-**Boundaries:**
-- Only answer from given info
-- Don't make stuff up
-- Don't know? → "I don't have that info 😅 Contact support!"
-- Off-topic? → "Outside my scope! Contact support."
-- Complex issue? → "This needs human help! Contact support."
+    let messages, temperature;
 
-**Example:**
-Q: "What's the price?"
-A: "<p>Plans start at <strong>$X/month</strong>! 💰</p>"
+    if (isOnboarding) {
+      const onboardingPrompt = `Rules:
 
----
-**Your Platform Info:**
-${botContext}`;
+Output ONLY USING HTML TAGS NO FULL HTML
+
+Always use bullet points (<ul><li>) where applicable.
+
+Include ALL navigation items as <li> in Quick Links.
+
+Write a 1–2 sentence intro.
+
+Include 3–4 meaningful features only.
+
+Use ONE contact email.
+
+Do NOT add anything outside the template.
+
+Template:
+
+Welcome to [NAME]! 🎉
+
+[1–2 sentence description]
+
+🔗 Quick Links:
+
+[Page] — [short description] → [/path]
+
+✨ Top Features:
+
+[Feature]
+
+📬 [email]
+
+Platform Info:
+${botContext}
+
+USER: ${userMessage}`;
+
+      messages = [{ role: "user", content: onboardingPrompt }];
+      temperature = 0.15;
+      console.log(`[llmQuery] ONBOARDING TRIGGERED — prompt length: ${onboardingPrompt.length} chars`);
+    } else {
+      messages = [
+        {
+          role: "system",
+          content: `You are a helpful website assistant. Answer ONLY from the platform info below.
+
+STRICT FORMAT RULES — FOLLOW THESE OR FAIL:
+1. Output HTML only. Use <p>, <strong>, <ul>, <li>, <ol>, <em>. NO Markdown ever.
+2. ANY time you list data (courses, features, links, prices, people, options) — you MUST use <ul><li>. NEVER write them as a paragraph or sentence.
+3. Put key info in <strong>: names, prices, ratings, paths.
+4. Put URL paths in <em>: e.g. <em>/courses/1</em>
+5. Keep each <li> to ONE line — name, key details, path.
+6. Max 1-2 emojis per response. Be brief.
+7. If you don't know → "<p>I don't have that info right now 😅</p>"
+
+Example of CORRECT response to "do you have react courses?":
+<p>Yes! Here's what we have:</p>
+<ul>
+<li><strong>Adv React Patterns</strong> — Michael Chen, <strong>$79.99</strong>, ⭐4.9 → <em>/courses/2</em></li>
+</ul>
+
+Example of WRONG response (NEVER do this):
+"Yes! We have an Advanced React Patterns course by Michael Chen for $79.99 with a 4.9 rating."
+
+Platform Info:
+${botContext}`
+        },
+        { role: "user", content: userMessage }
+      ];
+      temperature = 0.15;
+      console.log(`[llmQuery] REGULAR QUERY — userMessage: "${userMessage}"`);
+    }
+
+    console.log(`[llmQuery] Sending to model: mistralai/mistral-large-3-675b-instruct-2512`);
 
     const completion = await openai_NVIDIA.chat.completions.create({
-      model: "mistralai/mistral-small-4-119b-2603",
-      messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMessage }],
-      temperature: 0.6,
-      top_p: 0.7,
+      model: "mistralai/mistral-large-3-675b-instruct-2512",
+      messages,
+      temperature,
+      top_p: 1.00,
       max_tokens: 2048,
+      frequency_penalty: 0.00,
+      presence_penalty: 0.00,
       stream: false,
-      reasoning_effort: "none",
     });
 
     const response = completion.choices[0]?.message?.content;
+    console.log(`[llmQuery] Response (first 200 chars): ${response?.substring(0, 200)}`);
     if (!response) throw new Error("Empty response from AI");
 
     return res.status(200).json({ data: response });
   } catch (error) {
+    console.error(`[llmQuery] ERROR: ${error.message}`);
     return res.status(500).json({ error: "Failed to process request", message: error.message });
   }
 };

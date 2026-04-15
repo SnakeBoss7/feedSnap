@@ -22,7 +22,7 @@ function extractCleanJSON(text) {
   }
 
   try {
-    text = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+    text = text.trim();
 
     if (text.startsWith("{") || text.startsWith("[")) {
       try { return JSON.parse(text); } catch { /* fall through */ }
@@ -315,11 +315,10 @@ needsAllData=true → filters MUST be {}. Specific criteria → needsAllData:fal
   try {
     const completion = await Promise.race([
       openai_NVIDIA.chat.completions.create({
-        model: "mistralai/mistral-small-4-119b-2603",
+        model: "meta/llama-3.1-70b-instruct",
         temperature: 0.1,
         top_p: 1.0,
         max_tokens: 256,
-        reasoning_effort: "none",
         messages: [
           { role: "system", content: intentSystemPrompt },
           { role: "user", content: userPrompt },
@@ -416,6 +415,10 @@ const askAI = async (req, res) => {
   const pipelineStart = Date.now();
 
   try {
+    console.log("\n[askAI] ========== PIPELINE START ==========");
+    console.log("[askAI] User:", req.user?.id, "| Name:", req.user?.name);
+    console.log("[askAI] Prompt:", req.body?.userPrompt?.substring(0, 100));
+
     if (!req.body?.userPrompt) {
       return res.status(400).json({ error: "Missing required field: userPrompt" });
     }
@@ -429,38 +432,64 @@ const askAI = async (req, res) => {
       .map((c) => ({ role: c.role || "assistant", content: String(c.content || "") }))
       .concat([{ role: "user", content: userPrompt }]);
 
-    const websites = await getUserAccessibleWebsites(req.user.id);
-    const availableSites = websites.sites || [];
-    const username = req.user?.name || "Unknown User";
-    const userMail = req.user?.email || "Unknown Email";
+    console.log("[askAI] Chat history length:", chat.length);
 
-    // Phase 1: Intent
-    const intent = await extractIntent(userPrompt, availableSites);
-    const phase1Usage = intent._usage || {};
-    delete intent._usage;
+    // --- STAGE: Get user websites ---
+    let websites, availableSites, username, userMail;
+    try {
+      websites = await getUserAccessibleWebsites(req.user.id);
+      availableSites = websites.sites || [];
+      username = req.user?.name || "Unknown User";
+      userMail = req.user?.email || "Unknown Email";
+      console.log("[askAI] Available sites:", availableSites.length, availableSites);
+    } catch (siteErr) {
+      console.error("[askAI] ❌ FAILED at getUserAccessibleWebsites:", siteErr.message);
+      console.error("[askAI] Stack:", siteErr.stack);
+      throw siteErr;
+    }
 
-    // Phase 2: Fetch data
+    // --- STAGE: Phase 1 — Intent extraction ---
+    let intent, phase1Usage;
+    try {
+      intent = await extractIntent(userPrompt, availableSites);
+      phase1Usage = intent._usage || {};
+      delete intent._usage;
+      console.log("[askAI] Phase 1 intent:", JSON.stringify({ websites: intent.websites, filters: intent.filters, needsAllData: intent.needsAllData }));
+    } catch (intentErr) {
+      console.error("[askAI] ❌ FAILED at Phase 1 (intent extraction):", intentErr.message);
+      console.error("[askAI] Stack:", intentErr.stack);
+      throw intentErr;
+    }
+
+    // --- STAGE: Phase 2 — Fetch data ---
     let contextData, dataMode, filterSummary;
-
-    if (intent.needsAllData) {
-      dataMode = "full";
-      filterSummary = "Full analysis across all sites";
-      const results = await Promise.all(availableSites.filter(Boolean).map(optimizeFeedbackForAI));
-      contextData = Object.assign({}, ...results);
-    } else {
-      dataMode = "filtered";
-      const filteredResult = await fetchFilteredFeedback(intent, availableSites);
-      contextData = filteredResult.data;
-      const parts = [];
-      if (intent.filters?.title) parts.push(`Category: ${intent.filters.title}`);
-      if (intent.filters?.rating_op) parts.push(`Rating ${intent.filters.rating_op} ${intent.filters.rating_val}`);
-      if (intent.filters?.severity_op) parts.push(`Severity ${intent.filters.severity_op} ${intent.filters.severity_val}`);
-      if (intent.filters?.status !== undefined) parts.push(intent.filters.status ? "Resolved" : "Unresolved");
-      const sitePart = intent.websites?.includes("all") ? "all sites" : (intent.websites || []).join(", ");
-      filterSummary = `Filtered: ${parts.length ? parts.join(", ") : "specific query"} from ${sitePart} (${filteredResult.totalMatched} results)`;
+    try {
+      if (intent.needsAllData) {
+        dataMode = "full";
+        filterSummary = "Full analysis across all sites";
+        const results = await Promise.all(availableSites.filter(Boolean).map(optimizeFeedbackForAI));
+        contextData = Object.assign({}, ...results);
+      } else {
+        dataMode = "filtered";
+        const filteredResult = await fetchFilteredFeedback(intent, availableSites);
+        contextData = filteredResult.data;
+        const parts = [];
+        if (intent.filters?.title) parts.push(`Category: ${intent.filters.title}`);
+        if (intent.filters?.rating_op) parts.push(`Rating ${intent.filters.rating_op} ${intent.filters.rating_val}`);
+        if (intent.filters?.severity_op) parts.push(`Severity ${intent.filters.severity_op} ${intent.filters.severity_val}`);
+        if (intent.filters?.status !== undefined) parts.push(intent.filters.status ? "Resolved" : "Unresolved");
+        const sitePart = intent.websites?.includes("all") ? "all sites" : (intent.websites || []).join(", ");
+        filterSummary = `Filtered: ${parts.length ? parts.join(", ") : "specific query"} from ${sitePart} (${filteredResult.totalMatched} results)`;
+      }
+      console.log("[askAI] Phase 2 data mode:", dataMode, "| Context data keys:", Object.keys(contextData || {}));
+    } catch (dataErr) {
+      console.error("[askAI] ❌ FAILED at Phase 2 (data fetch):", dataErr.message);
+      console.error("[askAI] Stack:", dataErr.stack);
+      throw dataErr;
     }
 
     const data = JSON.stringify(contextData).replace(/`/g, "\\`").replace(/\$/g, "\\$");
+    console.log("[askAI] Serialized data length:", data.length, "chars");
 
     const dataContextNote = dataMode === "filtered"
       ? `\nNOTE: The data below is FILTERED based on user's query. ${filterSummary}. Analyze ONLY this filtered subset.`
@@ -479,36 +508,68 @@ Rules:
 - response: HTML only (<p>,<strong>,<ul>,<li>,<br>). No markdown. Cite specific numbers. ALWAYS include a meaningful response.
 - sug1/sug2: 3-5 word button labels (REQUIRED)
 ${isEmailRequested
-      ? `- reports_or_emails: Generate ONLY if user explicitly asks for email/report/notify. Include signature with ${username}, ${userMail}, Management Head.\n- When generating an email, set response to a friendly message like: "<p>Here's your email, ready to send! 📧 I've drafted it based on the feedback data. You can edit it before sending.</p>"`
-      : `- reports_or_emails: OMIT this field entirely.`}
+        ? `- reports_or_emails: Generate ONLY if user explicitly asks for email/report/notify. Include signature with ${username}, ${userMail}, Management Head.\n- When generating an email, set response to a friendly message like: "<p>Here's your email, ready to send! 📧 I've drafted it based on the feedback data. You can edit it before sending.</p>"`
+        : `- reports_or_emails: OMIT this field entirely.`}
 - Output ONLY valid JSON. No code blocks, no extra text.`;
 
-    // Phase 2b: AI Analysis (streaming — google/gemma-2-27b-it)
+    // --- STAGE: Phase 2b — AI Analysis (streaming — meta/llama-4-scout) ---
     let result = "";
     let usage2 = {};
 
-    const stream = await Promise.race([
-      openai_NVIDIA.chat.completions.create({
-        model: "google/gemma-2-27b-it",
-        temperature: 0.2,
-        top_p: 0.7,
-        max_tokens: 1024,
-        stream: true,
-        messages: [{ role: "system", content: systemInstructions }, ...chat],
-      }),
-      new Promise((_, reject) => setTimeout(() => reject(new Error("API timeout")), 60000)),
-    ]);
+    try {
+      console.log("[askAI] Phase 2b: Calling NVIDIA API (meta/llama-3.1-70b-instruct)...");
+      console.log("[askAI] System prompt length:", systemInstructions.length, "chars | Messages:", chat.length);
 
-    for await (const chunk of stream) {
-      result += chunk.choices?.[0]?.delta?.content || "";
-      if (chunk.usage) usage2 = chunk.usage;
+      const stream = await Promise.race([
+        openai_NVIDIA.chat.completions.create({
+          model: "meta/llama-3.1-70b-instruct",
+          temperature: 1.0,
+          top_p: 1.0,
+          max_tokens: 512,
+          frequency_penalty: 0.0,
+          presence_penalty: 0.0,
+          stream: true,
+          stream_options: { include_usage: true },
+          messages: [{ role: "system", content: systemInstructions }, ...chat],
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("API timeout")), 60000)),
+      ]);
+
+      for await (const chunk of stream) {
+        result += chunk.choices[0]?.delta?.content || "";
+        if (chunk.usage) usage2 = chunk.usage;
+      }
+
+      console.log("[askAI] Phase 2b raw result length:", result.length, "chars");
+      console.log("[askAI] Phase 2b raw result (first 300):", result.substring(0, 300));
+    } catch (apiErr) {
+      console.error("[askAI] ❌ FAILED at Phase 2b (NVIDIA API call):");
+      console.error("[askAI]   Message:", apiErr.message);
+      console.error("[askAI]   Status:", apiErr.status || apiErr.response?.status);
+      console.error("[askAI]   Response data:", JSON.stringify(apiErr.response?.data || "N/A"));
+      console.error("[askAI]   Stack:", apiErr.stack);
+      throw apiErr;
     }
 
     if (!result) throw new Error("Empty response from AI");
 
-    const validatedResult = validateAIResponse(extractCleanJSON(result));
+    // --- STAGE: Parse & validate ---
+    let validatedResult;
+    try {
+      const extracted = extractCleanJSON(result);
+      console.log("[askAI] Extracted JSON keys:", Object.keys(extracted || {}));
+      validatedResult = validateAIResponse(extracted);
+      console.log("[askAI] Validated result keys:", Object.keys(validatedResult));
+    } catch (parseErr) {
+      console.error("[askAI] ❌ FAILED at JSON parse/validate:", parseErr.message);
+      console.error("[askAI] Raw result:", result.substring(0, 500));
+      throw parseErr;
+    }
+
     const totalTokens = (phase1Usage.prompt_tokens || 0) + (phase1Usage.completion_tokens || 0) +
       (usage2.prompt_tokens || 0) + (usage2.completion_tokens || 0);
+
+    console.log("[askAI] ✅ SUCCESS | Time:", Date.now() - pipelineStart, "ms | Tokens:", totalTokens);
 
     return res.status(200).json({
       response: validatedResult,
@@ -530,10 +591,30 @@ ${isEmailRequested
       },
     });
   } catch (error) {
+    const elapsed = Date.now() - pipelineStart;
+    console.error("\n[askAI] ================ ERROR ================");
+    console.error("[askAI] Message:", error.message);
+    console.error("[askAI] Name:", error.name);
+    console.error("[askAI] Code:", error.code);
+    console.error("[askAI] Status:", error.status || error.response?.status);
+    console.error("[askAI] Response data:", JSON.stringify(error.response?.data || "N/A"));
+    console.error("[askAI] Stack:", error.stack);
+    console.error("[askAI] Elapsed:", elapsed, "ms");
+    console.error("[askAI] ==============================================\n");
+
     if (error.message === "API timeout") {
       return res.status(504).json({ response: { response: "<p>Request timed out. Please try again.</p>", error: "timeout" } });
     }
-    return res.status(500).json({ response: { response: "<p>Sorry, the AI is under maintenance right now. Please try again later.</p>", error: "service_unavailable" } });
+    return res.status(500).json({
+      response: { response: "<p>Sorry, the AI is under maintenance right now. Please try again later.</p>", error: "service_unavailable" },
+      debug: {
+        message: error.message,
+        code: error.code,
+        status: error.status || error.response?.status,
+        apiResponse: error.response?.data,
+        elapsed,
+      }
+    });
   }
 };
 

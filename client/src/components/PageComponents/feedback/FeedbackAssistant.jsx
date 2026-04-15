@@ -396,9 +396,15 @@ export const FeedbackAssistant = ({
       });
     } catch (error) {
       console.error("[FeedbackAssistant] askAI error:", error);
+      console.error("[FeedbackAssistant] Error response status:", error.response?.status);
+      console.error("[FeedbackAssistant] Error response data:", JSON.stringify(error.response?.data, null, 2));
+      if (error.response?.data?.debug) {
+        console.error("[FeedbackAssistant] Server debug info:", error.response.data.debug);
+      }
+      const serverMsg = error.response?.data?.response?.response || "Sorry, I encountered an error. Please try again.";
       setAiResponse((prev) => [
         ...prev,
-        { role: "assistant", content: "Sorry, I encountered an error. Please try again." },
+        { role: "assistant", content: serverMsg },
       ]);
     }
     setIsLoading(false);

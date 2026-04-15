@@ -829,8 +829,17 @@ const widgetGen = (config) => {
     padding-left: 20px;
 }
 
+.fw-message.bot ul {
+    list-style-type: disc;
+}
+
+.fw-message.bot ol {
+    list-style-type: decimal;
+}
+
 .fw-message.bot li {
     margin: 4px 0;
+    line-height: 1.5;
 }
 
 .fw-message.bot p {
@@ -1017,6 +1026,39 @@ const widgetGen = (config) => {
                 .fw-nudge.show {
                     animation: nudgePulse 2s ease-in-out 0.5s;
                 }
+
+                /* Suggestion chips */
+                .fw-suggestions {
+                    display: flex;
+                    gap: 8px;
+                    padding: 8px 4px;
+                    flex-wrap: wrap;
+                }
+
+                .fw-suggestion-chip {
+                    background: var(--surface);
+                    border: 1px solid var(--border-color);
+                    color: var(--text-color);
+                    padding: 8px 14px;
+                    border-radius: 20px;
+                    font-size: 13px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    font-family: 'Inter', sans-serif;
+                    white-space: nowrap;
+                }
+
+                .fw-suggestion-chip:hover {
+                    background: var(--primary-color);
+                    color: white;
+                    border-color: var(--primary-color);
+                    transform: translateY(-1px);
+                }
+
+                .fw-suggestions.hidden {
+                    display: none;
+                }
             \`;
             
             const styleSheet = document.createElement('style');
@@ -1188,6 +1230,10 @@ const widgetGen = (config) => {
                                     Hello! I'm here to help. What can I assist you with today? 👋
                                 </div>
                             </div>
+                            <div class="fw-suggestions">
+                                <button class="fw-suggestion-chip" data-msg="I'm new here">I'm new here</button>
+                                <button class="fw-suggestion-chip" data-msg="What can I do here?">What can I do?</button>
+                            </div>
                             <div class="fw-chat-input-container">
                                 <textarea class="fw-chat-input" placeholder="Type your message..." rows="1"></textarea>
                                 <button class="fw-chat-send">
@@ -1327,10 +1373,15 @@ const widgetGen = (config) => {
             const chatInput = this.popup.querySelector('.fw-chat-input');
             const chatSend = this.popup.querySelector('.fw-chat-send');
             const chatMessages = this.popup.querySelector('.fw-chat-messages');
+            const suggestionsContainer = this.popup.querySelector('.fw-suggestions');
 
-            const sendMessage = () => {
-                const message = chatInput.value.trim();
+            const sendChatMessage = (message) => {
                 if (!message) return;
+
+                // Hide suggestions after any message is sent
+                if (suggestionsContainer) {
+                    suggestionsContainer.classList.add('hidden');
+                }
 
                 // Add user message
                 this.addChatMessage(message, 'user');
@@ -1355,28 +1406,40 @@ const widgetGen = (config) => {
                     loadingMsg.remove();
                     
                     // Add bot response - check if AI already returned HTML
-                    // If the response contains block-level HTML tags, don't add <br> for newlines
                     const hasHtmlBlocks = /<(p|ul|ol|li|div|h[1-6]|br)[^>]*>/i.test(data.data);
                     const formattedMessage = hasHtmlBlocks 
-                        ? data.data.replace(/\\n\\s*\\n/g, '').replace(/\\n/g, '') // Remove newlines from HTML
-                        : data.data.replace(/\\n/g, '<br>'); // Only add <br> for plain text
+                        ? data.data.replace(/\\n\\s*\\n/g, '').replace(/\\n/g, '')
+                        : data.data.replace(/\\n/g, '<br>');
                     this.addChatMessage(formattedMessage, 'bot');
                 })
                 .catch(error => {
-                    //.error('Error fetching LLM response:', error);
                     loadingMsg.remove();
                     this.addChatMessage('Sorry, I encountered an error. Please try again.', 'bot');
                 });
             };
 
+            // Suggestion chip click handlers
+            if (suggestionsContainer) {
+                suggestionsContainer.querySelectorAll('.fw-suggestion-chip').forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        const msg = chip.getAttribute('data-msg');
+                        if (msg) sendChatMessage(msg);
+                    });
+                });
+            }
+
             // Send button click
-            chatSend.addEventListener('click', sendMessage);
+            chatSend.addEventListener('click', () => {
+                const message = chatInput.value.trim();
+                if (message) sendChatMessage(message);
+            });
 
             // Enter key to send (Shift+Enter for new line)
             chatInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    sendMessage();
+                    const message = chatInput.value.trim();
+                    if (message) sendChatMessage(message);
                 }
             });
 
