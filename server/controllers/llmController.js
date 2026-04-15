@@ -114,6 +114,37 @@ function validateAIResponse(aiResponse) {
 // Simple chatbot query (llmQuery)
 // ============================================
 
+/**
+ * Detects whether the user message is an onboarding/welcome intent.
+ * Covers greetings, "new here", "what is this", "help me get started", etc.
+ */
+function isOnboardingIntent(msg) {
+  const lower = msg.toLowerCase().trim();
+  const onboardingPatterns = [
+    // Direct "new" signals
+    "new here", "im new", "i'm new", "i am new", "just joined",
+    "first time", "getting started", "get started",
+    // Exploratory / what-is-this signals
+    "what is this", "what's this", "whats this",
+    "what can i do", "what do you do", "what does this do",
+    "what can you do", "what do you offer",
+    "what is this website", "what is this site", "what is this platform",
+    "tell me about this", "tell me about yourself",
+    // Help / guide signals
+    "help me", "guide me", "show me around", "walk me through",
+    "where do i start", "where should i start", "how does this work",
+    "how do i use", "how to use",
+    // Generic greetings that imply exploration
+    "hello", "hi there", "hey there", "howdy",
+  ];
+
+  // Exact-match short greetings (avoid false positives on longer messages)
+  const exactGreetings = ["hi", "hey", "hello", "yo", "sup", "hola", "hii", "hiii", "namaste"];
+  if (exactGreetings.includes(lower)) return true;
+
+  return onboardingPatterns.some((p) => lower.includes(p));
+}
+
 const llmQuery = async (req, res) => {
   const { userMessage, botContext } = req.body;
 
@@ -122,95 +153,136 @@ const llmQuery = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields: userMessage and botContext" });
     }
 
-    // Simple onboarding detection — no complex regex, just plain string check
-    const msg = userMessage.toLowerCase().trim();
-    const isOnboarding = msg.includes("new here") || 
-                         msg.includes("im new") || 
-                         msg.includes("i'm new") || 
-                         msg.includes("just joined") || 
-                         msg.includes("getting started") || 
-                         msg.includes("first time") ||
-                         msg.includes("what can i do");
-
-    console.log(`[llmQuery] userMessage="${userMessage}" | isOnboarding=${isOnboarding}`);
+    const onboarding = isOnboardingIntent(userMessage);
+    console.log(`[llmQuery] userMessage="${userMessage}" | isOnboarding=${onboarding}`);
 
     let messages, temperature;
 
-    if (isOnboarding) {
-      const onboardingPrompt = `Rules:
+    if (onboarding) {
+      // ── ONBOARDING PROMPT ──────────────────────────────────────
+      // Generic — works with ANY botContext. Parses the context to
+      // extract site name, nav links, features, and contact info.
+      const onboardingSystemPrompt = `You are a friendly website assistant. The user just arrived or greeted you.
+Your job: give them a warm, structured onboarding response using ONLY the platform info provided below.
 
-Output ONLY USING HTML TAGS NO FULL HTML
+═══ STRICT RULES ═══
+1. Output HTML only (<p>, <strong>, <ul>, <li>, <em>, <br>). NEVER use Markdown.
+2. Follow the EXACT structure below — do NOT skip or reorder sections.
+3. Extract ALL information from the Platform Info. Do NOT invent or hallucinate data.
+4. Navigation paths MUST be wrapped in <em> tags: e.g. <em>/courses</em>
+5. Keep it concise — no filler text, no paragraphs of fluff.
+6. Max 2-3 emojis total. Be professional yet warm.
 
-Always use bullet points (<ul><li>) where applicable.
+═══ RESPONSE STRUCTURE (follow this order) ═══
 
-Include ALL navigation items as <li> in Quick Links.
+SECTION 1 — GREETING
+<p><strong>Welcome to [SITE NAME]! 👋</strong></p>
+<p>[1–2 sentence summary of what the platform does, extracted from context]</p>
 
-Write a 1–2 sentence intro.
-
-Include 3–4 meaningful features only.
-
-Use ONE contact email.
-
-Do NOT add anything outside the template.
-
-Template:
-
-Welcome to [NAME]! 🎉
-
-[1–2 sentence description]
-
-🔗 Quick Links:
-
-[Page] — [short description] → [/path]
-
-✨ Top Features:
-
-[Feature]
-
-📬 [email]
-
-Platform Info:
-${botContext}
-
-USER: ${userMessage}`;
-
-      messages = [{ role: "user", content: onboardingPrompt }];
-      temperature = 0.15;
-      console.log(`[llmQuery] ONBOARDING TRIGGERED — prompt length: ${onboardingPrompt.length} chars`);
-    } else {
-      messages = [
-        {
-          role: "system",
-          content: `You are a helpful website assistant. Answer ONLY from the platform info below.
-
-STRICT FORMAT RULES — FOLLOW THESE OR FAIL:
-1. Output HTML only. Use <p>, <strong>, <ul>, <li>, <ol>, <em>. NO Markdown ever.
-2. ANY time you list data (courses, features, links, prices, people, options) — you MUST use <ul><li>. NEVER write them as a paragraph or sentence.
-3. Put key info in <strong>: names, prices, ratings, paths.
-4. Put URL paths in <em>: e.g. <em>/courses/1</em>
-5. Keep each <li> to ONE line — name, key details, path.
-6. Max 1-2 emojis per response. Be brief.
-7. If you don't know → "<p>I don't have that info right now 😅</p>"
-
-Example of CORRECT response to "do you have react courses?":
-<p>Yes! Here's what we have:</p>
+SECTION 2 — QUICK NAVIGATION
+<p><strong>🔗 Quick Links:</strong></p>
 <ul>
-<li><strong>Adv React Patterns</strong> — Michael Chen, <strong>$79.99</strong>, ⭐4.9 → <em>/courses/2</em></li>
+  <li><strong>[Page Name]</strong> — [what user finds there] → <em>/path</em></li>
+  ... (list ALL nav items from context)
 </ul>
 
-Example of WRONG response (NEVER do this):
-"Yes! We have an Advanced React Patterns course by Michael Chen for $79.99 with a 4.9 rating."
+SECTION 3 — TOP FEATURES (pick 3-4 most useful from context)
+<p><strong>✨ What You Can Do:</strong></p>
+<ul>
+  <li>[Feature/highlight with a brief one-line value prop]</li>
+  ...
+</ul>
+
+SECTION 4 — CONTACT (only if contact info exists in context)
+<p><strong>📬 Need Help?</strong> Reach out at <strong>[email]</strong></p>
+
+═══ IMPORTANT ═══
+- If the context has courses, show 1–2 top-rated ones as highlights (not all).
+- If the context has mentors, mention mentorship availability as a feature.
+- If the context has community/events, mention community as a feature.
+- ALWAYS end with a helpful closing like: <p>Feel free to ask me anything — I'm here to help! 😊</p>
 
 Platform Info:
-${botContext}`
-        },
-        { role: "user", content: userMessage }
+${botContext}`;
+
+      messages = [
+        { role: "system", content: onboardingSystemPrompt },
+        { role: "user", content: userMessage },
+      ];
+      temperature = 0.2;
+      console.log(`[llmQuery] ONBOARDING TRIGGERED — prompt length: ${onboardingSystemPrompt.length} chars`);
+    } else {
+      // ── GENERAL QUERY PROMPT ───────────────────────────────────
+      // Always returns structured bullet points with navigation links.
+      const generalSystemPrompt = `You are a helpful and precise website assistant. Answer the user's question using ONLY the platform info below.
+
+═══ ABSOLUTE FORMAT RULES — VIOLATING THESE IS A FAILURE ═══
+
+1. Output HTML tags only: <p>, <strong>, <ul>, <li>, <ol>, <em>, <br>. NEVER use Markdown (no **, no ##, no -).
+2. EVERY response MUST use <ul><li> bullet points. NEVER answer in plain paragraph form.
+   - Listing items (courses, people, events, prices)? → <ul><li> for EACH item.
+   - Comparing options? → <ul><li> for EACH option.
+   - Explaining steps? → <ol><li> numbered steps.
+   - Even single-item answers → wrap in <ul><li>.
+3. ALWAYS include direct navigation paths wrapped in <em>: e.g. → <em>/courses/2</em>
+   - If the answer relates to a page, ALWAYS append the relevant path.
+   - If multiple items, EACH <li> must have its own path.
+4. Key data in <strong>: names, prices, ratings, counts, emails.
+5. Start with a short 1-line <p> intro sentence, then immediately go to bullet points.
+6. Max 2 emojis per response. Be concise — no filler.
+7. If info is not in the context → "<p>I don't have that info right now 😅</p>"
+
+═══ RESPONSE PATTERN (always follow) ═══
+
+<p>[1-line direct answer to the question]</p>
+<ul>
+  <li><strong>[Item/Name]</strong> — [key details] → <em>/path</em></li>
+  ...
+</ul>
+<p>[Optional: 1-line follow-up suggestion with a path, e.g. "Browse all courses at <em>/courses</em>"]</p>
+
+═══ EXAMPLES OF CORRECT RESPONSES ═══
+
+Q: "Do you have React courses?"
+<p>Yes! Here's what we have for React:</p>
+<ul>
+  <li><strong>Adv React Patterns</strong> — Michael Chen, <strong>$79.99</strong>, ⭐4.9, 8.4k students → <em>/courses/2</em></li>
+</ul>
+<p>See all courses at <em>/courses</em></p>
+
+Q: "How can I get mentored?"
+<p>We offer 1-on-1 video mentorship sessions! Here are our mentors:</p>
+<ul>
+  <li><strong>Alice Chen</strong> — Sr. Frontend @Meta, React & System Design, ⭐4.9 → <em>/mentorship</em></li>
+  <li><strong>David Kim</strong> — Staff Backend @Stripe, Node & Go, ⭐5.0 → <em>/mentorship</em></li>
+</ul>
+<p>Book a session at <em>/mentorship</em></p>
+
+Q: "What's the cheapest course?"
+<p>Here's the most affordable option:</p>
+<ul>
+  <li><strong>UI/UX for Devs</strong> — Emily Davis, <strong>$69.99</strong>, ⭐4.9, 15k students → <em>/courses/4</em></li>
+</ul>
+<p>Compare all courses at <em>/courses</em></p>
+
+═══ EXAMPLES OF WRONG RESPONSES (NEVER DO THIS) ═══
+✗ "We have an Advanced React Patterns course by Michael Chen for $79.99 with a 4.9 rating."
+✗ Using ** for bold instead of <strong>
+✗ Listing items in a comma-separated sentence instead of <ul><li>
+✗ Forgetting to include the navigation path
+
+Platform Info:
+${botContext}`;
+
+      messages = [
+        { role: "system", content: generalSystemPrompt },
+        { role: "user", content: userMessage },
       ];
       temperature = 0.15;
       console.log(`[llmQuery] REGULAR QUERY — userMessage: "${userMessage}"`);
     }
 
-    console.log(`[llmQuery] Sending to model: mistralai/mistral-large-3-675b-instruct-2512`);
+    console.log(`[llmQuery] Sending to model: mistralai/devstral-2-123b-instruct-2512`);
 
     const completion = await openai_NVIDIA.chat.completions.create({
       model: "mistralai/devstral-2-123b-instruct-2512",
@@ -222,10 +294,13 @@ ${botContext}`
     });
 
     const response = completion.choices[0]?.message?.content;
-    console.log(`[llmQuery] Response (first 200 chars): ${response?.substring(0, 200)}`);
+    console.log(`[llmQuery] Response (first 300 chars): ${response?.substring(0, 300)}`);
     if (!response) throw new Error("Empty response from AI");
 
-    return res.status(200).json({ data: response });
+    // Strip any <think>...</think> blocks some models return
+    const cleanResponse = response.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+
+    return res.status(200).json({ data: cleanResponse });
   } catch (error) {
     console.error(`[llmQuery] ERROR: ${error.message}`);
     return res.status(500).json({ error: "Failed to process request", message: error.message });
