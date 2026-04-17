@@ -4,8 +4,9 @@ const scriptCreate = async (req, res) => {
   if (!req.user) {
     res.status(400).json({ mess: "user not found" });
   }
-  const { webUrl, position, color, text, bgColor, ackMail, botContext } =
+  let { webUrl, position, color, text, bgColor, ackMail, botContext } =
     req.body.settings;
+  webUrl = webUrl.replace(/\/+$/, '');
   let webdata = await webData.findOne({ webUrl: webUrl });
   if (!webdata) {
     let webdata = await webData.create({

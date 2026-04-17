@@ -943,6 +943,14 @@ const widgetGen = (config) => {
                     transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
                     position: relative;
                     overflow: visible; /* Changed to visible for arrow */
+                    cursor: pointer;
+                }
+
+                .fw-nudge.fw-nudge-onboarding {
+                    white-space: normal;
+                    max-width: 260px;
+                    text-align: left;
+                    line-height: 1.4;
                 }
 
                 /* Subtle gradient accent line at top */
@@ -1087,6 +1095,16 @@ const widgetGen = (config) => {
             this.nudge.className = 'fw-nudge fw-container';
             this.nudge.innerHTML = '<div class="fw-nudge-content"><span class="fw-nudge-emoji">💬</span><span class="fw-nudge-text">Need help?</span></div>';
 
+            // Nudge click handler — onboarding nudge opens chatbot with "I'm new here"
+            this.nudge.addEventListener('click', () => {
+                this.nudge.classList.remove('show');
+                if (this._isOnboardingNudge) {
+                    this.openPopupWithOnboarding();
+                } else {
+                    this.togglePopup();
+                }
+            });
+
             // Create button
             this.button = document.createElement('button');
             this.button.className = 'fw-button fw-container';
@@ -1127,13 +1145,24 @@ const widgetGen = (config) => {
                     { emoji: '💭', text: 'We\\'re listening!' }
                 ];
             this.currentNudgeIndex = 0;
+            this._isOnboardingNudge = false;
 
-            // Show first nudge after 5 seconds for testing (change to 10000 for production)
-            setTimeout(() => {
-                this.showNudge();
-            }, 5000);
+            // Check if onboarding nudge was already shown this session
+            const onboardingShown = sessionStorage.getItem('fw_onboarding_shown');
 
-            // Then show every 2-3 minutes (random between 120-180 seconds)
+            if (!onboardingShown) {
+                // Show onboarding nudge first after 3 seconds
+                setTimeout(() => {
+                    this.showOnboardingNudge();
+                }, 3000);
+            } else {
+                // Normal nudge after 5 seconds
+                setTimeout(() => {
+                    this.showNudge();
+                }, 5000);
+            }
+
+            // Then show normal nudges every 2-3 minutes
             this.nudgeInterval = setInterval(() => {
                 if (!this.isOpen) {
                     this.showNudge();
@@ -1146,8 +1175,85 @@ const widgetGen = (config) => {
             return Math.floor(Math.random() * 60000) + 120000;
         }
 
+        showOnboardingNudge() {
+            if (this.isOpen) return;
+
+            this._isOnboardingNudge = true;
+            this.nudge.classList.add('fw-nudge-onboarding');
+            this.nudge.innerHTML = '<div class="fw-nudge-content"><span class="fw-nudge-emoji">👋</span><span class="fw-nudge-text">New here? Let us help you onboard!</span></div>';
+
+            // Show nudge
+            requestAnimationFrame(() => {
+                this.nudge.classList.add('show');
+            });
+
+            // Mark as shown in session
+            sessionStorage.setItem('fw_onboarding_shown', 'true');
+
+            // Hide after 8 seconds (longer than normal nudges)
+            setTimeout(() => {
+                this.nudge.classList.remove('show');
+                this._isOnboardingNudge = false;
+                this.nudge.classList.remove('fw-nudge-onboarding');
+            }, 8000);
+        }
+
+        openPopupWithOnboarding() {
+            // Open popup
+            this.openPopup();
+
+            // Switch to chat tab
+            this.switchTab('chat');
+
+            // Auto-send "I'm new here" message after a small delay for the UI to settle
+            setTimeout(() => {
+                const chatInput = this.popup.querySelector('.fw-chat-input');
+                const suggestionsContainer = this.popup.querySelector('.fw-suggestions');
+
+                // Hide suggestions
+                if (suggestionsContainer) {
+                    suggestionsContainer.classList.add('hidden');
+                }
+
+                const message = "I'm new here";
+
+                // Add user message
+                this.addChatMessage(message, 'user');
+                if (chatInput) chatInput.value = '';
+
+                // Add loading message
+                const loadingMsg = this.addChatMessage('Thinking...', 'bot');
+                loadingMsg.classList.add('fw-loader');
+
+                // Send to API
+                fetch(\`\${CONFIG.BASE_API}/api/llm/llmquery\`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userMessage: message, botContext: this.config.botContext || {} }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    loadingMsg.remove();
+                    const hasHtmlBlocks = /<(p|ul|ol|li|div|h[1-6]|br)[^>]*>/i.test(data.data);
+                    const formattedMessage = hasHtmlBlocks 
+                        ? data.data.replace(/\\n\\s*\\n/g, '').replace(/\\n/g, '')
+                        : data.data.replace(/\\n/g, '<br>');
+                    this.addChatMessage(formattedMessage, 'bot');
+                })
+                .catch(error => {
+                    loadingMsg.remove();
+                    this.addChatMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                });
+            }, 300);
+        }
+
         showNudge() {
             if (this.isOpen) return;
+
+            this._isOnboardingNudge = false;
+            this.nudge.classList.remove('fw-nudge-onboarding');
 
             const message = this.nudgeMessages[this.currentNudgeIndex];
             this.nudge.innerHTML = \`<div class="fw-nudge-content"><span class="fw-nudge-emoji">\${message.emoji}</span><span class="fw-nudge-text">\${message.text}</span></div>\`;

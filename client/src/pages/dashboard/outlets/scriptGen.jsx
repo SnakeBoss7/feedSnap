@@ -71,9 +71,14 @@ export const ScriptGen = () => {
     try {
       setUrlsettings((prev) => ({ ...prev, loading: true }));
 
+      const cleanedSettings = {
+        ...UrlSettings,
+        webUrl: UrlSettings.webUrl.replace(/\/+$/, ''),
+      };
+
       let res = await axios.post(
         `${apiUrl}/api/script/create`,
-        { settings: UrlSettings },
+        { settings: cleanedSettings },
         {
           withCredentials: true,
         }

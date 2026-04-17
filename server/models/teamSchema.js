@@ -7,7 +7,7 @@ const teamSchema = new mongoose.Schema({
   members: [
     {
       user: { type: mongoose.Types.ObjectId, ref: "User" },
-      role: { type: String, enum: ["owner", "editor", "viewer"], default: "viewer" }
+      role: { type: String, enum: ["owner", "admin", "editor", "viewer"], default: "viewer" }
     }
   ]
 }, { timestamps: true });
